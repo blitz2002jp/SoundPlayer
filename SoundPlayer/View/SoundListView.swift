@@ -62,8 +62,7 @@ struct SoundListView: View {
                       soundInfo.startTimeStr = String("\(self.titleTime.hours):\(self.titleTime.minutes):\(self.titleTime.seconds)")
                       groupInfo.soundInfos.append(soundInfo)
                       self.viewModel.playListInfos.append(groupInfo)
-                      print(utility.getSettingFilePathPlayList().absoluteString)
-                      try utility.writeGroupInfo(url: utility.getSettingFilePathPlayList(), outputInfos: self.viewModel.playListInfos)
+                      try utility.writePlayListInfo(outputInfos: self.viewModel.playListInfos)
                     }
                   case .remove:
                     break

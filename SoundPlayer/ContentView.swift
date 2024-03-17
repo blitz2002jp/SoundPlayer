@@ -76,7 +76,6 @@ struct otherView: View {
   var body: some View {
     Text("Other View")
     Button("戻る"){
-      let _ = utility.getDocumentDirectory()
       nextView = .topView
     }
   }

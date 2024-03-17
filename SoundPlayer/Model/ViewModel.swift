@@ -50,8 +50,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
   var playMode = PlayMode.play
   
   init() {
-    // 設定ファイル用フォルダ作成
-    utility.createSettingFileFolder()
 
     createSoundInfo()
 
@@ -135,24 +133,20 @@ class ViewModel: ObservableObject, PlayerDelegate {
     // URLのパスコンポーネントを取得
     self.soundInfos.forEach{
       item in
-      if let folder = self.folderInfos.first(where: {$0.text == item.getFolderName()}){
+      if let folder = self.folderInfos.first(where: {$0.text == item.foldersName}){
         folder.soundInfos.append(item.copy())
       } else {
-        self.folderInfos.append(GroupInfo(text: item.getFolderName(), soundInfos: [item.copy()]))
+        self.folderInfos.append(GroupInfo(text: item.foldersName, soundInfos: [item.copy()]))
       }
     }
   }
 
   /// PlayList情報Json入力
-   func getPlayListInfo() {   // 移動済
-     self.playListInfos = self.getGroupInfo(url: utility.getSettingFilePathPlayList()).sorted { $0.sortKey < $1.sortKey }
-     
-     // SoundInfosソート
-     self.playListInfos.forEach {
-       $0.soundInfos.sort { $0.sortKey < $1.sortKey }
-     }
+  func getPlayListInfo() {   // 移動済
+    self.playListInfos = utility.getPlayListInfo().sorted { $0.sortKey < $1.sortKey }
   }
 
+  /*
   /// グループ情報Json入力
   func getGroupInfo(url: URL) -> [GroupInfo] {
     do {
@@ -164,6 +158,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
     }
     return [GroupInfo]()
   }
+   */
   
   /// PlayModeカラー
   func getPlayModeColor(playMode: SoundInfo) -> Color {

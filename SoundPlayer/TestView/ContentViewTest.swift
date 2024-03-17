@@ -39,6 +39,8 @@ struct CreateTestData: View {
   @EnvironmentObject var viewModel: ViewModel
 
   var body: some View {
+    Text("")
+    /*
     Button("Create PlayList"){
       viewModel.playListInfos = [GroupInfo]()
       viewModel.playListInfos.append(GroupInfo(text: "PlayList 1"))
@@ -57,8 +59,9 @@ struct CreateTestData: View {
       idx = Int.random(in: 0...viewModel.soundInfos.count - 1)
       viewModel.playListInfos[1].soundInfos[1] = viewModel.soundInfos[idx].copy()
 
-      try! utility.writeGroupInfo(url: utility.getSettingFilePathPlayList(), outputInfos: viewModel.playListInfos)
-      let _ = utility.readGroupInfo(url: utility.getSettingFilePathPlayList())
+      try! utility.writePlayListInfo(url: utility.getSettingFilePathPlayList(), outputInfos: viewModel.playListInfos)
+      let _ = utility.getPlayListInfo(url: utility.getSettingFilePathPlayList())
+     */
       
 /*
       @EnvironmentObject var viewModel: ViewModel
@@ -82,5 +85,4 @@ struct CreateTestData: View {
  */
     }
   }
-}
 

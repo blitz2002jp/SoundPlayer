@@ -65,9 +65,7 @@ class SoundInfo: Codable, Identifiable {
       // Documentoフォルダより下のフォルダ名を取得する
       // 除去するフォルダ
       var removeDirName = URL(fileURLWithPath: docDir.path)
-      if utility.isSoundBox() {
-        removeDirName = URL(fileURLWithPath:String("\(utility.SANDBOX_DIRECRORY)\(docDir.path)"))
-      }
+
       ///  フォルダ名の設定
       // 先頭からDocumentフォルダまでを除去してfoldersNameにセット
       self.foldersName = fileName.deletingLastPathComponent().absoluteString.replacingOccurrences(of: removeDirName.absoluteString, with: "")
@@ -102,10 +100,10 @@ class SoundInfo: Codable, Identifiable {
   }
    */
   
-  func getFolderName() -> String {
-    return ""
+//  func getFolderName() -> String {
+//    return ""
 //    return self.foldersName.joined(separator: "/")
-  }
+//  }
   
   func isSelectedx() -> Bool {
     if(self.playMode == .stop){
