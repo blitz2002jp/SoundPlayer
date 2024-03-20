@@ -110,7 +110,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
 
   /// デバイスに登録されているMP3ファイルからSoundInfoを作成する
   func createSoundInfo() {
-    utility.getFiles(byExtensionConditions: utility.SOUND_FILE_EXTENSIONS).forEach { item in
+    utility.getSoundFiles().forEach { item in
       self.soundInfos.append(SoundInfo(fileName: item))
     }
     
@@ -173,7 +173,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
           try self.player.Play(url: _targetSound.fullPath, startTime: startTime, isLoop: isLoop)
 
           // 現在再生中の音源を保存
-          utility.SaveCurrentSound(url: _targetSound.path)
+          utility.SaveCurrentInfo(url: _targetSound.path)
           
         case .play:
           _targetSound.playMode = .pause

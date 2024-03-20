@@ -8,12 +8,15 @@
 import Foundation
 
 struct utility {
-  private static let SETTING_FILE_DIRECTORY = "Setteing"
-  static let PLAY_LIST_INFO_KEY = "PLAY_LIST_INFO"
-  private static let CURRENT_SOUND_SAVE_KEY = "CurrentSound"
+  private static let PLAY_LIST_INFO_KEY = "PLAY_LIST_INFO"
+  private static let CURRENT_GROUP_KEY = "CurrentGroup"
+  private static let CURRENT_SOUND_KEY = "CurrentSound"
   private static let IS_SAND_BOX_KEY = "isSandBox"
-  static let SOUND_FILE_EXTENSIONS = ["mp3"]
-  static let SANDBOX_DIRECRORY = "private"
+  
+  
+  private static let SETTING_FILE_DIRECTORY = "Setteing"
+  private static let SANDBOX_DIRECRORY = "private"
+  private static let SOUND_FILE_EXTENSIONS = ["mp3"]
   
   /// Documentディレクトリ取得
   static func getDocumentDirectory() -> URL?{
@@ -68,7 +71,7 @@ struct utility {
   }
   
   /// Documentフォルダ以下のMP3ファイルの一覧を取得する
-  static func getFiles(byExtensionConditions extensionConditions: [String]) -> [URL]{
+  static func getSoundFiles() -> [URL]{
     if let documentsPath = utility.getDocumentDirectory() {
       // Documentディレクトリ以下のすべてのファイルを列挙する
       if let enumerator = FileManager.default.enumerator(at: documentsPath, includingPropertiesForKeys: nil, options: [], errorHandler: nil) {
@@ -76,7 +79,7 @@ struct utility {
         if let files = enumerator.allObjects as? [URL] {
           // 拡張子(mp3)でファイルをフィルタ
           return files.filter { file in
-            return extensionConditions.contains { condition in
+            return utility.SOUND_FILE_EXTENSIONS.contains { condition in
               file.pathExtension.lowercased() == condition.lowercased()
             }
           }
@@ -130,22 +133,33 @@ struct utility {
     try JSONEncoder().encode(groupinfo).write(to:outputFullUrl)
   }
   
-  /// 現在再生中の音源保存
-  static func SaveCurrentSound(url: URL?) {
+  /// 現在再生中の音声(url)、GroupTextの保存
+//  static func SaveCurrentInfo(url: URL?, groupText: String) {
+    static func SaveCurrentInfo(url: URL?) {
     if let _url = url {
-      UserDefaults.standard.set(_url, forKey: CURRENT_SOUND_SAVE_KEY)
+      UserDefaults.standard.set(_url, forKey: CURRENT_SOUND_KEY)
+//      UserDefaults.standard.set(groupText, forKey: CURRENT_GROUP_KEY)
     }
   }
   
-  /// 現在再生中の音源取得
+  /// 現在再生中の音声(url)の取得
   static func GetCurrentSound() -> URL? {
-    if let loadedText = UserDefaults.standard.url(forKey: CURRENT_SOUND_SAVE_KEY) {
-      return loadedText
+    if let url = UserDefaults.standard.url(forKey: CURRENT_SOUND_KEY) {
+      return url
     }else{
       return nil
     }
   }
-  
+
+  /// 現在再生中のGroupTextの取得
+  static func GetCurrentGroup() -> String {
+    if let loadedText = UserDefaults.standard.string(forKey: CURRENT_GROUP_KEY) {
+      return loadedText
+    }else{
+      return ""
+    }
+  }
+
   /// 環境がサンドボックスか
   static func isSoundBox() -> Bool{
     // Get Temporary Directory
