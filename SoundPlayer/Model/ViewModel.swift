@@ -100,7 +100,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
     }
   }
   
-  /// 対象のグループを変更する  PPPPP
+  /// 対象のグループを変更する
   func changeGroup(targetGroup: GroupInfo){
     self.currentGroup = targetGroup
     
@@ -108,6 +108,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
     self.currentGroup?.initPlayMode()
   }
 
+  /// デバイスに登録されているMP3ファイルからSoundInfoを作成する
   func createSoundInfo() {
     utility.getFiles(byExtensionConditions: utility.SOUND_FILE_EXTENSIONS).forEach { item in
       self.soundInfos.append(SoundInfo(fileName: item))
@@ -115,11 +116,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
     
     // ソート（フォルダ名＋ファイル名）
     self.soundInfos.sort{
-      /*
-       let d0 = $0.getFileFullPath()?.absoluteString ?? ""
-       let d1 = $1.getFileFullPath()?.absoluteString ?? ""
-       return d0 < d1
-       */
       let d0 = $0.fullPath?.absoluteString ?? ""
       let d1 = $1.fullPath?.absoluteString ?? ""
       return d0 < d1
@@ -127,7 +123,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
   }
   
   /// フォルダ情報作成
-  func createFolderInfo() {   // 移動済
+  func createFolderInfo() {
     self.folderInfos = [GroupInfo]()
     
     // URLのパスコンポーネントを取得
@@ -146,20 +142,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
     self.playListInfos = utility.getPlayListInfo().sorted { $0.sortKey < $1.sortKey }
   }
 
-  /*
-  /// グループ情報Json入力
-  func getGroupInfo(url: URL) -> [GroupInfo] {
-    do {
-      let data = try Data(contentsOf: url)
-      let decoder = JSONDecoder()
-      return try decoder.decode([GroupInfo].self, from: data)
-    } catch {
-      print("Error reading contents of directory: \(error)")
-    }
-    return [GroupInfo]()
-  }
-   */
-  
   /// PlayModeカラー
   func getPlayModeColor(playMode: SoundInfo) -> Color {
     switch playMode.playMode {
@@ -239,37 +221,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
         try self.playSound(targetSound: _targetSound)
       }
     }
-
-    /*
-    if let _currentGroup =  self.currentGroup {
-      if let _targetSound = _currentGroup.getPlayTargetSound() {
-        // 再生 or 停止
-        self.playSound(targetSound: _targetSound)
-        
-      }
-    } else {
-      print("ViewModelのcurrentGroup未設定")
-    }
-    // 再描画
-    redraw()
-     */
-    
-    /*
-     if(self.playMode == .play){
-     self.playerLib.pauseSound()
-     } else {
-     if let _currentGroup = self.currentGroup {
-     if let _selectedSound = _currentGroup.soundInfos.first(where: {$0.isSelected == true}){
-     self.playSound(targetSound: _selectedSound)
-     } else {
-     // 選択されているものが無いので先頭の曲を再生
-     self.playSound(targetSound: self.currentGroup?.soundInfos[0])
-     }
-     } else {
-     print("ViewModelのcurrentGroup未設定")
-     }
-     }
-     */
   }
 
   /// 選択中のSoundInfo取得

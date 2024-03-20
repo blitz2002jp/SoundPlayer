@@ -26,22 +26,13 @@ struct GroupListView: View {
 
   var body: some View {
     VStack {
-      /*
-      HStack {
-        Button("戻る"){
-          nextView = .topView
-        }
-        Spacer()
-      }
-       */
-      
       NavigationView {
         ScrollView {
           VStack {
             ForEach(self.targetGroupInfos, id: \.id) { item in
               NavigationLink(destination: SoundListView(selectedItem: item, viewModel: _viewModel), isActive: $isActive) {
                 HStack{
-                  Text(item.text)
+                  Text(item.text.count < 1 ? "Document" : item.text)
                     .lineLimit(1)
                     .padding([.leading, .trailing, .top, .bottom], 20)
                     .frame(maxWidth: .infinity, alignment: .leading)

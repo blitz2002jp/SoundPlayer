@@ -16,7 +16,6 @@ enum subViews1: String{
 }
 
 struct ContentView: View {
-//  @EnvironmentObject var vm: ViewModel
   @EnvironmentObject var viewModel: ViewModel
   @State private var nextView: subViews1 = .topView
   @State private var showTestSheet = false
@@ -25,34 +24,40 @@ struct ContentView: View {
     switch nextView {
     case .topView:
       List{
-        Text("All List View")
-          .onTapGesture{
-            nextView = .AllSoundView
-          }
-        Text("FolderList View")
-          .onTapGesture{
-            nextView = .folderView
-          }
-        Text("PlayList View")
-          .onTapGesture{
-            nextView = .playListView
-          }
-        Text("Test1")
+        HStack {
+          Image(systemName: "internaldrive")
+          Text("KeyMenu1")
+            .onTapGesture{
+              nextView = .AllSoundView
+            }
+        }
+        HStack {
+          Image(systemName: "folder")
+          Text("KeyMenu2")
+            .onTapGesture{
+              nextView = .folderView
+            }
+        }
+        HStack {
+          Image(systemName: "music.note.list")
+          Text("KeyMenu3")
+            .onTapGesture{
+              nextView = .playListView
+            }
+        }
+        Text("KeyMenu4")
           .onTapGesture{
             showTestSheet.toggle()
           }
           .sheet(isPresented: $showTestSheet){
-            CreateTestData()
+            CreateTestDataView()
           }
       }
     case .AllSoundView:
-//      otherView(nextView: $nextView)
       GroupListView(viewTitle: "ALL", nextView: $nextView, targetGroupInfos: viewModel.fullSoundInfo)
     case .folderView:
-//      GroupListView(viewTitle: "Folder", nextView: $nextView, targetGroupInfo: vm.playerLib.folderInfos)
       GroupListView(viewTitle: "Folder", nextView: $nextView, targetGroupInfos: viewModel.folderInfos)
     case .playListView:
-//      GroupListView(viewTitle: "PlayList", nextView: $nextView, targetGroupInfo: vm.playerLib.playListInfos)
       GroupListView(viewTitle: "PlayList", nextView: $nextView, targetGroupInfos: viewModel.playListInfos)
     }
     

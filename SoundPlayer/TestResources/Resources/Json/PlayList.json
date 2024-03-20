@@ -1,0 +1,44 @@
+[
+  {
+    "text": "おまえ本当に大学・・・",
+    "soundInfos": [
+      {
+        "sortKey": 0,
+        "fileName": "おまえ本当に大学出たのか.mp3",
+        "playMode": "play",
+        "isSelected": false,
+        "repeatMode": "noRepeate",
+        "text": "",
+        "comment": "",
+        "currentTimeStr": "",
+        "startTimeStr": "0:3:32",
+        "foldersName": "Wedenesday",
+        "volume": 0
+      }
+    ],
+    "repeatMode": "repeateAll",
+    "comment": "",
+    "sortKey": 0
+  },
+  {
+    "text": "ここをキャンプ地",
+    "soundInfos": [
+      {
+        "sortKey": 0,
+        "fileName": "ここをキャンプ地とする！.mp3",
+        "playMode": "play",
+        "isSelected": false,
+        "repeatMode": "noRepeate",
+        "text": "",
+        "comment": "",
+        "currentTimeStr": "",
+        "startTimeStr": "0:3:32",
+        "foldersName": "Wedenesday",
+        "volume": 0
+      }
+    ],
+    "repeatMode": "repeateAll",
+    "comment": "",
+    "sortKey": 0
+  }
+]

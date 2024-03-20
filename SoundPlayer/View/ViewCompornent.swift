@@ -161,12 +161,7 @@ class TitleTimeModel {
   }
 }
 
-
-
-
-
 struct TitleInput: View {
-  
   @EnvironmentObject var viewModel: ViewModel
   @Binding var title: String
   @Binding var result: ResultSaveView
@@ -186,13 +181,13 @@ struct TitleInput: View {
         self.result = .ok
         dismiss()
       }
+      .disabled(self.inputTitle.count <= 0)
       Spacer()
-      Button("Remove"){
-      }
+      Button(action: {}, label: {Image(systemName: "trash")})
       .foregroundColor(.red)
       .alert(isPresented: $showingAlert) {
           Alert(
-              title: Text("Remode"),
+            title: Text("Remove"),
               message: Text("削除しますか？"),
               primaryButton: .default(Text("Ok"), action: {
                 self.result = .remove
@@ -207,7 +202,6 @@ struct TitleInput: View {
     Form{
       Section(header: Text("タイトル")) {
         Picker("", selection: $title) {
-          Text("New Item").tag("NewItem")
           ForEach(self.viewModel.playListInfos){ item in
             Text(item.text).tag(item.text)
           }
@@ -242,10 +236,11 @@ struct TitleTimeInput: View {
       }
       Spacer()
       Button("OK"){
-        self.model.title = self.inputTitle
         self.result = .ok
         dismiss()
       }
+      .disabled(self.inputTitle.count <= 0)
+/*
       Spacer()
       Button("Remove"){
       }
@@ -261,16 +256,13 @@ struct TitleTimeInput: View {
               })
           )
       }
+      */
     }
     .padding([.leading, .trailing], 20 )
 
     Form{
       Section(header: Text("タイトル")) {
-        /*
-         TextField("", text: $model.title)
-         */
-        
-        Picker("タイトルaaaa", selection: self.$selectedTitle) {
+        Picker("タイトル", selection: self.$selectedTitle) {
           ForEach(self.viewModel.playListInfos){ item in
             Text(item.text).tag(item.text)
           }

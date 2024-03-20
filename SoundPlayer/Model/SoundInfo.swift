@@ -9,7 +9,6 @@ import Foundation
 import AVFoundation
 
 class SoundInfo: Codable, Identifiable {
-//  var foldersName = [String]()                      // フォルダ名(Documentフォルダより下位のフォルダ)
   var foldersName: String = ""                      // フォルダ名(Documentフォルダより下位のフォルダ)
   var fileName: String = ""                         // ファイル名
   var text: String = ""                             // 表示
@@ -54,17 +53,14 @@ class SoundInfo: Codable, Identifiable {
   }
   
   init(fileName: URL){
-    
-    
     // fileNameからDocumentsディレクトリを除くディレクトリとファイル名を抽出
     if let docDir = utility.getDocumentDirectory() {
       // ファイル名
       self.fileName = fileName.lastPathComponent
-      
-      
+
       // Documentoフォルダより下のフォルダ名を取得する
       // 除去するフォルダ
-      var removeDirName = URL(fileURLWithPath: docDir.path)
+      let removeDirName = URL(fileURLWithPath: docDir.path)
 
       ///  フォルダ名の設定
       // 先頭からDocumentフォルダまでを除去してfoldersNameにセット

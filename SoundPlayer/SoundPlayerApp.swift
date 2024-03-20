@@ -27,7 +27,11 @@ struct SoundPlayerApp: App {
           CustomAppDelegate.orientationLock = UIInterfaceOrientationMask.portrait
           
           // フォルダ
-          print("DocumentDirectory : \(String(describing: utility.getDocumentDirectory()))")
+          if let _docUrl = utility.getDocumentDirectory() {
+            print("DocumentDirectory : \(String(describing: _docUrl.path))")
+          } else {
+            print("DocumentDirectory なし")
+          }
         }
     }
   }

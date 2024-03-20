@@ -38,19 +38,17 @@ struct SoundListView: View {
                   Rectangle()
                     .stroke(viewModel.getPlayModeColor(playMode: item), lineWidth: item.isSelectedx() ? 2 : 0)
                 )
-              Button("@"){
+              Button(action: {
                 let (hours, minutes, seconds) = utility.getHMS(time: viewModel.getCurrentTime())
                 self.titleTime.hours = hours
                 self.titleTime.minutes = minutes
                 self.titleTime.seconds = seconds
                 self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
                 isPresented.toggle()
-              }
+              }, label: {Image(systemName: "pencil.and.list.clipboard")})
               .sheet(isPresented: $isPresented, onDismiss: {
                 do {
                   // PlayListへの追加
-                  print(self.titleTime.title)
-                
                   switch self.saveViewResult {
                   case .cancel:
                     break
