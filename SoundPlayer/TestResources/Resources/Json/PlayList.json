@@ -18,7 +18,8 @@
     ],
     "repeatMode": "repeateAll",
     "comment": "",
-    "sortKey": 0
+    "sortKey": 0,
+    "groupType": "PlayList"
   },
   {
     "text": "ここをキャンプ地",
@@ -39,6 +40,7 @@
     ],
     "repeatMode": "repeateAll",
     "comment": "",
-    "sortKey": 0
+    "sortKey": 0,
+    "groupType": "PlayList"
   }
 ]

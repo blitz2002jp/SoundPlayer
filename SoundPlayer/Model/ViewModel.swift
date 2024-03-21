@@ -27,9 +27,9 @@ class ViewModel: ObservableObject, PlayerDelegate {
   
   // 音声データ
   var soundInfos = [SoundInfo]()
-  var fullSoundInfo = [GroupInfo]()
-  var folderInfos = [GroupInfo]()
-  var playListInfos = [GroupInfo]()
+  var fullSoundInfos = [FullSoundInfo]()
+  var folderInfos = [FolderInfo]()
+  var playListInfos = [PlayListInfo]()
   
   var currentGroup: GroupInfo? = nil
   var currentTimeStr: String = ""
@@ -56,9 +56,9 @@ class ViewModel: ObservableObject, PlayerDelegate {
     createFolderInfo()
     getPlayListInfo()
 
-    self.fullSoundInfo = [GroupInfo]()
-    self.fullSoundInfo.append(GroupInfo(text: "Full Sound"))
-    self.fullSoundInfo[0].soundInfos = self.soundInfos
+    self.fullSoundInfos = [FullSoundInfo]()
+    self.fullSoundInfos.append(FullSoundInfo(text: "Full Sound"))
+    self.fullSoundInfos[0].soundInfos = self.soundInfos
 
     // Playerデリゲート
     player.delegate = self
@@ -124,7 +124,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
   
   /// フォルダ情報作成
   func createFolderInfo() {
-    self.folderInfos = [GroupInfo]()
+    self.folderInfos = [FolderInfo]()
     
     // URLのパスコンポーネントを取得
     self.soundInfos.forEach{
@@ -132,7 +132,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
       if let folder = self.folderInfos.first(where: {$0.text == item.foldersName}){
         folder.soundInfos.append(item.copy())
       } else {
-        self.folderInfos.append(GroupInfo(text: item.foldersName, soundInfos: [item.copy()]))
+        self.folderInfos.append(FolderInfo(text: item.foldersName, soundInfos: [item.copy()]))
       }
     }
   }
@@ -173,7 +173,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
           try self.player.Play(url: _targetSound.fullPath, startTime: startTime, isLoop: isLoop)
 
           // 現在再生中の音源を保存
-          utility.SaveCurrentInfo(url: _targetSound.path)
+          utility.SaveCurrentInfo(groupInfo: _currentGroup, soundInfo: _targetSound)
           
         case .play:
           _targetSound.playMode = .pause

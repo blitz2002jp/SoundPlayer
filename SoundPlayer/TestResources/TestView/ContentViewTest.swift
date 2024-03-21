@@ -99,11 +99,14 @@ struct CreateTestDataView: View {
         if let path = Bundle.main.url(forResource: "PlayList", withExtension: "json") {
           // ファイルのデータを読み込む
           let jsonData = try Data(contentsOf: path)
+        
+          if let jsonString = String(data: try Data(contentsOf: path), encoding: .utf8) {
+            print("")
+          }
+          // JsonDataをPlayListInfo配列に変換
+          let playListInfo = try JSONDecoder().decode([PlayListInfo].self, from: jsonData)
           
-          // JsonDataをGroupInfo配列に変換
-          let playListInfo = try JSONDecoder().decode([GroupInfo].self, from: jsonData)
-          
-          try utility.writePlayListInfo(outputInfos: playListInfo)
+          try utility.savePlayListInfo(outputInfos: playListInfo)
         }
       } catch {
         print("createPlayListでエラー:\(error.localizedDescription)")

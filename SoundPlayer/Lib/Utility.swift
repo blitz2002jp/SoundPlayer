@@ -90,25 +90,29 @@ struct utility {
   }
   
   /// PlayList情報の取得
-  static func getPlayListInfo() -> [GroupInfo]{   // 移動済
+  static func getPlayListInfo() -> [PlayListInfo]{   // 移動済
     // UserDefaultsから保存データ取得
     if let jsonString = UserDefaults.standard.string(forKey: PLAY_LIST_INFO_KEY) {
       // String型データをData型に変換
       if let jsonData = jsonString.data(using: .utf8) {
         do {
-          // JsonDataをGroupInfo配列に変換
-          return try JSONDecoder().decode([GroupInfo].self, from: jsonData)
+          // JsonDataをPlayListInfo配列に変換
+          return try JSONDecoder().decode([PlayListInfo].self, from: jsonData)
         } catch {
-          print("Error reading contents of directory: \(error)")
+          print("Error decoding JSON data: \(error.localizedDescription)")
         }
+      } else {
+        print("Error converting JSON string to data")
       }
+    } else {
+      print("Error retrieving JSON string from UserDefaults")
     }
-    return [GroupInfo]()
+    return [PlayListInfo]()
   }
   
-  /// PlayList情報をJson形式で出力(UserDefaults)
-  static func writePlayListInfo(outputInfos:[GroupInfo]) throws {
-    // GroupInfoの配列をjsonDataにエンコード
+  /// PlayList情報をJson形式で保存(UserDefaults)
+  static func savePlayListInfo(outputInfos:[PlayListInfo]) throws {
+    // PlayListInfoの配列をjsonDataにエンコード
     let jsonData = try JSONEncoder().encode(outputInfos)
     
     // JSONデータをStringに変換
@@ -120,8 +124,8 @@ struct utility {
     }
   }
   
-  /// GroupInfoをファイル出力する
-  static func playListInfoToFile(groupinfo: [GroupInfo] ,fileName: String, outputUrl: URL? = nil) throws {
+  /// PlayListInfoをファイル出力する
+  static func playListInfoToFile(groupinfo: [PlayListInfo] ,fileName: String, outputUrl: URL? = nil) throws {
     var outputFullUrl: URL
     if let _outputUrl = outputUrl {
       outputFullUrl = _outputUrl.appendingPathComponent(fileName)
@@ -133,13 +137,12 @@ struct utility {
     try JSONEncoder().encode(groupinfo).write(to:outputFullUrl)
   }
   
-  /// 現在再生中の音声(url)、GroupTextの保存
-//  static func SaveCurrentInfo(url: URL?, groupText: String) {
-    static func SaveCurrentInfo(url: URL?) {
-    if let _url = url {
-      UserDefaults.standard.set(_url, forKey: CURRENT_SOUND_KEY)
-//      UserDefaults.standard.set(groupText, forKey: CURRENT_GROUP_KEY)
-    }
+  /// 現在再生中の音声情報、グループ情報の保存
+  static func SaveCurrentInfo(groupInfo: GroupInfo, soundInfo: SoundInfo) {
+    // グループ情報の保存
+    UserDefaults.standard.set(groupInfo.groupType , forKey: CURRENT_GROUP_KEY)
+    // 音声のPath保存
+    UserDefaults.standard.set(soundInfo.path , forKey: CURRENT_SOUND_KEY)
   }
   
   /// 現在再生中の音声(url)の取得

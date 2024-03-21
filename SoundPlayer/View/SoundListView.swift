@@ -10,7 +10,6 @@ import SwiftUI
 /// SoundInfo List
 struct SoundListView: View {
   var selectedItem: GroupInfo
-//  @EnvironmentObject var viewModel: ViewModel
   @EnvironmentObject var viewModel: ViewModel
   @State private var repeateMode = RepeatMode.noRepeate
   @State private var isPresented = false
@@ -54,13 +53,13 @@ struct SoundListView: View {
                     break
                   case .ok:
                     if let soundInfo = self.viewModel.getCurrentSound()?.copy() {
-                      let groupInfo = GroupInfo(text: self.titleTime.title)
-                      groupInfo.text = self.titleTime.title
-                      groupInfo.soundInfos = [SoundInfo]()
                       soundInfo.startTimeStr = String("\(self.titleTime.hours):\(self.titleTime.minutes):\(self.titleTime.seconds)")
-                      groupInfo.soundInfos.append(soundInfo)
-                      self.viewModel.playListInfos.append(groupInfo)
-                      try utility.writePlayListInfo(outputInfos: self.viewModel.playListInfos)
+                      let playListInfo = PlayListInfo(text: self.titleTime.title)
+                      playListInfo.text = self.titleTime.title
+                      playListInfo.soundInfos = [SoundInfo]()
+                      playListInfo.soundInfos.append(soundInfo)
+                      self.viewModel.playListInfos.append(playListInfo)
+                      try utility.savePlayListInfo(outputInfos: self.viewModel.playListInfos)
                     }
                   case .remove:
                     break

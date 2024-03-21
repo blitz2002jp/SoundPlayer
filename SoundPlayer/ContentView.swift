@@ -54,7 +54,7 @@ struct ContentView: View {
           }
       }
     case .AllSoundView:
-      GroupListView(viewTitle: "ALL", nextView: $nextView, targetGroupInfos: viewModel.fullSoundInfo)
+      GroupListView(viewTitle: "ALL", nextView: $nextView, targetGroupInfos: viewModel.fullSoundInfos)
     case .folderView:
       GroupListView(viewTitle: "Folder", nextView: $nextView, targetGroupInfos: viewModel.folderInfos)
     case .playListView:
