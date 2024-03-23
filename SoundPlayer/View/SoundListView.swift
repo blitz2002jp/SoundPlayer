@@ -104,8 +104,6 @@ struct SoundListView: View {
       }
     }
     .onAppear {
-      viewModel.changeGroup(targetGroup: selectedItem)
-      viewModel.redraw()
     }
     .alert("Error", isPresented: $isShowAlert) {
       // ダイアログ内で行うアクション処理...

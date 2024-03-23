@@ -9,8 +9,9 @@ import Foundation
 
 struct utility {
   private static let PLAY_LIST_INFO_KEY = "PLAY_LIST_INFO"
-  private static let CURRENT_GROUP_KEY = "CurrentGroup"
-  private static let CURRENT_SOUND_KEY = "CurrentSound"
+  private static let CURRENT_GROUP_TYPE_KEY = "CurrentGroupType"
+  private static let CURRENT_GROUP_TEXT_KEY = "CurrentGroupText"
+  private static let CURRENT_SOUND_URL_KEY = "CurrentSound"
   private static let IS_SAND_BOX_KEY = "isSandBox"
   
   
@@ -137,17 +138,24 @@ struct utility {
     try JSONEncoder().encode(groupinfo).write(to:outputFullUrl)
   }
   
-  /// 現在再生中の音声情報、グループ情報の保存
-  static func SaveCurrentInfo(groupInfo: GroupInfo, soundInfo: SoundInfo) {
-    // グループ情報の保存
-    UserDefaults.standard.set(groupInfo.groupType , forKey: CURRENT_GROUP_KEY)
-    // 音声のPath保存
-    UserDefaults.standard.set(soundInfo.path , forKey: CURRENT_SOUND_KEY)
+  // 現在のグループ情報の保存
+  static func saveCurrentGroupInfo(groupInfo: GroupInfo?) {
+    if let _groupInfo = groupInfo {
+      UserDefaults.standard.set(_groupInfo.groupType.rawValue , forKey: CURRENT_GROUP_TYPE_KEY)
+      UserDefaults.standard.set(_groupInfo.text , forKey: CURRENT_GROUP_TEXT_KEY)
+    }
+  }
+  
+  // 現在の音声情報の保存
+  static func saveCurrentSoundInfo(soundInfo: SoundInfo?) {
+    if let _soundIndo = soundInfo {
+      UserDefaults.standard.set(_soundIndo.path , forKey: CURRENT_SOUND_URL_KEY)
+    }
   }
   
   /// 現在再生中の音声(url)の取得
   static func GetCurrentSound() -> URL? {
-    if let url = UserDefaults.standard.url(forKey: CURRENT_SOUND_KEY) {
+    if let url = UserDefaults.standard.url(forKey: CURRENT_SOUND_URL_KEY) {
       return url
     }else{
       return nil
@@ -156,12 +164,31 @@ struct utility {
 
   /// 現在再生中のGroupTextの取得
   static func GetCurrentGroup() -> String {
-    if let loadedText = UserDefaults.standard.string(forKey: CURRENT_GROUP_KEY) {
+    if let loadedText = UserDefaults.standard.string(forKey: CURRENT_GROUP_TEXT_KEY) {
       return loadedText
     }else{
       return ""
     }
   }
+
+  // 現在のグループ名(text)取得
+  static func getCurrentGroupText() -> String? {
+    return UserDefaults.standard.string(forKey: CURRENT_GROUP_TEXT_KEY)
+  }
+  
+  // 現在のグループタイプ(GroupType)取得
+  static func getCurrentGroupType() -> GroupType? {
+    if let _groupType = UserDefaults.standard.string(forKey: CURRENT_GROUP_TYPE_KEY) {
+      return GroupType(rawValue: _groupType)
+    }
+    return nil
+  }
+  
+  // 現在の音声情報(url)取得
+  static func getCurrentSoundUrl() -> URL? {
+    return UserDefaults.standard.url(forKey: CURRENT_SOUND_URL_KEY)
+  }
+
 
   /// 環境がサンドボックスか
   static func isSoundBox() -> Bool{

@@ -32,6 +32,7 @@ class GroupInfo: Codable, Identifiable{
     self.sortKey = sortKey
   }
 
+  // Json Decode用のinit(Json Decoderから呼ばれる)
   required init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     groupType = try container.decode(GroupType.self, forKey: .groupType)
@@ -67,6 +68,4 @@ class GroupInfo: Codable, Identifiable{
       return self.soundInfos[0]
     }
   }
-  
-  
 }
