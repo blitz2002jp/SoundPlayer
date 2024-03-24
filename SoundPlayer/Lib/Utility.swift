@@ -9,8 +9,9 @@ import Foundation
 
 struct utility {
   private static let PLAY_LIST_INFO_KEY = "PLAY_LIST_INFO"
-  private static let CURRENT_GROUP_KEY = "CurrentGroup"
-  private static let CURRENT_SOUND_KEY = "CurrentSound"
+  private static let CURRENT_GROUP_TYPE_KEY = "CurrentGroupType"
+  private static let CURRENT_GROUP_TEXT_KEY = "CurrentGroupText"
+  private static let CURRENT_SOUND_URL_KEY = "CurrentSound"
   private static let IS_SAND_BOX_KEY = "isSandBox"
   
   
@@ -90,25 +91,29 @@ struct utility {
   }
   
   /// PlayList情報の取得
-  static func getPlayListInfo() -> [GroupInfo]{   // 移動済
+  static func getPlayListInfo() -> [PlayListInfo]{   // 移動済
     // UserDefaultsから保存データ取得
     if let jsonString = UserDefaults.standard.string(forKey: PLAY_LIST_INFO_KEY) {
       // String型データをData型に変換
       if let jsonData = jsonString.data(using: .utf8) {
         do {
-          // JsonDataをGroupInfo配列に変換
-          return try JSONDecoder().decode([GroupInfo].self, from: jsonData)
+          // JsonDataをPlayListInfo配列に変換
+          return try JSONDecoder().decode([PlayListInfo].self, from: jsonData)
         } catch {
-          print("Error reading contents of directory: \(error)")
+          print("Error decoding JSON data: \(error.localizedDescription)")
         }
+      } else {
+        print("Error converting JSON string to data")
       }
+    } else {
+      print("Error retrieving JSON string from UserDefaults")
     }
-    return [GroupInfo]()
+    return [PlayListInfo]()
   }
   
-  /// PlayList情報をJson形式で出力(UserDefaults)
-  static func writePlayListInfo(outputInfos:[GroupInfo]) throws {
-    // GroupInfoの配列をjsonDataにエンコード
+  /// PlayList情報をJson形式で保存(UserDefaults)
+  static func savePlayListInfo(outputInfos:[PlayListInfo]) throws {
+    // PlayListInfoの配列をjsonDataにエンコード
     let jsonData = try JSONEncoder().encode(outputInfos)
     
     // JSONデータをStringに変換
@@ -120,8 +125,8 @@ struct utility {
     }
   }
   
-  /// GroupInfoをファイル出力する
-  static func playListInfoToFile(groupinfo: [GroupInfo] ,fileName: String, outputUrl: URL? = nil) throws {
+  /// PlayListInfoをファイル出力する
+  static func playListInfoToFile(groupinfo: [PlayListInfo] ,fileName: String, outputUrl: URL? = nil) throws {
     var outputFullUrl: URL
     if let _outputUrl = outputUrl {
       outputFullUrl = _outputUrl.appendingPathComponent(fileName)
@@ -133,18 +138,24 @@ struct utility {
     try JSONEncoder().encode(groupinfo).write(to:outputFullUrl)
   }
   
-  /// 現在再生中の音声(url)、GroupTextの保存
-//  static func SaveCurrentInfo(url: URL?, groupText: String) {
-    static func SaveCurrentInfo(url: URL?) {
-    if let _url = url {
-      UserDefaults.standard.set(_url, forKey: CURRENT_SOUND_KEY)
-//      UserDefaults.standard.set(groupText, forKey: CURRENT_GROUP_KEY)
+  // 現在のグループ情報の保存
+  static func saveCurrentGroupInfo(groupInfo: GroupInfo?) {
+    if let _groupInfo = groupInfo {
+      UserDefaults.standard.set(_groupInfo.groupType.rawValue , forKey: CURRENT_GROUP_TYPE_KEY)
+      UserDefaults.standard.set(_groupInfo.text , forKey: CURRENT_GROUP_TEXT_KEY)
+    }
+  }
+  
+  // 現在の音声情報の保存
+  static func saveCurrentSoundInfo(soundInfo: SoundInfo?) {
+    if let _soundIndo = soundInfo {
+      UserDefaults.standard.set(_soundIndo.path , forKey: CURRENT_SOUND_URL_KEY)
     }
   }
   
   /// 現在再生中の音声(url)の取得
   static func GetCurrentSound() -> URL? {
-    if let url = UserDefaults.standard.url(forKey: CURRENT_SOUND_KEY) {
+    if let url = UserDefaults.standard.url(forKey: CURRENT_SOUND_URL_KEY) {
       return url
     }else{
       return nil
@@ -153,12 +164,31 @@ struct utility {
 
   /// 現在再生中のGroupTextの取得
   static func GetCurrentGroup() -> String {
-    if let loadedText = UserDefaults.standard.string(forKey: CURRENT_GROUP_KEY) {
+    if let loadedText = UserDefaults.standard.string(forKey: CURRENT_GROUP_TEXT_KEY) {
       return loadedText
     }else{
       return ""
     }
   }
+
+  // 現在のグループ名(text)取得
+  static func getCurrentGroupText() -> String? {
+    return UserDefaults.standard.string(forKey: CURRENT_GROUP_TEXT_KEY)
+  }
+  
+  // 現在のグループタイプ(GroupType)取得
+  static func getCurrentGroupType() -> GroupType? {
+    if let _groupType = UserDefaults.standard.string(forKey: CURRENT_GROUP_TYPE_KEY) {
+      return GroupType(rawValue: _groupType)
+    }
+    return nil
+  }
+  
+  // 現在の音声情報(url)取得
+  static func getCurrentSoundUrl() -> URL? {
+    return UserDefaults.standard.url(forKey: CURRENT_SOUND_URL_KEY)
+  }
+
 
   /// 環境がサンドボックスか
   static func isSoundBox() -> Bool{

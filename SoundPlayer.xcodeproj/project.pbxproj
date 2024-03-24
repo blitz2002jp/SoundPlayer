@@ -20,6 +20,9 @@
 		5840EBD22BA7E9080043C3EA /* PlayList.json in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBAD2BA7E81D0043C3EA /* PlayList.json */; };
 		5840EBD42BA9385E0043C3EA /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBD32BA9385D0043C3EA /* Localizable.xcstrings */; };
 		5853A5552BA68D9A0047F2EF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5894E47A2BA571760014C60E /* ContentView.swift */; };
+		58729EE32BABD63D00FB28BB /* FullSoundInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58729EE22BABD63D00FB28BB /* FullSoundInfo.swift */; };
+		58729EE52BABD67000FB28BB /* FolderInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58729EE42BABD67000FB28BB /* FolderInfo.swift */; };
+		58729EE72BABD6A100FB28BB /* PlayListInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58729EE62BABD6A100FB28BB /* PlayListInfo.swift */; };
 		5894E43A2BA56F120014C60E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5894E4392BA56F120014C60E /* Assets.xcassets */; };
 		5894E43D2BA56F120014C60E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5894E43C2BA56F120014C60E /* Preview Assets.xcassets */; };
 		5894E4472BA56F120014C60E /* SoundPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5894E4462BA56F120014C60E /* SoundPlayerTests.swift */; };
@@ -66,6 +69,9 @@
 		5840EBB82BA7E81D0043C3EA /* 004.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = 004.mp3; sourceTree = "<group>"; };
 		5840EBBB2BA7E81D0043C3EA /* ContentViewTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewTest.swift; sourceTree = "<group>"; };
 		5840EBD32BA9385D0043C3EA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		58729EE22BABD63D00FB28BB /* FullSoundInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullSoundInfo.swift; sourceTree = "<group>"; };
+		58729EE42BABD67000FB28BB /* FolderInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderInfo.swift; sourceTree = "<group>"; };
+		58729EE62BABD6A100FB28BB /* PlayListInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayListInfo.swift; sourceTree = "<group>"; };
 		5894E4322BA56F110014C60E /* SoundPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SoundPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5894E4392BA56F120014C60E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5894E43C2BA56F120014C60E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -170,6 +176,14 @@
 			path = TestResources;
 			sourceTree = "<group>";
 		};
+		58729EE12BABD5E900FB28BB /* BaseClass */ = {
+			isa = PBXGroup;
+			children = (
+				5894E4682BA56F820014C60E /* GroupInfo.swift */,
+			);
+			path = BaseClass;
+			sourceTree = "<group>";
+		};
 		5894E4292BA56F110014C60E = {
 			isa = PBXGroup;
 			children = (
@@ -244,9 +258,12 @@
 		5894E46B2BA56F820014C60E /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				5894E4682BA56F820014C60E /* GroupInfo.swift */,
+				58729EE12BABD5E900FB28BB /* BaseClass */,
 				5894E4692BA56F820014C60E /* SoundInfo.swift */,
 				5894E46A2BA56F820014C60E /* ViewModel.swift */,
+				58729EE22BABD63D00FB28BB /* FullSoundInfo.swift */,
+				58729EE42BABD67000FB28BB /* FolderInfo.swift */,
+				58729EE62BABD6A100FB28BB /* PlayListInfo.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -404,11 +421,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				5894E4672BA56F740014C60E /* Utility.swift in Sources */,
+				58729EE72BABD6A100FB28BB /* PlayListInfo.swift in Sources */,
 				5840EBC82BA7E81D0043C3EA /* ContentViewTest.swift in Sources */,
 				5853A5552BA68D9A0047F2EF /* ContentView.swift in Sources */,
 				5894E4742BA56FA80014C60E /* ViewCompornent.swift in Sources */,
+				58729EE52BABD67000FB28BB /* FolderInfo.swift in Sources */,
 				5894E46D2BA56F820014C60E /* SoundInfo.swift in Sources */,
 				5894E4612BA56F350014C60E /* GroupListView.swift in Sources */,
+				58729EE32BABD63D00FB28BB /* FullSoundInfo.swift in Sources */,
 				5894E4662BA56F740014C60E /* Player.swift in Sources */,
 				5894E46C2BA56F820014C60E /* GroupInfo.swift in Sources */,
 				5894E4722BA56FA80014C60E /* SoundPlayerApp.swift in Sources */,

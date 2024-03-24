@@ -27,11 +27,59 @@ class ViewModel: ObservableObject, PlayerDelegate {
   
   // 音声データ
   var soundInfos = [SoundInfo]()
-  var fullSoundInfo = [GroupInfo]()
-  var folderInfos = [GroupInfo]()
-  var playListInfos = [GroupInfo]()
+  var fullSoundInfos = [FullSoundInfo]()
+  var folderInfos = [FolderInfo]()
+  var playListInfos = [PlayListInfo]()
   
-  var currentGroup: GroupInfo? = nil
+  // 現在のグループ情報
+  var currentGroup: GroupInfo? {
+    get {
+      // グループタイプにより使うデータを判断
+      var groupInfos = [GroupInfo]()
+      switch utility.getCurrentGroupType() {
+      case .FullSound:
+        groupInfos = self.fullSoundInfos
+      case .Folder:
+        groupInfos = self.folderInfos
+      case .PlayList:
+        groupInfos = self.playListInfos
+      case .none:
+        break
+      }
+      
+      // 対象のGroupInfoを検索
+      if let groupText = utility.getCurrentGroupText() {
+        if let groupInfo = groupInfos.first(where: {$0.text == groupText}) {
+          return groupInfo
+        }
+      }
+      return nil
+    }
+    
+    set(groupInfo) {
+        // 現在のグループ情報を保存
+        utility.saveCurrentGroupInfo(groupInfo: groupInfo)
+    }
+  }
+  
+  // 現在の音声情報
+  var currentSound: SoundInfo? {
+    get {
+      if let _currentSoundUrl = utility.getCurrentSoundUrl() {
+        if let _currentGroup = self.currentGroup {
+          _currentGroup.soundInfos.forEach{ item in
+          }
+          return _currentGroup.soundInfos.first(where: {$0.path == _currentSoundUrl})
+        }
+      }
+      return nil
+    }
+    
+    set(soundInfo) {
+      utility.saveCurrentSoundInfo(soundInfo: soundInfo)
+    }
+  }
+//  var currentGroup: GroupInfo? = nil
   var currentTimeStr: String = ""
   var currentFileName: String {
     get {
@@ -50,21 +98,45 @@ class ViewModel: ObservableObject, PlayerDelegate {
   var playMode = PlayMode.play
   
   init() {
-
+    
     createSoundInfo()
-
     createFolderInfo()
     getPlayListInfo()
-
-    self.fullSoundInfo = [GroupInfo]()
-    self.fullSoundInfo.append(GroupInfo(text: "Full Sound"))
-    self.fullSoundInfo[0].soundInfos = self.soundInfos
-
+    
+    self.fullSoundInfos = [FullSoundInfo]()
+    self.fullSoundInfos.append(FullSoundInfo(text: "Full Sound"))
+    self.fullSoundInfos[0].soundInfos = self.soundInfos
+    
     // Playerデリゲート
     player.delegate = self
     
     // イヤホン
     self.player.addRemoteCommandEvent()
+    
+    // 現在情報の設定
+    /*
+    if let _currentGroup = self.currentGroup {
+      if let _currentSound = self.currentSound {
+        print("PlayMode:\(_currentSound.playMode.rawValue) url:\(_currentSound.fullPath?.absoluteString)")
+        _currentGroup.soundInfos.forEach{ item in
+          if item.fullPath == _currentSound.fullPath {
+            item.playMode = .pause
+          } else {
+            item.playMode = .stop
+          }
+        }
+      }
+    }
+     */
+    if let _currentSound = self.currentSound {
+      _currentSound.playMode = .pause
+    }
+    
+    if let _currentGroup = self.currentGroup {
+      _currentGroup.soundInfos.forEach{ item in
+        print("PlayMode:\(item.playMode.rawValue) url:\(item.path?.absoluteString)")
+      }
+    }
   }
 
   // 再生時間の通知 デリゲート
@@ -100,14 +172,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
     }
   }
   
-  /// 対象のグループを変更する
-  func changeGroup(targetGroup: GroupInfo){
-    self.currentGroup = targetGroup
-    
-    // PlayModeの初期化
-    self.currentGroup?.initPlayMode()
-  }
-
   /// デバイスに登録されているMP3ファイルからSoundInfoを作成する
   func createSoundInfo() {
     utility.getSoundFiles().forEach { item in
@@ -124,7 +188,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
   
   /// フォルダ情報作成
   func createFolderInfo() {
-    self.folderInfos = [GroupInfo]()
+    self.folderInfos = [FolderInfo]()
     
     // URLのパスコンポーネントを取得
     self.soundInfos.forEach{
@@ -132,7 +196,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
       if let folder = self.folderInfos.first(where: {$0.text == item.foldersName}){
         folder.soundInfos.append(item.copy())
       } else {
-        self.folderInfos.append(GroupInfo(text: item.foldersName, soundInfos: [item.copy()]))
+        self.folderInfos.append(FolderInfo(text: item.foldersName, soundInfos: [item.copy()]))
       }
     }
   }
@@ -172,8 +236,9 @@ class ViewModel: ObservableObject, PlayerDelegate {
           let isLoop = _targetSound.repeatMode == .repeateOne ? true : false
           try self.player.Play(url: _targetSound.fullPath, startTime: startTime, isLoop: isLoop)
 
-          // 現在再生中の音源を保存
-          utility.SaveCurrentInfo(url: _targetSound.path)
+          // 現在再生中の音源とグループを保存
+          self.currentGroup = _currentGroup
+          self.currentSound = _targetSound
           
         case .play:
           _targetSound.playMode = .pause

@@ -9,7 +9,6 @@ import SwiftUI
 
 struct GroupListView: View {
   var viewTitle = "View Title"
-  //  @EnvironmentObject var viewModel: ViewModel
   @EnvironmentObject var viewModel: ViewModel
   @Binding var nextView: subViews1
   var targetGroupInfos: [GroupInfo]
