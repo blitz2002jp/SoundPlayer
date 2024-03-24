@@ -17,56 +17,67 @@ struct GroupListView: View {
   // アラート表示SwitchとMessage
   @State private var isShowAlert = false
   @State private var errorMessage = ""
-
-  // 
+  
+  //
   @State private var isEditing = false
   
   @State private var isActive = false
-
+  
+  @State private var selectItem: GroupInfo?
+  
   var body: some View {
     VStack {
       NavigationView {
         ScrollView {
           VStack {
             ForEach(self.targetGroupInfos, id: \.id) { item in
-              NavigationLink(destination: SoundListView(selectedItem: item, viewModel: _viewModel), isActive: $isActive) {
-                HStack{
-                  Text(item.text.count < 1 ? "Document" : item.text)
-                    .lineLimit(1)
-                    .padding([.leading, .trailing, .top, .bottom], 20)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                  
-                  Spacer()
-                  Button(action: {
-                    isEditing.toggle()
-                  }, label: {
-                    Image(systemName: "pencil")
-                  })
-                  .padding(.trailing, 20)
-
-                  Button(action:{
-                    do {
-                      try self.viewModel.playGroup(targetGroup: item)
-                    } catch {
-                      self.errorMessage = error.localizedDescription
-                      self.isShowAlert = true
-                    }
-                  }, label: {
-                    Image(systemName: "play.circle")
-                  })
-                }
+              HStack{
+                Text(item.text.count < 1 ? "Document" : item.text)
+                  .lineLimit(1)
+                  .padding([.leading, .trailing, .top, .bottom], 20)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .onTapGesture {
+                    self.selectItem = item
+                    isActive = true
+                  }
+                
+                Spacer()
+                Button(action: {
+                  isEditing.toggle()
+                }, label: {
+                  Image(systemName: "pencil")
+                })
+                .padding(.trailing, 20)
+                
+                Button(action:{
+                  do {
+                    try self.viewModel.playGroup(targetGroup: item)
+                  } catch {
+                    self.errorMessage = error.localizedDescription
+                    self.isShowAlert = true
+                  }
+                }, label: {
+                  Image(systemName: "play.circle")
+                })
               }
-              .navigationBarTitle(self.viewTitle, displayMode: .inline)
-              .navigationBarItems(leading: Button(action: {nextView = .topView}, label: {
-                HStack {
-                  Image(systemName: "chevron.left")
-                  Text("戻る")
-                }
-              }))
             }
           }
+          .background(
+            NavigationLink(destination: SoundListView(selectedItem: self.selectItem, viewModel: _viewModel), isActive: $isActive) {
+              EmptyView()
+            }
+          )
         }
       }
+      
+      .navigationBarTitle(self.viewTitle, displayMode: .inline)
+      .navigationBarItems(leading: Button(action: {nextView = .topView}, label: {
+        HStack {
+          Image(systemName: "chevron.left")
+          Text("戻る")
+        }
+      }))
+      
       .onAppear{
       }
       .alert("Error", isPresented: $isShowAlert) {
@@ -76,18 +87,6 @@ struct GroupListView: View {
         // アラートのメッセージ...
         Text("エラーが発生しました\n\(self.errorMessage)")
       }
-
-      /*
-      if !isActive {
-        HStack {
-          Text("\(viewModel.currentFileName)")
-            .font(.footnote)
-          
-          // 繰り返しボタン
-          RepeatButton()
-        }
-      }
-       */
     }
   }
 }

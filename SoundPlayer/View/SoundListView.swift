@@ -9,7 +9,7 @@ import SwiftUI
 
 /// SoundInfo List
 struct SoundListView: View {
-  var selectedItem: GroupInfo
+  var selectedItem: GroupInfo?
   @EnvironmentObject var viewModel: ViewModel
   @State private var repeateMode = RepeatMode.noRepeate
   @State private var isPresented = false
@@ -26,78 +26,80 @@ struct SoundListView: View {
   var body: some View {
     ScrollView {
       LazyVStack {
-        ForEach(selectedItem.soundInfos, id: \.id) { item in
-          VStack {
-            HStack {
-              Text(item.text == "" ? item.fileName : item.text)
-                .lineLimit(1)
-                .padding([.leading, .trailing, .top, .bottom], 20)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                  Rectangle()
-                    .stroke(viewModel.getPlayModeColor(playMode: item), lineWidth: item.isSelectedx() ? 2 : 0)
-                )
-              Button(action: {
-                let (hours, minutes, seconds) = utility.getHMS(time: viewModel.getCurrentTime())
-                self.titleTime.hours = hours
-                self.titleTime.minutes = minutes
-                self.titleTime.seconds = seconds
-                self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
-                isPresented.toggle()
-              }, label: {Image(systemName: "pencil.and.list.clipboard")})
-              .sheet(isPresented: $isPresented, onDismiss: {
-                do {
-                  // PlayListへの追加
-                  switch self.saveViewResult {
-                  case .cancel:
-                    break
-                  case .ok:
-                    if let soundInfo = self.viewModel.getCurrentSound()?.copy() {
-                      soundInfo.startTimeStr = String("\(self.titleTime.hours):\(self.titleTime.minutes):\(self.titleTime.seconds)")
-                      let playListInfo = PlayListInfo(text: self.titleTime.title)
-                      playListInfo.text = self.titleTime.title
-                      playListInfo.soundInfos = [SoundInfo]()
-                      playListInfo.soundInfos.append(soundInfo)
-                      self.viewModel.playListInfos.append(playListInfo)
-                      try utility.savePlayListInfo(outputInfos: self.viewModel.playListInfos)
+        if let _selectedItem = selectedItem {
+          ForEach(_selectedItem.soundInfos, id: \.id) { item in
+            VStack {
+              HStack {
+                Text(item.text == "" ? item.fileName : item.text)
+                  .lineLimit(1)
+                  .padding([.leading, .trailing, .top, .bottom], 20)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .background(
+                    Rectangle()
+                      .stroke(viewModel.getPlayModeColor(playMode: item), lineWidth: item.isSelectedx() ? 2 : 0)
+                  )
+                Button(action: {
+                  let (hours, minutes, seconds) = utility.getHMS(time: viewModel.getCurrentTime())
+                  self.titleTime.hours = hours
+                  self.titleTime.minutes = minutes
+                  self.titleTime.seconds = seconds
+                  self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
+                  isPresented.toggle()
+                }, label: {Image(systemName: "pencil.and.list.clipboard")})
+                .sheet(isPresented: $isPresented, onDismiss: {
+                  do {
+                    // PlayListへの追加
+                    switch self.saveViewResult {
+                    case .cancel:
+                      break
+                    case .ok:
+                      if let soundInfo = self.viewModel.getCurrentSound()?.copy() {
+                        soundInfo.startTimeStr = String("\(self.titleTime.hours):\(self.titleTime.minutes):\(self.titleTime.seconds)")
+                        let playListInfo = PlayListInfo(text: self.titleTime.title)
+                        playListInfo.text = self.titleTime.title
+                        playListInfo.soundInfos = [SoundInfo]()
+                        playListInfo.soundInfos.append(soundInfo)
+                        self.viewModel.playListInfos.append(playListInfo)
+                        try utility.savePlayListInfo(outputInfos: self.viewModel.playListInfos)
+                      }
+                    case .remove:
+                      break
+                      //                    self.viewModel.playListInfos = self.viewModel. { $0.id != self.viewModel.getCurrentSound()?.id }
                     }
-                  case .remove:
-                    break
-//                    self.viewModel.playListInfos = self.viewModel. { $0.id != self.viewModel.getCurrentSound()?.id }
+                    /*
+                     if self.saveVireResult == . {
+                     if let soundInfo = self.viewModel.getCurrentSound()?.copy() {
+                     let groupInfo = GroupInfo(text: self.titleTime.title)
+                     groupInfo.text = self.titleTime.title
+                     groupInfo.soundInfos = [SoundInfo]()
+                     soundInfo.startTimeStr = String("\(self.titleTime.hours):\(self.titleTime.minutes):\(self.titleTime.seconds)")
+                     groupInfo.soundInfos.append(soundInfo)
+                     self.viewModel.playListInfos.append(groupInfo)
+                     print(utility.getSettingFilePathPlayList().absoluteString)
+                     try utility.writeGroupInfo(url: utility.getSettingFilePathPlayList(), outputInfos: self.viewModel.playListInfos)
+                     }
+                     }
+                     */
+                  } catch {
+                    self.isShowAlert = true
                   }
-/*
-                  if self.saveVireResult == . {
-                    if let soundInfo = self.viewModel.getCurrentSound()?.copy() {
-                      let groupInfo = GroupInfo(text: self.titleTime.title)
-                      groupInfo.text = self.titleTime.title
-                      groupInfo.soundInfos = [SoundInfo]()
-                      soundInfo.startTimeStr = String("\(self.titleTime.hours):\(self.titleTime.minutes):\(self.titleTime.seconds)")
-                      groupInfo.soundInfos.append(soundInfo)
-                      self.viewModel.playListInfos.append(groupInfo)
-                      print(utility.getSettingFilePathPlayList().absoluteString)
-                      try utility.writeGroupInfo(url: utility.getSettingFilePathPlayList(), outputInfos: self.viewModel.playListInfos)
-                    }
- }
- */
-                } catch {
-                  self.isShowAlert = true
+                  
+                })
+                {
+                  TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
                 }
                 
-              })
-              {
-                TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
               }
-                
+              .padding([.leading, .trailing], 20)
             }
-            .padding([.leading, .trailing], 20)
-          }
-          .onTapGesture {
-            do {
-              try viewModel.playSound(targetSound: item)
-              viewModel.redraw()
-            } catch {
-              self.isShowAlert = true
-              self.errorMessage = error.localizedDescription
+            .onTapGesture {
+              do {
+                try viewModel.playSound(targetSound: item)
+                viewModel.redraw()
+              } catch {
+                self.isShowAlert = true
+                self.errorMessage = error.localizedDescription
+              }
             }
           }
         }
