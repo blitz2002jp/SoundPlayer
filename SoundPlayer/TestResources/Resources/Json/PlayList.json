@@ -3,6 +3,7 @@
     "text": "おまえ本当に大学・・・",
     "soundInfos": [
       {
+        "parentText" : "おまえ本当に大学・・・",
         "sortKey": 0,
         "fileName": "おまえ本当に大学出たのか.mp3",
         "playMode": "play",
@@ -25,6 +26,7 @@
     "text": "ここをキャンプ地",
     "soundInfos": [
       {
+        "parentText" : "ここをキャンプ地",
         "sortKey": 0,
         "fileName": "ここをキャンプ地とする！.mp3",
         "playMode": "play",

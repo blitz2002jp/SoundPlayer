@@ -14,6 +14,10 @@ enum GroupType: String, Codable {
   case PlayList
 }
 
+class MyClass {
+    var property: Int = 42
+}
+
 class GroupInfo: Codable, Identifiable{
   var groupType: GroupType                      // グループタイプ
   var text: String                              // 表示名
@@ -21,7 +25,15 @@ class GroupInfo: Codable, Identifiable{
   var repeatMode: RepeatMode                    // 繰り返し
   var comment: String                           // コメント
   var sortKey: Int                              // ソートキー
-
+  
+  var selectedSound: SoundInfo? {               // 選択音声
+    get {
+      if let selectedSoundUrl = utility.getSelectedSoundPath(groupInfo: self) {
+        return self.soundInfos.first(where: {$0.path?.absoluteString == selectedSoundUrl.absoluteString} )
+      }
+      return nil
+    }
+  }
   
   init(groupType: GroupType, text: String, soundInfos: [SoundInfo] = [SoundInfo](), repeatMode: RepeatMode = RepeatMode.repeateAll, comment: String = "", sortKey: Int = 0) {
     self.groupType = groupType
@@ -31,7 +43,7 @@ class GroupInfo: Codable, Identifiable{
     self.comment = comment
     self.sortKey = sortKey
   }
-
+  
   // Json Decode用のinit(Json Decoderから呼ばれる)
   required init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -42,30 +54,30 @@ class GroupInfo: Codable, Identifiable{
     comment = try container.decode(String.self, forKey: .comment)
     sortKey = try container.decode(Int.self, forKey: .sortKey)
   }
-
+  
   enum CodingKeys: String, CodingKey {
-      case groupType
-      case text
-      case soundInfos
-      case repeatMode
-      case comment
-      case sortKey
-  }
-  /// PlayModeの初期化
-  func initPlayMode(){
-    let playingItem = self.soundInfos.first(where: {$0.playMode == .play || $0.playMode == .pause})
-    soundInfos.forEach{ item in item.playMode = .stop }
-    if(playingItem != nil){
-      playingItem?.playMode = .pause
-    }
+    case groupType
+    case text
+    case soundInfos
+    case repeatMode
+    case comment
+    case sortKey
   }
   
-  /// 再生対象の取得
-  func getPlayTargetSound() -> SoundInfo? {
-    if let res = self.soundInfos.first(where: {$0.playMode == .play || $0.playMode == .pause}) {
-      return res
-    } else {
-      return self.soundInfos[0]
+  func isSelected(soundInfo: SoundInfo) -> Bool {
+    if let _selectedSound = self.selectedSound {
+      if _selectedSound.path?.absoluteString == soundInfo.path?.absoluteString {
+        return true
+      }
     }
+    return false
+  }
+  
+  /// 選択された音声取得
+  func getSelectedSound() -> SoundInfo? {
+    if let _path = utility.getSelectedSoundPath(groupInfo: self) {
+      return self.soundInfos.first(where: {$0.path?.absoluteString == _path.absoluteString})
+    }
+    return nil
   }
 }

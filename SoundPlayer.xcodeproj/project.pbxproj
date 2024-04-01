@@ -18,7 +18,6 @@
 		5840EBD02BA7E8F70043C3EA /* 003.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBB72BA7E81D0043C3EA /* 003.mp3 */; };
 		5840EBD12BA7E8F70043C3EA /* 004.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBB82BA7E81D0043C3EA /* 004.mp3 */; };
 		5840EBD22BA7E9080043C3EA /* PlayList.json in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBAD2BA7E81D0043C3EA /* PlayList.json */; };
-		5840EBD42BA9385E0043C3EA /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBD32BA9385D0043C3EA /* Localizable.xcstrings */; };
 		5853A5552BA68D9A0047F2EF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5894E47A2BA571760014C60E /* ContentView.swift */; };
 		58729EE32BABD63D00FB28BB /* FullSoundInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58729EE22BABD63D00FB28BB /* FullSoundInfo.swift */; };
 		58729EE52BABD67000FB28BB /* FolderInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58729EE42BABD67000FB28BB /* FolderInfo.swift */; };
@@ -68,7 +67,6 @@
 		5840EBB72BA7E81D0043C3EA /* 003.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = 003.mp3; sourceTree = "<group>"; };
 		5840EBB82BA7E81D0043C3EA /* 004.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = 004.mp3; sourceTree = "<group>"; };
 		5840EBBB2BA7E81D0043C3EA /* ContentViewTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewTest.swift; sourceTree = "<group>"; };
-		5840EBD32BA9385D0043C3EA /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		58729EE22BABD63D00FB28BB /* FullSoundInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullSoundInfo.swift; sourceTree = "<group>"; };
 		58729EE42BABD67000FB28BB /* FolderInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderInfo.swift; sourceTree = "<group>"; };
 		58729EE62BABD6A100FB28BB /* PlayListInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayListInfo.swift; sourceTree = "<group>"; };
@@ -176,14 +174,6 @@
 			path = TestResources;
 			sourceTree = "<group>";
 		};
-		58729EE12BABD5E900FB28BB /* BaseClass */ = {
-			isa = PBXGroup;
-			children = (
-				5894E4682BA56F820014C60E /* GroupInfo.swift */,
-			);
-			path = BaseClass;
-			sourceTree = "<group>";
-		};
 		5894E4292BA56F110014C60E = {
 			isa = PBXGroup;
 			children = (
@@ -207,16 +197,15 @@
 		5894E4342BA56F110014C60E /* SoundPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				5894E46F2BA56FA80014C60E /* SoundPlayerApp.swift */,
 				5894E47A2BA571760014C60E /* ContentView.swift */,
-				5894E4792BA571660014C60E /* View */,
+				5894E4392BA56F120014C60E /* Assets.xcassets */,
 				5894E4752BA570140014C60E /* Info.plist */,
+				5894E4792BA571660014C60E /* View */,
 				5894E46B2BA56F820014C60E /* Model */,
 				5894E4652BA56F740014C60E /* Lib */,
-				5894E46F2BA56FA80014C60E /* SoundPlayerApp.swift */,
-				5894E4392BA56F120014C60E /* Assets.xcassets */,
 				5840EBBD2BA7E81D0043C3EA /* TestResources */,
 				5894E43B2BA56F120014C60E /* Preview Content */,
-				5840EBD32BA9385D0043C3EA /* Localizable.xcstrings */,
 			);
 			path = SoundPlayer;
 			sourceTree = "<group>";
@@ -258,7 +247,7 @@
 		5894E46B2BA56F820014C60E /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				58729EE12BABD5E900FB28BB /* BaseClass */,
+				5894E4682BA56F820014C60E /* GroupInfo.swift */,
 				5894E4692BA56F820014C60E /* SoundInfo.swift */,
 				5894E46A2BA56F820014C60E /* ViewModel.swift */,
 				58729EE22BABD63D00FB28BB /* FullSoundInfo.swift */,
@@ -364,7 +353,6 @@
 			knownRegions = (
 				en,
 				ja,
-				fr,
 			);
 			mainGroup = 5894E4292BA56F110014C60E;
 			productRefGroup = 5894E4332BA56F110014C60E /* Products */;
@@ -389,7 +377,6 @@
 				5840EBCB2BA7E8F70043C3EA /* トンネルだトンネルだ.mp3 in Resources */,
 				5840EBCC2BA7E8F70043C3EA /* みっちゃん.mp3 in Resources */,
 				5840EBCD2BA7E8F70043C3EA /* 糸ようじ.mp3 in Resources */,
-				5840EBD42BA9385E0043C3EA /* Localizable.xcstrings in Resources */,
 				5840EBCE2BA7E8F70043C3EA /* 001.mp3 in Resources */,
 				5840EBCF2BA7E8F70043C3EA /* 002.mp3 in Resources */,
 				5840EBD02BA7E8F70043C3EA /* 003.mp3 in Resources */,
@@ -522,7 +509,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -579,7 +566,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -603,8 +590,8 @@
 				INFOPLIST_FILE = SoundPlayer/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -633,8 +620,8 @@
 				INFOPLIST_FILE = SoundPlayer/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

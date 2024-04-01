@@ -9,7 +9,7 @@ import SwiftUI
 
 /// SoundInfo List
 struct SoundListView: View {
-  var selectedItem: GroupInfo?
+  var targetGroup: GroupInfo?
   @EnvironmentObject var viewModel: ViewModel
   @State private var repeateMode = RepeatMode.noRepeate
   @State private var isPresented = false
@@ -26,8 +26,8 @@ struct SoundListView: View {
   var body: some View {
     ScrollView {
       LazyVStack {
-        if let _selectedItem = selectedItem {
-          ForEach(_selectedItem.soundInfos, id: \.id) { item in
+        if let _targetGroup = targetGroup {
+          ForEach(_targetGroup.soundInfos, id: \.id) { item in
             VStack {
               HStack {
                 Text(item.text == "" ? item.fileName : item.text)
@@ -36,65 +36,23 @@ struct SoundListView: View {
                   .frame(maxWidth: .infinity, alignment: .leading)
                   .background(
                     Rectangle()
-                      .stroke(viewModel.getPlayModeColor(playMode: item), lineWidth: item.isSelectedx() ? 2 : 0)
+                      .stroke(viewModel.getPlayModeColor(), lineWidth: _targetGroup.isSelected(soundInfo: item) ? 2 : 0)
                   )
+
                 Button(action: {
-                  let (hours, minutes, seconds) = utility.getHMS(time: viewModel.getCurrentTime())
-                  self.titleTime.hours = hours
-                  self.titleTime.minutes = minutes
-                  self.titleTime.seconds = seconds
-                  self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
                   isPresented.toggle()
-                }, label: {Image(systemName: "pencil.and.list.clipboard")})
+                }, label: {Image(systemName: "list.triangle")})
                 .sheet(isPresented: $isPresented, onDismiss: {
-                  do {
-                    // PlayListへの追加
-                    switch self.saveViewResult {
-                    case .cancel:
-                      break
-                    case .ok:
-                      if let soundInfo = self.viewModel.getCurrentSound()?.copy() {
-                        soundInfo.startTimeStr = String("\(self.titleTime.hours):\(self.titleTime.minutes):\(self.titleTime.seconds)")
-                        let playListInfo = PlayListInfo(text: self.titleTime.title)
-                        playListInfo.text = self.titleTime.title
-                        playListInfo.soundInfos = [SoundInfo]()
-                        playListInfo.soundInfos.append(soundInfo)
-                        self.viewModel.playListInfos.append(playListInfo)
-                        try utility.savePlayListInfo(outputInfos: self.viewModel.playListInfos)
-                      }
-                    case .remove:
-                      break
-                      //                    self.viewModel.playListInfos = self.viewModel. { $0.id != self.viewModel.getCurrentSound()?.id }
-                    }
-                    /*
-                     if self.saveVireResult == . {
-                     if let soundInfo = self.viewModel.getCurrentSound()?.copy() {
-                     let groupInfo = GroupInfo(text: self.titleTime.title)
-                     groupInfo.text = self.titleTime.title
-                     groupInfo.soundInfos = [SoundInfo]()
-                     soundInfo.startTimeStr = String("\(self.titleTime.hours):\(self.titleTime.minutes):\(self.titleTime.seconds)")
-                     groupInfo.soundInfos.append(soundInfo)
-                     self.viewModel.playListInfos.append(groupInfo)
-                     print(utility.getSettingFilePathPlayList().absoluteString)
-                     try utility.writeGroupInfo(url: utility.getSettingFilePathPlayList(), outputInfos: self.viewModel.playListInfos)
-                     }
-                     }
-                     */
-                  } catch {
-                    self.isShowAlert = true
-                  }
-                  
                 })
                 {
-                  TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
+                  SoundFileMenu(soundInfo: item)
                 }
-                
               }
               .padding([.leading, .trailing], 20)
             }
             .onTapGesture {
               do {
-                try viewModel.playSound(targetSound: item)
+                try viewModel.playSound(targetGroup: _targetGroup,  targetSound: item)
                 viewModel.redraw()
               } catch {
                 self.isShowAlert = true
@@ -114,39 +72,12 @@ struct SoundListView: View {
       // アラートのメッセージ...
       Text("エラーが発生しました\n\(self.errorMessage)")
     }
-    
-//    Spacer()
-//    PositionSlider(sliderVal: $viewModel.currentTime)
-    // フッター部分
-//    HStack {
-//      Spacer()
-      
-      // ボリューム
-//      VolumeSlider(sliderVal: $volume)
+  }
+}
 
-      /*
-      Text("Vol").font(.footnote)
-      Slider(value:$sliderVal, in: 0...1.0, step: 0.1)
-        .onChange(of: sliderVal) { newValue in
-          print("onReceive:\(sliderVal)")
-          viewModel.setVolume(volume: Float(sliderVal))
-        }
-        .font(.footnote)
-       */
-      
-      
-      /*
-      // 再生ボタン
-      PlayButton() {
-        viewModel.playGroup()
-      }
-*/
-      
-      // 繰り返しボタン
-//      RepeatButton()
-
-//      Spacer()
-//    }
-//    .background(Color.white) // フッターの背景色を設定
+struct SoundInfoDataView: View {
+  var soundInfo: SoundInfo
+  var body: some View {
+      EmptyView()
   }
 }

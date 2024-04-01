@@ -15,7 +15,7 @@ struct CreateTestDataView: View {
         message: Text("テストデータを作成しますか？"),
         primaryButton: .default(Text("OK")) {
           // テストデータ作成
-          CreateTestData().createTestData()
+          CreateTestData().create()
         },
         secondaryButton: .cancel()
       )
@@ -27,7 +27,7 @@ struct CreateTestDataView: View {
   }
   
   class CreateTestData {
-    func createTestData() {
+    func create() {
       if let docFolder = utility.getDocumentDirectory() {
         
         /// Documenフォルダのファイルを全て削除

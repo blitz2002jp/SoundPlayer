@@ -13,9 +13,7 @@ class SoundInfo: Codable, Identifiable {
   var fileName: String = ""                         // ファイル名
   var text: String = ""                             // 表示
   var comment: String = ""                          // コメント
-  var isSelected: Bool = false                      // 選択中
-  var playMode = PlayMode.stop                      // 再生中
-  var currentTimeStr: String = ""                   // 現在再生時間(文字列)
+  var currentTimeStr: String = ""                   // 現在再生時間("HH:MM:SS")
   var currentTime: TimeInterval {                   // 現在再生時間
     get {
       return utility.stringToTimeInterval(HHMMSS: self.currentTimeStr)
@@ -30,7 +28,6 @@ class SoundInfo: Codable, Identifiable {
   var volume: Float = Float.zero                    // ボリューム
   var repeatMode: RepeatMode = .noRepeate           // 繰り返し
   var sortKey: Int = Int.zero                       // ソートキー
-  
   // フルパス（ドキュメントフォルダを含むパス)
   var fullPath: URL? {
     get {
@@ -48,7 +45,7 @@ class SoundInfo: Codable, Identifiable {
       return nil
     }
   }
-
+  
   init(){
   }
   
@@ -57,11 +54,11 @@ class SoundInfo: Codable, Identifiable {
     if let docDir = utility.getDocumentDirectory() {
       // ファイル名
       self.fileName = fileName.lastPathComponent
-
+      
       // Documentoフォルダより下のフォルダ名を取得する
       // 除去するフォルダ
       let removeDirName = URL(fileURLWithPath: docDir.path)
-
+      
       ///  フォルダ名の設定
       // 先頭からDocumentフォルダまでを除去してfoldersNameにセット
       self.foldersName = fileName.deletingLastPathComponent().absoluteString.replacingOccurrences(of: removeDirName.absoluteString, with: "")
@@ -71,13 +68,10 @@ class SoundInfo: Codable, Identifiable {
   // Cron
   func copy() -> SoundInfo{
     let res = SoundInfo()
-//    res.id = self.id
     res.foldersName = self.foldersName                     // フォルダ名(Documentフォルダより下位のフォルダ)
     res.fileName = self.fileName                          // ファイル名
     res.text = self.text                              // 表示
     res.comment = self.comment                           // コメント
-    res.isSelected = self.isSelected                  // 選択中
-    res.playMode = self.playMode                  // 再生中
     res.currentTimeStr = self.currentTimeStr                  // 現在再生時間
     res.startTimeStr = self.startTimeStr                    // 再生開始時間
     res.volume = self.volume                             // ボリューム
@@ -87,28 +81,20 @@ class SoundInfo: Codable, Identifiable {
     
     return res
   }
-
-
-  ///  Equal
+  
   /*
-  static func ==(lhs: SoundInfo, rhs: SoundInfo) -> Bool {
-      return lhs.id == rhs.id
-  }
-   */
+  ///  Equal
+   static func ==(lhs: SoundInfo, rhs: SoundInfo) -> Bool {
+   return lhs.id == rhs.id
+   }
+*/
   
-//  func getFolderName() -> String {
-//    return ""
-//    return self.foldersName.joined(separator: "/")
-//  }
+  //  func getFolderName() -> String {
+  //    return ""
+  //    return self.foldersName.joined(separator: "/")
+  //  }
   
-  func isSelectedx() -> Bool {
-    if(self.playMode == .stop){
-      return false
-    }
-    return true
-  }
-  
-    /// 再生時間
+  /// 再生時間
   func duration() -> TimeInterval{
     if let _url = self.fullPath{
       do {

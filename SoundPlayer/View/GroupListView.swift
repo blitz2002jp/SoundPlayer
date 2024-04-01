@@ -23,7 +23,7 @@ struct GroupListView: View {
   
   @State private var isActive = false
   
-  @State private var selectItem: GroupInfo?
+//  @State private var selectItem: GroupInfo?
   
   var body: some View {
     VStack {
@@ -37,8 +37,11 @@ struct GroupListView: View {
                   .padding([.leading, .trailing, .top, .bottom], 20)
                   .frame(maxWidth: .infinity, alignment: .leading)
                   .onTapGesture {
-                    self.selectItem = item
+//                    self.selectItem = item
                     isActive = true
+                    
+                    self.viewModel.currentGroup = item
+
                   }
                 
                 Spacer()
@@ -51,7 +54,9 @@ struct GroupListView: View {
                 
                 Button(action:{
                   do {
-                    try self.viewModel.playGroup(targetGroup: item)
+                    self.viewModel.currentGroup = item
+
+                    try self.viewModel.playGroup(groupInfo: item)
                   } catch {
                     self.errorMessage = error.localizedDescription
                     self.isShowAlert = true
@@ -62,22 +67,20 @@ struct GroupListView: View {
               }
             }
           }
-          .background(
-            NavigationLink(destination: SoundListView(selectedItem: self.selectItem, viewModel: _viewModel), isActive: $isActive) {
-              EmptyView()
+          .navigationTitle(self.viewTitle)
+          .navigationBarTitleDisplayMode(.inline)
+          .navigationBarItems(leading: Button(action: {nextView = .topView}, label: {
+            HStack {
+              Image(systemName: "chevron.left")
+              Text("戻る")
             }
-          )
+          }))
         }
+        .background(
+          NavigationLink(destination: SoundListView(targetGroup: self.viewModel.currentGroup, viewModel: _viewModel), isActive: $isActive) {
+            EmptyView()
+          })
       }
-      
-      .navigationBarTitle(self.viewTitle, displayMode: .inline)
-      .navigationBarItems(leading: Button(action: {nextView = .topView}, label: {
-        HStack {
-          Image(systemName: "chevron.left")
-          Text("戻る")
-        }
-      }))
-      
       .onAppear{
       }
       .alert("Error", isPresented: $isShowAlert) {

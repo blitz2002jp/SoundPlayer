@@ -9,47 +9,43 @@ import SwiftUI
 
 /// Repeateボタン
 struct RepeatButton: View {
-//  @ObservedObject var vm: ViewModel
   @EnvironmentObject var viewModel: ViewModel
 
   var body: some View {
     
     Button(action: {
-      // アイコンをクリックした時のアクション
-      switch self.viewModel.currentGroup?.repeatMode {
-      case .noRepeate:
-        self.viewModel.currentGroup?.repeatMode = .repeateAll
-        break
-      case .repeateOne:
-        self.viewModel.currentGroup?.repeatMode = .noRepeate
-        break
-      case .repeateAll:
-        self.viewModel.currentGroup?.repeatMode = .repeateOne
-        break
-      case nil:
-        print("ViewModelのcurrentGroup未設定")
+      if let _currentGroup = self.viewModel.currentGroup {
+        // アイコンをクリックした時のアクション
+        switch _currentGroup.repeatMode {
+        case .noRepeate:
+          _currentGroup.repeatMode = .repeateAll
+          break
+        case .repeateOne:
+          _currentGroup.repeatMode = .noRepeate
+          break
+        case .repeateAll:
+          _currentGroup.repeatMode = .repeateOne
+          break
+        }
       }
       // 再描画
       self.viewModel.redraw()
     })
     {
-      switch self.viewModel.currentGroup?.repeatMode {
-      case .noRepeate:
-        Image(systemName: "repeat")
-          .foregroundColor(.gray)
-          .imageScale(.large)
-      case .repeateOne:
-        Image(systemName: "repeat.1")
-          .imageScale(.large)
-      case .repeateAll:
-        Image(systemName: "repeat")
-          .imageScale(.large)
-      case nil:
-        Image(systemName: "repeat")
-          .foregroundColor(.gray)
-          .imageScale(.large)
+      if let _currentGroup = self.viewModel.currentGroup {
+        switch _currentGroup.repeatMode {
+        case .noRepeate:
+          Image(systemName: "repeat")
+            .foregroundColor(.gray)
+            .imageScale(.large)
+        case .repeateOne:
+          Image(systemName: "repeat.1")
+            .imageScale(.large)
+        case .repeateAll:
+          Image(systemName: "repeat")
+            .imageScale(.large)
+        }
       }
-
     }
     .padding()
   }
@@ -57,7 +53,6 @@ struct RepeatButton: View {
 
 /// 詳細入力ボタン
 struct SoundDetailButton: View {
-//  @ObservedObject var vm: ViewModel
   @EnvironmentObject var viewModel: ViewModel
   var action: () -> Void
 
@@ -72,23 +67,11 @@ struct SoundDetailButton: View {
 
 /// Playボタン
 struct PlayButton: View {
-//  @ObservedObject var vm: ViewModel
   @EnvironmentObject var viewModel: ViewModel
   var action: () -> Void
 
   var body: some View {
     Button(action: {
-      // アイコンをクリックした時のアクション
-      switch self.viewModel.playMode {
-      case .play:
-        self.viewModel.playMode = .pause
-        break
-      case .pause:
-        self.viewModel.playMode = .play
-        break
-      case .stop:
-        break
-      }
       self.action()
       // 再描画
       viewModel.redraw()
@@ -96,11 +79,10 @@ struct PlayButton: View {
     {
       // 表示を切り替える
        if self.viewModel.playMode == .play {
-           Image(systemName: "play")
-//               .foregroundColor(.gray)
+           Image(systemName: "pause")
                .imageScale(.large)
        } else {
-           Image(systemName: "pause")
+           Image(systemName: "play")
                .imageScale(.large)
        }
     }
@@ -127,7 +109,7 @@ class TitleTimeModel {
   var seconds = 0
   var strHours: String {
     get{
-      return String(self.hours)
+      return String(format: "%02d", self.hours)
     }
     set(val){
       self.hours = Int(val) ?? 0
@@ -135,7 +117,7 @@ class TitleTimeModel {
   }
   var strMinutes: String {
     get{
-      return String(self.minutes)
+      return String(format: "%02d", self.minutes)
     }
     set(val){
       self.minutes = Int(val) ?? 0
@@ -143,7 +125,7 @@ class TitleTimeModel {
   }
   var strSeconds: String {
     get{
-      return String(self.seconds)
+      return String(format: "%02d", self.seconds)
     }
     set(val){
       self.seconds = Int(val) ?? 0
@@ -171,9 +153,8 @@ struct TitleInput: View {
   
   @State var inputTitle = ""
   var body: some View {
-    HStack{
+    HStack {
       Button("Cancel"){
-        
         dismiss()
       }
       Spacer()
@@ -189,7 +170,7 @@ struct TitleInput: View {
           Alert(
             title: Text("Remove"),
               message: Text("削除しますか？"),
-              primaryButton: .default(Text("Ok"), action: {
+              primaryButton: .default(Text("OK"), action: {
                 self.result = .remove
               }),
               secondaryButton: .cancel(Text("Cancel"), action: {
@@ -221,6 +202,7 @@ struct TitleTimeInput: View {
   @State var model: TitleTimeModel
   @Binding var result: ResultSaveView
   @State var title = ""
+  var soundInfo: SoundInfo
   
   @Environment(\.dismiss) var dismiss
   @State var showingAlert = false
@@ -237,6 +219,7 @@ struct TitleTimeInput: View {
       Spacer()
       Button("OK"){
         self.result = .ok
+        self.model.title = self.inputTitle
         dismiss()
       }
       .disabled(self.inputTitle.count <= 0)
@@ -249,7 +232,7 @@ struct TitleTimeInput: View {
           Alert(
               title: Text("Remode"),
               message: Text("削除しますか？"),
-              primaryButton: .default(Text("Ok"), action: {
+              primaryButton: .default(Text("OK"), action: {
                 self.result = .remove
               }),
               secondaryButton: .cancel(Text("Cancel"), action: {
@@ -352,10 +335,12 @@ struct VolumeSlider: View {
   var body: some View {
     HStack {
       Text("Vol").font(.footnote)
-      Slider(value:$sliderVal, in: 0...1.0, step: 0.1)
+      Slider(value: $viewModel.volome, in: 0...1.0, step: 0.1)
+//      Slider(value:$sliderVal, in: 0...1.0, step: 0.1)
         .onChange(of: sliderVal) { newValue in
-          print("onReceive:\(sliderVal)")
-          viewModel.setVolume(volume: Float(sliderVal))
+          viewModel.volome = Float(sliderVal)
+          print("newValue:\(newValue)")
+          print("sliderVal:\(sliderVal)")
         }
         .font(.footnote)
     }
@@ -373,7 +358,9 @@ struct Fotter: View {
         .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .leading)
 
       PlayButton(action: {
-        try? viewModel.playGroup(targetGroup: viewModel.currentGroup)
+        if let _currentGroup = self.viewModel.currentGroup {
+          try? viewModel.playGroup(groupInfo: _currentGroup)
+        }
       })
         .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .trailing)
     }
@@ -405,18 +392,92 @@ struct PlayView: View {
   @State var volume: Float = 0
   
   var body: some View {
-    VStack {
+    HStack {
       Button("Close"){
         dismiss()
       }
       Spacer()
-
+    }
+    VStack {
       // 再生位置
       PositionSlider(sliderVal: $viewModel.currentTime)
       Spacer()
       // ボリューム
       VolumeSlider(sliderVal: $volume)
       
+      Button("test") {
+        viewModel.volome = 0.5
+        viewModel.redraw()
+      }
+      
+    }
+    .padding(.top, 50)
+    .padding([.leading, .trailing], 30)
+    Spacer()
+  }
+}
+
+struct SoundFileMenu: View {
+  @EnvironmentObject var viewModel: ViewModel
+  @Environment(\.dismiss) var dismiss
+  @State private var titleTime: TitleTimeModel = TitleTimeModel(title: "")
+  @State private var saveViewResult: ResultSaveView = .cancel
+  @State private var isPresented:Bool = false
+  var soundInfo: SoundInfo
+
+  var body: some View {
+    VStack {
+      List {
+        Section {
+          HStack {
+            Image(systemName: "note.text.badge.plus")
+            Text("プレイリストへ追加")
+              .onTapGesture {
+                let (hours, minutes, seconds) = utility.getHMS(time: viewModel.getCurrentTime())
+                self.titleTime.hours = hours
+                self.titleTime.minutes = minutes
+                self.titleTime.seconds = seconds
+                self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
+                self.isPresented.toggle()
+              }
+          .sheet(isPresented: $isPresented, onDismiss: {
+            if self.saveViewResult == .ok {
+              do {
+                // 追加するSoundInfoの作成
+                let addSoundInfo = self.soundInfo.copy()
+                addSoundInfo.currentTimeStr = "\(self.titleTime.strHours):\(self.titleTime.strMinutes):\(self.titleTime.strSeconds)"
+
+                // PlayList作成
+                var playList = viewModel.playListInfos.first(where: {$0.text == self.titleTime.title})
+                if playList == nil {
+                  playList = PlayListInfo(text: self.titleTime.title)
+                  viewModel.playListInfos.append(playList!)
+                }
+                playList?.soundInfos.append(addSoundInfo)
+                
+                try utility.savePlayListInfo(outputInfos: viewModel.playListInfos)
+              } catch {
+                print(error.localizedDescription)
+              }
+            }
+          })
+          {
+            TitleTimeInput(model: self.titleTime, result: self.$saveViewResult, soundInfo: self.soundInfo)
+          }
+          }
+          HStack {
+            Image(systemName: "trash")
+            Text("削除")
+              .onTapGesture {
+                print("")
+              }
+          }
+        }
+      }
+      Button("Close"){
+        dismiss()
+      }
+      Spacer()
     }
     .padding(.top, 50)
     .padding([.leading, .trailing], 30)

@@ -31,6 +31,18 @@ class ViewModel: ObservableObject, PlayerDelegate {
   var folderInfos = [FolderInfo]()
   var playListInfos = [PlayListInfo]()
   
+  
+  var volome: Float {
+    get {
+      return utility.getCurrentVolume()
+    }
+    
+    set(volume) {
+      utility.saveCurrentVolume(currentVolume: volume)
+      self.player.setVolume(volume: volume)
+    }
+  }
+  
   // 現在のグループ情報
   var currentGroup: GroupInfo? {
     get {
@@ -55,7 +67,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
       }
       return nil
     }
-    
+
     set(groupInfo) {
         // 現在のグループ情報を保存
         utility.saveCurrentGroupInfo(groupInfo: groupInfo)
@@ -65,40 +77,51 @@ class ViewModel: ObservableObject, PlayerDelegate {
   // 現在の音声情報
   var currentSound: SoundInfo? {
     get {
-      if let _currentSoundUrl = utility.getCurrentSoundUrl() {
-        if let _currentGroup = self.currentGroup {
-          _currentGroup.soundInfos.forEach{ item in
-          }
-          return _currentGroup.soundInfos.first(where: {$0.path == _currentSoundUrl})
+      if let _currentGroup = self.currentGroup {
+        if let _selectedSoundPath = utility.getSelectedSoundPath(groupInfo: _currentGroup) {
+          return _currentGroup.soundInfos.first(where: {$0.path?.absoluteString == _selectedSoundPath.absoluteString})
         }
       }
       return nil
     }
     
     set(soundInfo) {
-      utility.saveCurrentSoundInfo(soundInfo: soundInfo)
+      //      utility.saveCurrentSoundInfo(soundInfo: soundInfo)
+      if let _soundInfo = soundInfo {
+        if let _currentGroup = self.currentGroup {
+          utility.saveSelectedSoundUrl(soundInfo: _soundInfo, groupInfo: _currentGroup)
+        }
+      }
     }
   }
-//  var currentGroup: GroupInfo? = nil
   var currentTimeStr: String = ""
   var currentFileName: String {
     get {
-      if let currentSoundUrl = utility.GetCurrentSound() {
-        if let found = soundInfos.first(where: {$0.path?.absoluteString == currentSoundUrl.absoluteString}) {
-          return found.fileName
+      if let _currentGroup = self.currentGroup {
+        if let _selectedSoundPath = utility.getSelectedSoundPath(groupInfo: _currentGroup) {
+          return _selectedSoundPath.lastPathComponent
         }
       }
       return ""
     }
   }
   
+//  var playMode = PlayMode.play
+  var playMode: PlayMode {
+    get {
+      if self.player.isPlaying() == true {
+        return .play
+      }
+      return .pause
+    }
+  }
+
+
   // Player
   var player = Player()
 
-  var playMode = PlayMode.play
   
   init() {
-    
     createSoundInfo()
     createFolderInfo()
     getPlayListInfo()
@@ -112,37 +135,20 @@ class ViewModel: ObservableObject, PlayerDelegate {
     
     // イヤホン
     self.player.addRemoteCommandEvent()
-    
-    // 現在情報の設定
-    /*
-    if let _currentGroup = self.currentGroup {
-      if let _currentSound = self.currentSound {
-        print("PlayMode:\(_currentSound.playMode.rawValue) url:\(_currentSound.fullPath?.absoluteString)")
-        _currentGroup.soundInfos.forEach{ item in
-          if item.fullPath == _currentSound.fullPath {
-            item.playMode = .pause
-          } else {
-            item.playMode = .stop
-          }
-        }
-      }
-    }
-     */
-    if let _currentSound = self.currentSound {
-      _currentSound.playMode = .pause
-    }
-    
-    if let _currentGroup = self.currentGroup {
-      _currentGroup.soundInfos.forEach{ item in
-        print("PlayMode:\(item.playMode.rawValue) url:\(item.path?.absoluteString)")
-      }
-    }
   }
 
   // 再生時間の通知 デリゲート
   func notifyCurrentTime(currentTime: TimeInterval) {
     self.currentTime = currentTime
     self.currentTimeStr = utility.timeIntervalToString(timeInterval: currentTime)
+    
+    // 音声情報に現在再生時間をセット
+    if let _currentSound = self.currentSound {
+      _currentSound.currentTimeStr = currentTimeStr
+    }
+    
+    // 現在再生時間の保存
+    utility.saveCurrentPlayTime(currentTime: currentTimeStr)
     
     // 再描画
     self.redraw()
@@ -152,20 +158,21 @@ class ViewModel: ObservableObject, PlayerDelegate {
   func notifyTermination() {
     var nextIndex = 0
     if let _currentGroup = self.currentGroup {
-      if(_currentGroup.repeatMode == .repeateAll) {
-        if let _currentSound = _currentGroup.getPlayTargetSound() {
-          // 再生時間クリア
-//          self.soundPlayer.currentTime = 0.0
-  
+      if let _currentSound = _currentGroup.getSelectedSound() {
+        if _currentGroup.soundInfos.count > 0 {
           if let _currentSoundIndex = _currentGroup.soundInfos.firstIndex(where: { $0.id == _currentSound.id }) {
             if(_currentSoundIndex + 1 < _currentGroup.soundInfos.count){
               nextIndex = _currentSoundIndex + 1
+            } else {
+              nextIndex = 0
             }
+#if DEBUG
             // 次曲の選択と再生
             print(nextIndex)
-// ここから(デリゲートでThrowする方法を調べる、現在はtry!で無理やり通している
-//↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
-            try! self.playSound(targetSound: _currentGroup.soundInfos[nextIndex])
+#endif
+            // ここから(デリゲートでThrowする方法を調べる、現在はtry!で無理やり通している
+            //↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
+            try! self.playSound(targetGroup: _currentGroup, targetSound: _currentGroup.soundInfos[nextIndex])
           }
         }
       }
@@ -193,10 +200,11 @@ class ViewModel: ObservableObject, PlayerDelegate {
     // URLのパスコンポーネントを取得
     self.soundInfos.forEach{
       item in
+      let copyItem = item.copy()
       if let folder = self.folderInfos.first(where: {$0.text == item.foldersName}){
-        folder.soundInfos.append(item.copy())
+        folder.soundInfos.append(copyItem)
       } else {
-        self.folderInfos.append(FolderInfo(text: item.foldersName, soundInfos: [item.copy()]))
+        self.folderInfos.append(FolderInfo(text: item.foldersName, soundInfos: [copyItem]))
       }
     }
   }
@@ -207,8 +215,8 @@ class ViewModel: ObservableObject, PlayerDelegate {
   }
 
   /// PlayModeカラー
-  func getPlayModeColor(playMode: SoundInfo) -> Color {
-    switch playMode.playMode {
+  func getPlayModeColor() -> Color {
+    switch self.playMode {
     case .play:
       return Color.blue
     case .pause:
@@ -216,50 +224,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
     case .stop:
       return Color.black
     }
-  }
-  
-  /// 指定された音声を再生
-  func playSound(targetSound: SoundInfo?) throws {
-    if let _targetSound = targetSound {
-      let playMode = _targetSound.playMode
-      
-      if let _currentGroup = self.currentGroup {
-        // グループ内のSoundをすべてSTOPして指定された曲をPLAYにする
-        _currentGroup.soundInfos.forEach{ item in item.playMode = .stop }
-        
-        switch playMode {
-        case .pause, .stop:
-          _targetSound.playMode = .play
-          
-          // 再生
-          let startTime =  _targetSound.currentTime == TimeInterval.zero ? _targetSound.startTime : _targetSound.currentTime
-          let isLoop = _targetSound.repeatMode == .repeateOne ? true : false
-          try self.player.Play(url: _targetSound.fullPath, startTime: startTime, isLoop: isLoop)
-
-          // 現在再生中の音源とグループを保存
-          self.currentGroup = _currentGroup
-          self.currentSound = _targetSound
-          
-        case .play:
-          _targetSound.playMode = .pause
-          
-          // Pause
-          self.player.pauseSound()
-        }
-      }
-    }
-    // 再描画
-    redraw()
-  }
-  
-  // Pause
-  func pauseSound(){
-    self.player.pauseSound()
-  }
-
-  /// ボリューム設定
-  func setVolume(volume: Float) {
-    self.player.setVolume(volume: volume)
   }
 
   /// 再生時間設定
@@ -270,29 +234,47 @@ class ViewModel: ObservableObject, PlayerDelegate {
   /// 再生位置調整
   func adjustPlayPosition(seconds: Double) {
     let newTime = self.getCurrentTime() + seconds
-    print("NewTime:\(utility.timeIntervalToString(timeInterval: newTime))")
-    print("PlayTime:\(utility.timeIntervalToString(timeInterval: self.getPlayTime()))")
     if newTime <= self.getPlayTime() {
       self.player.setPlayPosition(position: newTime)
     }
   }
 
   /// グループ再生
-  func playGroup(targetGroup: GroupInfo? = nil) throws {
-    if let _targetGroup = targetGroup {
-      self.currentGroup = targetGroup
-      if let _targetSound = _targetGroup.getPlayTargetSound() {
-        // 再生 or 停止
-        try self.playSound(targetSound: _targetSound)
-      }
+  func playGroup(groupInfo: GroupInfo) throws {
+    if let _targetSound = groupInfo.getSelectedSound() {
+      try self.playSound(targetGroup: groupInfo, targetSound: _targetSound)
     }
   }
-
-  /// 選択中のSoundInfo取得
-  func getCurrentSound() -> SoundInfo?{
-    return self.currentGroup?.soundInfos.first(where: { $0.playMode == .play || $0.playMode == .pause })
-  }
   
+  /// 指定された音声を再生
+  func playSound(targetGroup: GroupInfo, targetSound: SoundInfo) throws {
+    
+    if self.player.isPlaying() {
+      // Pause
+      self.player.pauseSound()
+      
+      if let _currentSound = self.currentSound {
+        if let _oldPath = _currentSound.path {
+          if let _newPath = targetSound.path {
+            if _oldPath.absoluteString != _newPath.absoluteString {
+              
+              // Play
+              try self.player.Play(url: targetSound.fullPath, volume: utility.getCurrentVolume())
+            }
+          }
+        }
+      }
+    } else {
+      // Play
+      try self.player.Play(url: targetSound.fullPath,  startTime: utility.stringToTimeInterval(HHMMSS: utility.getCurrentPlayTime()), volume: utility.getCurrentVolume())
+    }
+    // Current Gropu設定
+    self.currentGroup = targetGroup
+    
+    // Current Sound設定
+    self.currentSound = targetSound
+  }
+
   func getCurrentTime() -> TimeInterval {
     self.player.getCurrentTime()
   }
@@ -303,6 +285,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
 
   // 再描画
   func redraw(){
-    objectWillChange.send()
+//    objectWillChange.send()
   }
 }

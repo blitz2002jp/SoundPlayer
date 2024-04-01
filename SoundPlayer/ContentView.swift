@@ -26,39 +26,41 @@ struct ContentView: View {
       List{
         HStack {
           Image(systemName: "internaldrive")
-          Text("KeyMenu1")
+          Text("全曲")
             .onTapGesture{
               nextView = .AllSoundView
             }
         }
         HStack {
           Image(systemName: "folder")
-          Text("KeyMenu2")
+          Text("フォルダ")
             .onTapGesture{
               nextView = .folderView
             }
         }
         HStack {
           Image(systemName: "music.note.list")
-          Text("KeyMenu3")
+          Text("プレイリスト")
             .onTapGesture{
               nextView = .playListView
             }
         }
-        Text("KeyMenu4")
+#if DEBUG
+        Text("テスト")
           .onTapGesture{
             showTestSheet.toggle()
           }
           .sheet(isPresented: $showTestSheet){
             CreateTestDataView()
           }
+#endif
       }
     case .AllSoundView:
-      GroupListView(viewTitle: "ALL", nextView: $nextView, targetGroupInfos: viewModel.fullSoundInfos)
+      GroupListView(viewTitle: "全曲", nextView: $nextView, targetGroupInfos: viewModel.fullSoundInfos)
     case .folderView:
-      GroupListView(viewTitle: "Folder", nextView: $nextView, targetGroupInfos: viewModel.folderInfos)
+      GroupListView(viewTitle: "フォルダ", nextView: $nextView, targetGroupInfos: viewModel.folderInfos)
     case .playListView:
-      GroupListView(viewTitle: "PlayList", nextView: $nextView, targetGroupInfos: viewModel.playListInfos)
+      GroupListView(viewTitle: "プレイリスト", nextView: $nextView, targetGroupInfos: viewModel.playListInfos)
     }
     
     // フッター

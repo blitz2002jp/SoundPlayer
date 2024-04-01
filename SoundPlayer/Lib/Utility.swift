@@ -6,12 +6,23 @@
 //
 
 import Foundation
+import AVFAudio
 
 struct utility {
-  private static let PLAY_LIST_INFO_KEY = "PLAY_LIST_INFO"
-  private static let CURRENT_GROUP_TYPE_KEY = "CurrentGroupType"
-  private static let CURRENT_GROUP_TEXT_KEY = "CurrentGroupText"
-  private static let CURRENT_SOUND_URL_KEY = "CurrentSound"
+  // UserDefaultのキー
+  private static let PLAY_LIST_INFO = "PLAY_LIST_INFO"              // PlayListのJsonデータ
+  private static let CURRENT_GROUP_TYPE_KEY = "CurrentGroupType"    // 現在のグループType
+                                                                    // (Full,Folde,Playlist)
+  private static let CURRENT_GROUP_TEXT_KEY = "CurrentGroupText"    // 現在のグループ
+  private static let CURRENT_SOUND_URL_KEY = "CurrentSound"         // 現在の音声のURL
+  private static let CURRENT_PLAY_TIME = "CurrentPlayTime"          // 偏在の再生時間
+  
+  private static let CURRENT_VOLUME = "CurrentVolume"               // 音量
+  
+  private static let SELECTED_URL_FULL = "SelectedfUrlFull"         // 全曲グループで選択されている音声URL
+  private static let SELECTED_URL_FOLDER = "SelectedUrlFolder"      // フォルダグループで選択されている音声URL
+  private static let SELECTED_URL_PLAYLIST = "SelectedUrlPlaylist"  // プレイリストグループで選択されている音声URL
+
   private static let IS_SAND_BOX_KEY = "isSandBox"
   
   
@@ -93,7 +104,7 @@ struct utility {
   /// PlayList情報の取得
   static func getPlayListInfo() -> [PlayListInfo]{   // 移動済
     // UserDefaultsから保存データ取得
-    if let jsonString = UserDefaults.standard.string(forKey: PLAY_LIST_INFO_KEY) {
+    if let jsonString = UserDefaults.standard.string(forKey: PLAY_LIST_INFO) {
       // String型データをData型に変換
       if let jsonData = jsonString.data(using: .utf8) {
         do {
@@ -119,7 +130,7 @@ struct utility {
     // JSONデータをStringに変換
     if let jsonString = String(data: jsonData, encoding: .utf8) {
       // UserDefaultsにPlayListデータを保存
-      UserDefaults.standard.setValue(jsonString, forKey: PLAY_LIST_INFO_KEY)
+      UserDefaults.standard.setValue(jsonString, forKey: PLAY_LIST_INFO)
     } else {
         print("Failed to convert JSON data to string.")
     }
@@ -147,19 +158,72 @@ struct utility {
   }
   
   // 現在の音声情報の保存
-  static func saveCurrentSoundInfo(soundInfo: SoundInfo?) {
+  static func saveCurrentSoundInfo_XXXXXX(soundInfo: SoundInfo?) {
     if let _soundIndo = soundInfo {
       UserDefaults.standard.set(_soundIndo.path , forKey: CURRENT_SOUND_URL_KEY)
     }
   }
-  
-  /// 現在再生中の音声(url)の取得
-  static func GetCurrentSound() -> URL? {
-    if let url = UserDefaults.standard.url(forKey: CURRENT_SOUND_URL_KEY) {
-      return url
-    }else{
-      return nil
+
+  // 現在の音声の再生時間保存
+  static func saveCurrentPlayTime(currentTime: String) {
+    UserDefaults.standard.set(currentTime , forKey: CURRENT_PLAY_TIME)
+  }
+
+  // 現在の音量の保存
+  static func saveCurrentVolume(currentVolume: Float) {
+    UserDefaults.standard.set(currentVolume , forKey: CURRENT_VOLUME)
+  }
+
+  // 現在の音量の取得
+  static func getCurrentVolume() -> Float {
+    return UserDefaults.standard.float(forKey: CURRENT_VOLUME)
+  }
+
+  // 選択されている音声URLを保存（各グループ別に保存）
+  static func saveSelectedSoundUrl(soundInfo: SoundInfo, groupInfo: GroupInfo) {
+    if let saveKey = getSelectedSoundSaveKey(groupInfo: groupInfo) {
+      UserDefaults.standard.set(soundInfo.path , forKey: saveKey)
     }
+  }
+
+  // 選択されている音声URLを取得（各グループ別に取得）
+  static func getSelectedSoundPath(groupInfo: GroupInfo) -> URL? {
+    if let saveKey = getSelectedSoundSaveKey(groupInfo: groupInfo) {
+      if let url = UserDefaults.standard.url(forKey: saveKey) {
+        return url
+      }
+    }
+
+    return nil
+  }
+
+  // 引数のGroup情報からグループ(Full、Folder、PlayList)を決定し保存キーを取得
+  private static func getSelectedSoundSaveKey(groupInfo: GroupInfo) -> String? {
+    var res: String? = nil
+    
+    if groupInfo is FullSoundInfo {
+      res = SELECTED_URL_FULL
+    } else if groupInfo is FolderInfo {
+      res = SELECTED_URL_FOLDER
+    } else if groupInfo is PlayListInfo {
+      res = SELECTED_URL_PLAYLIST
+    }
+    
+    return res
+
+  }
+  
+  // 現在の音声の再生時間取得
+  static func getCurrentPlayTime() -> String {
+    if let _currentTime = UserDefaults.standard.string(forKey: CURRENT_PLAY_TIME) {
+      return _currentTime
+    } 
+    return "00:00:00"
+  }
+
+  // 現在の音声情報(url)取得
+  static func getCurrentSoundUrl_XXXXXXX() -> URL? {
+    return UserDefaults.standard.url(forKey: CURRENT_SOUND_URL_KEY)
   }
 
   /// 現在再生中のGroupTextの取得
@@ -184,12 +248,6 @@ struct utility {
     return nil
   }
   
-  // 現在の音声情報(url)取得
-  static func getCurrentSoundUrl() -> URL? {
-    return UserDefaults.standard.url(forKey: CURRENT_SOUND_URL_KEY)
-  }
-
-
   /// 環境がサンドボックスか
   static func isSoundBox() -> Bool{
     // Get Temporary Directory
@@ -202,5 +260,4 @@ struct utility {
     
     return false
   }
-  
 }
