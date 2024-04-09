@@ -11,7 +11,7 @@
         "repeatMode": "noRepeate",
         "text": "",
         "comment": "",
-        "currentTimeStr": "",
+        "currentTime": 0.0,
         "startTimeStr": "0:3:32",
         "foldersName": "Wedenesday",
         "volume": 0
@@ -34,7 +34,7 @@
         "repeatMode": "noRepeate",
         "text": "",
         "comment": "",
-        "currentTimeStr": "",
+        "currentTime": 0.0,
         "startTimeStr": "0:3:32",
         "foldersName": "Wedenesday",
         "volume": 0

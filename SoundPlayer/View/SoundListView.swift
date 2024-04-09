@@ -23,6 +23,8 @@ struct SoundListView: View {
   @State private var titleTime: TitleTimeModel = TitleTimeModel(title: "")
   @State private var saveViewResult: ResultSaveView = .cancel
 
+  @State private var shouldHideImage = true // 初
+  
   var body: some View {
     ScrollView {
       LazyVStack {
@@ -30,22 +32,32 @@ struct SoundListView: View {
           ForEach(_targetGroup.soundInfos, id: \.id) { item in
             VStack {
               HStack {
+                if viewModel.player.isPlaying {
+                  Image(systemName: "speaker.zzz")
+                    .opacity(item.isSelected ? 1 : 0)
+                    .frame(width: 10)
+                } else {
+                  Image(systemName: "speaker")
+                    .opacity(item.isSelected ? 1 : 0)
+                    .frame(width: 10)
+                }
                 Text(item.text == "" ? item.fileName : item.text)
                   .lineLimit(1)
                   .padding([.leading, .trailing, .top, .bottom], 20)
                   .frame(maxWidth: .infinity, alignment: .leading)
-                  .background(
-                    Rectangle()
-                      .stroke(viewModel.getPlayModeColor(), lineWidth: _targetGroup.isSelected(soundInfo: item) ? 2 : 0)
-                  )
 
                 Button(action: {
                   isPresented.toggle()
-                }, label: {Image(systemName: "list.triangle")})
+                }, label: {Image(systemName: "square.and.pencil")})
                 .sheet(isPresented: $isPresented, onDismiss: {
                 })
                 {
-                  SoundFileMenu(soundInfo: item)
+                  if #available(iOS 16.0, *) {
+                    SoundFileMenu()
+                      .presentationDetents([.medium])
+                  } else {
+                    SoundFileMenu()
+                  }
                 }
               }
               .padding([.leading, .trailing], 20)
@@ -72,12 +84,5 @@ struct SoundListView: View {
       // アラートのメッセージ...
       Text("エラーが発生しました\n\(self.errorMessage)")
     }
-  }
-}
-
-struct SoundInfoDataView: View {
-  var soundInfo: SoundInfo
-  var body: some View {
-      EmptyView()
   }
 }

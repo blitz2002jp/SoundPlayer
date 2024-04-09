@@ -1,15 +1,18 @@
 import SwiftUI
 
 struct CreateTestDataView: View {
-  @State private var showingAlert = false
+  @EnvironmentObject var viewModel: ViewModel
+  @State private var showingCreateDataAlert = false
+  @State private var showingSaveAlert = false
   @Environment(\.dismiss) var dismiss
 
   var body: some View {
+    Spacer()
     Button("CreateTestData") {
       // 確認ダイアログ表示
-      self.showingAlert = true
+      self.showingCreateDataAlert = true
     }
-    .alert(isPresented: $showingAlert) {
+    .alert(isPresented: $showingCreateDataAlert) {
       Alert(
         title: Text("テストデータ作成"),
         message: Text("テストデータを作成しますか？"),
@@ -21,12 +24,38 @@ struct CreateTestDataView: View {
       )
     }
     Spacer()
+    Button("Save()") {
+      self.showingSaveAlert.toggle()
+    }
+    .alert(isPresented: $showingSaveAlert) {
+      Alert(
+        title: Text("データ保存"),
+        message: Text("保存しますか？"),
+        primaryButton: .default(Text("OK")) {
+          utility.saveGroupInfo(outputInfos: viewModel.fullSoundInfos)
+          utility.saveGroupInfo(outputInfos: viewModel.folderInfos)
+          utility.saveGroupInfo(outputInfos: viewModel.playListInfos)
+        },
+        secondaryButton: .cancel()
+      )
+    }
+    Text("アプリの終了検知が呼ばれないので、とりあえずこのボタンでSave")
+      .font(.footnote)
+    Spacer()
+    Button("Saveデータ読み込み") {
+#if DEBUG
+          utility.SaveDataDebugPrint(viewModel: viewModel)
+#endif
+    }
+    Spacer()
     Button("Close"){
       dismiss()
     }
   }
   
   class CreateTestData {
+    @StateObject internal var viewModel = ViewModel()
+
     func create() {
       if let docFolder = utility.getDocumentDirectory() {
         
@@ -38,6 +67,12 @@ struct CreateTestDataView: View {
         
         /// PlayList情報設定(ResourceにあるJsonファイルを実行環境に設定する)
         self.createPlayList()
+        
+        // ViewMOdelに作成したテストデータをセット
+        print(self.viewModel.soundInfos[0].fileName)
+        self.viewModel.createSoundInfo()
+        self.viewModel.createFolderInfo()
+        self.viewModel.getPlayListInfo()
       }
     }
     
@@ -106,7 +141,7 @@ struct CreateTestDataView: View {
           // JsonDataをPlayListInfo配列に変換
           let playListInfo = try JSONDecoder().decode([PlayListInfo].self, from: jsonData)
           
-          try utility.savePlayListInfo(outputInfos: playListInfo)
+          utility.saveGroupInfo(outputInfos: playListInfo)
         }
       } catch {
         print("createPlayListでエラー:\(error.localizedDescription)")

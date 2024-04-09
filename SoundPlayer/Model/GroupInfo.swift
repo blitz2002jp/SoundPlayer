@@ -28,10 +28,19 @@ class GroupInfo: Codable, Identifiable{
   
   var selectedSound: SoundInfo? {               // 選択音声
     get {
-      if let selectedSoundUrl = utility.getSelectedSoundPath(groupInfo: self) {
-        return self.soundInfos.first(where: {$0.path?.absoluteString == selectedSoundUrl.absoluteString} )
+      return self.soundInfos.first(where: {$0.isSelected == true})
+    }
+    
+    set(soundInfo) {
+      if let _soundInfo = soundInfo {
+        self.soundInfos.forEach { item in
+          if _soundInfo.path == item.path {
+            item.isSelected = true
+          } else {
+            item.isSelected = false
+          }
+        }
       }
-      return nil
     }
   }
   
@@ -64,20 +73,4 @@ class GroupInfo: Codable, Identifiable{
     case sortKey
   }
   
-  func isSelected(soundInfo: SoundInfo) -> Bool {
-    if let _selectedSound = self.selectedSound {
-      if _selectedSound.path?.absoluteString == soundInfo.path?.absoluteString {
-        return true
-      }
-    }
-    return false
-  }
-  
-  /// 選択された音声取得
-  func getSelectedSound() -> SoundInfo? {
-    if let _path = utility.getSelectedSoundPath(groupInfo: self) {
-      return self.soundInfos.first(where: {$0.path?.absoluteString == _path.absoluteString})
-    }
-    return nil
-  }
 }

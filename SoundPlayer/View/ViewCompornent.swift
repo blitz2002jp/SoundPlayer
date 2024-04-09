@@ -69,22 +69,27 @@ struct SoundDetailButton: View {
 struct PlayButton: View {
   @EnvironmentObject var viewModel: ViewModel
   var action: () -> Void
-
+  
   var body: some View {
     Button(action: {
+#if DEBUG
+      if let _selectedSound = viewModel.getCurrentSelectedSound() {
+      }
+#endif
+      
       self.action()
       // 再描画
       viewModel.redraw()
     })
     {
       // 表示を切り替える
-       if self.viewModel.playMode == .play {
-           Image(systemName: "pause")
-               .imageScale(.large)
-       } else {
-           Image(systemName: "play")
-               .imageScale(.large)
-       }
+      if self.viewModel.playMode == .play {
+        Image(systemName: "pause")
+          .imageScale(.large)
+      } else {
+        Image(systemName: "play")
+          .imageScale(.large)
+      }
     }
     .padding()
   }
@@ -202,14 +207,14 @@ struct TitleTimeInput: View {
   @State var model: TitleTimeModel
   @Binding var result: ResultSaveView
   @State var title = ""
-  var soundInfo: SoundInfo
+  //  var soundInfo: SoundInfo
   
   @Environment(\.dismiss) var dismiss
   @State var showingAlert = false
   
   @State var selectedTitle = ""
   @State var inputTitle = ""
-
+  
   var body: some View {
     HStack{
       Button("Cancel"){
@@ -223,27 +228,10 @@ struct TitleTimeInput: View {
         dismiss()
       }
       .disabled(self.inputTitle.count <= 0)
-/*
-      Spacer()
-      Button("Remove"){
-      }
-      .foregroundColor(.red)
-      .alert(isPresented: $showingAlert) {
-          Alert(
-              title: Text("Remode"),
-              message: Text("削除しますか？"),
-              primaryButton: .default(Text("OK"), action: {
-                self.result = .remove
-              }),
-              secondaryButton: .cancel(Text("Cancel"), action: {
-              })
-          )
-      }
-      */
     }
     .padding([.leading, .trailing], 20 )
-
-    Form{
+    
+//    Form {
       Section(header: Text("タイトル")) {
         Picker("タイトル", selection: self.$selectedTitle) {
           ForEach(self.viewModel.playListInfos){ item in
@@ -253,11 +241,11 @@ struct TitleTimeInput: View {
         .onChange(of: self.selectedTitle) { item in
           self.inputTitle = item
         }
-
+        
         TextField("Title", text: self.$inputTitle)
-
+        
       }
-
+      
       Section(header: Text("時")) {
         Stepper(value: $model.hours, in: 0...4, step: 1, onEditingChanged: {
           editing in
@@ -292,38 +280,41 @@ struct TitleTimeInput: View {
           TextField("", text: $model.strSeconds)
         }
       }
-    }
+//    }
   }
 }
 
 /// 再生位置Slider
 struct PositionSlider: View {
   @EnvironmentObject var viewModel: ViewModel
+//  @State private var sliderVal: TimeInterval = TimeInterval.zero
   @Binding var sliderVal: TimeInterval
-  
+  @State var duration: TimeInterval
+//  @State private var sliderVal: TimeInterval = TimeInterval.zero
+
   var body: some View {
     VStack {
       HStack {
-        Text("\(utility.timeIntervalToString(timeInterval: viewModel.getCurrentTime()))").font(.footnote)
-        Spacer()
-        Text("\(utility.timeIntervalToString(timeInterval: viewModel.getPlayTime()))").font(.footnote)
+        Slider(value:$sliderVal, in: 0.0...Double(viewModel.currentSoundDuration) + 1, step: 0.01)
+        {}onEditingChanged: { isEditing in
+          viewModel.setPlayTime(time: sliderVal)
+        }
+        .padding([.trailing, .leading], 0)
+        .onAppear() {
+          sliderVal = viewModel.getCurrentTime()
+        }
       }
       HStack {
-        Button(action: {viewModel.adjustPlayPosition(seconds: -10)}, label: {Image(systemName: "goforward.10")})
-        Slider(value:$sliderVal, in: 0.0...Double(viewModel.getPlayTime()) + 1, step: 0.01)
-        {
-          
-        }onEditingChanged: { isEditing in
-          viewModel.setPlayPosition(time: sliderVal)
-        }
-        /*
-         .onChange(of: sliderVal) { newValue in
-         vm.setPlayPosition(time: sliderVal)
-         */
+        Text("\(utility.timeIntervalToString(timeInterval: viewModel.getCurrentTime()))")
+          .font(.footnote)
+          .foregroundStyle(Color.gray.opacity(0.7))
+        Spacer()
+        Text("\(utility.timeIntervalToString(timeInterval: viewModel.currentSoundDuration))")
+          .font(.footnote)
+          .foregroundStyle(Color.gray.opacity(0.7))
       }
-      Button(action: {viewModel.adjustPlayPosition(seconds: 10)}, label: {Image(systemName: "gobackward.10")})
+
     }
-    .padding([.leading, .trailing], 20)
   }
 }
 
@@ -334,44 +325,67 @@ struct VolumeSlider: View {
   
   var body: some View {
     HStack {
-      Text("Vol").font(.footnote)
+      Button(action: {
+        sliderVal = sliderVal > 0.0 ? sliderVal - 0.1 : 0.0
+        viewModel.volome = sliderVal
+      }, label: { Image(systemName: "speaker.minus")})
+
       Slider(value: $viewModel.volome, in: 0...1.0, step: 0.1)
-//      Slider(value:$sliderVal, in: 0...1.0, step: 0.1)
         .onChange(of: sliderVal) { newValue in
           viewModel.volome = Float(sliderVal)
-          print("newValue:\(newValue)")
-          print("sliderVal:\(sliderVal)")
         }
-        .font(.footnote)
+        .onAppear() {
+          sliderVal = viewModel.volome
+        }
+      Button(action: {
+        sliderVal = sliderVal < 1.0 ? sliderVal + 0.1 : 1.0
+        viewModel.volome = sliderVal
+      }, label: { Image(systemName: "speaker.plus")})
     }
+  }
+  func volumeAdjust() {
+    sliderVal = sliderVal > 0.0 ? sliderVal - 0.1 : 0.0
+    viewModel.volome = sliderVal
   }
 }
 
 struct Fotter: View {
   @EnvironmentObject var viewModel: ViewModel
   @State var isShowSheet = false
+  @State var enableTap: Bool
   
   var body: some View {
     HStack {
       Text("\(viewModel.currentFileName)")
         .font(.footnote)
         .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .leading)
-
-      PlayButton(action: {
-        if let _currentGroup = self.viewModel.currentGroup {
-          try? viewModel.playGroup(groupInfo: _currentGroup)
+        .padding(.leading, 10)
+      Spacer()
+      Image(systemName: viewModel.playMode == .play ? "pause" : "play.fill")
+        .resizable()
+        .aspectRatio(contentMode: .fit)
+        .frame(width: 50, height: 50)
+        .padding(.trailing, 10)
+        .onTapGesture {
+          if let _currentGroup = self.viewModel.currentGroup {
+            if let _selectedSound = self.viewModel.getCurrentSelectedSound() {
+              try? self.viewModel.playSound(targetGroup: _currentGroup, targetSound: _selectedSound)
+            }
+          }
         }
-      })
-        .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .trailing)
-    }
-    .onTapGesture {
-      // Play Sheet表示
-      self.isShowSheet = true
+      
+      Image(systemName: "forward.fill")
+        .imageScale(.large)
+        .padding(.trailing, 10)
     }
     .sheet(isPresented: $isShowSheet, onDismiss: {
-      self.isShowSheet = false
     }) {
-      PlayView()
+      if #available(iOS 16.0, *) {
+        PlayView()
+          .presentationDetents([.medium])
+      } else {
+        PlayView()
+      }
     }
     .frame(height: 40)
     .background(
@@ -379,8 +393,11 @@ struct Fotter: View {
       Color.gray
         .contentShape(Rectangle())
         .onTapGesture {
-          // Play Sheet表示
-          self.isShowSheet = true
+          // タップジェスチャーが有効なら
+          if self.enableTap == true {
+            // Play Sheet表示
+            self.isShowSheet = true
+          }
         }
     )
   }
@@ -392,28 +409,73 @@ struct PlayView: View {
   @State var volume: Float = 0
   
   var body: some View {
-    HStack {
-      Button("Close"){
-        dismiss()
-      }
-      Spacer()
-    }
     VStack {
+      Spacer()
+      Text(viewModel.getCurrentSelectedSound()?.fileNameNoExt ?? "")
+        .font(.title3)
+      Text(viewModel.currentGroup?.text ?? "")
+        .font(.footnote)
+        .foregroundStyle(Color.gray.opacity(0.5))
+      Divider()
+      Spacer()
       // 再生位置
-      PositionSlider(sliderVal: $viewModel.currentTime)
+      PositionSlider(sliderVal: $viewModel.currentTime, duration: viewModel.currentSoundDuration)
+      Spacer()
+
+      HStack {
+        Image(systemName: "goforward.10")
+          .font(.title3)
+          .padding(.trailing, 30)
+          .onTapGesture {
+            viewModel.adjustPlayTime(seconds: 10)
+          }
+
+        Image(systemName: "backward.fill")
+          .font(.title3)
+          .padding(.trailing, 30)
+          .onTapGesture {
+            viewModel.playPrevSound()
+          }
+
+        Image(systemName: viewModel.player.isPlaying ? "pause.fill" :  "play.fill")
+          .font(.title3)
+          .padding(.trailing, 30)
+          .onTapGesture {
+            do {
+              try viewModel.playSound(targetGroup: viewModel.currentGroup, targetSound: viewModel.getCurrentSelectedSound())
+            } catch {
+              print(error.localizedDescription)
+            }
+          }
+
+        Image(systemName: "forward.fill")
+          .font(.title3)
+          .padding(.trailing, 30)
+          .onTapGesture {
+            viewModel.playNextSound()
+          }
+        Image(systemName: "gobackward.10")
+          .font(.title3)
+          .onTapGesture {
+            viewModel.adjustPlayTime(seconds: -10)
+          }
+      }
+
       Spacer()
       // ボリューム
       VolumeSlider(sliderVal: $volume)
-      
-      Button("test") {
-        viewModel.volome = 0.5
-        viewModel.redraw()
-      }
-      
     }
-    .padding(.top, 50)
-    .padding([.leading, .trailing], 30)
-    Spacer()
+    .onAppear() {
+      if let _s = viewModel.getCurrentSelectedSound() {
+        print("\(_s.currentTimeStr) : \(_s.currentTime)")
+      }
+      print()
+
+    }
+    .padding([.leading, .trailing], 10)
+    
+    // フッター
+//    Fotter(enableTap: false)
   }
 }
 
@@ -423,8 +485,8 @@ struct SoundFileMenu: View {
   @State private var titleTime: TitleTimeModel = TitleTimeModel(title: "")
   @State private var saveViewResult: ResultSaveView = .cancel
   @State private var isPresented:Bool = false
-  var soundInfo: SoundInfo
-
+  //var soundInfo: SoundInfo
+  
   var body: some View {
     VStack {
       List {
@@ -440,30 +502,33 @@ struct SoundFileMenu: View {
                 self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
                 self.isPresented.toggle()
               }
-          .sheet(isPresented: $isPresented, onDismiss: {
-            if self.saveViewResult == .ok {
-              do {
-                // 追加するSoundInfoの作成
-                let addSoundInfo = self.soundInfo.copy()
-                addSoundInfo.currentTimeStr = "\(self.titleTime.strHours):\(self.titleTime.strMinutes):\(self.titleTime.strSeconds)"
-
-                // PlayList作成
-                var playList = viewModel.playListInfos.first(where: {$0.text == self.titleTime.title})
-                if playList == nil {
-                  playList = PlayListInfo(text: self.titleTime.title)
-                  viewModel.playListInfos.append(playList!)
+              .sheet(isPresented: $isPresented, onDismiss: {
+                if self.saveViewResult == .ok {
+                  if let _currentSound = viewModel.getCurrentSelectedSound() {
+                    // 追加するSoundInfoの作成
+                    let addSoundInfo = _currentSound.copy()
+                    addSoundInfo.currentTime = utility.stringToTimeInterval(HHMMSS: "\(self.titleTime.strHours):\(self.titleTime.strMinutes):\(self.titleTime.strSeconds)")
+                    
+                    // PlayList作成
+                    var playList = viewModel.playListInfos.first(where: {$0.text == self.titleTime.title})
+                    if playList == nil {
+                      playList = PlayListInfo(text: self.titleTime.title)
+                      viewModel.playListInfos.append(playList!)
+                    }
+                    playList?.soundInfos.append(addSoundInfo)
+                    
+                    utility.saveGroupInfo(outputInfos: viewModel.playListInfos)
+                  }
                 }
-                playList?.soundInfos.append(addSoundInfo)
-                
-                try utility.savePlayListInfo(outputInfos: viewModel.playListInfos)
-              } catch {
-                print(error.localizedDescription)
+              })
+            {
+              if #available(iOS 16.0, *) {
+                TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
+                  .presentationDetents([.medium])
+              } else {
+                TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
               }
             }
-          })
-          {
-            TitleTimeInput(model: self.titleTime, result: self.$saveViewResult, soundInfo: self.soundInfo)
-          }
           }
           HStack {
             Image(systemName: "trash")
@@ -474,14 +539,13 @@ struct SoundFileMenu: View {
           }
         }
       }
+/*
       Button("Close"){
         dismiss()
       }
+ */
       Spacer()
     }
-    .padding(.top, 50)
-    .padding([.leading, .trailing], 30)
-    Spacer()
   }
 }
 

@@ -21,19 +21,16 @@ struct SoundPlayerApp: App {
     WindowGroup {
       ContentView().environmentObject(viewModel)
         .onAppear(){
-          // フォルダ
-          if let _docUrl = utility.getDocumentDirectory() {
-            print("DocumentDirectory : \(String(describing: _docUrl.path))")
-          } else {
-            print("DocumentDirectory なし")
-          }
+#if DEBUG
+          utility.SaveDataDebugPrint(viewModel: viewModel)
+#endif
         }
     }
   }
 }
 
 class CustomAppDelegate: UIResponder, UIApplicationDelegate {
-  
+
   // YourAppのインスタンスを保持する
   var appInstance: SoundPlayerApp?
 
@@ -55,10 +52,17 @@ class CustomAppDelegate: UIResponder, UIApplicationDelegate {
   }
   
   func applicationWillTerminate(_ application: UIApplication) {
+    print("")
     // YourAppからインスタンスを取得し、アプリ全体で使用可能な変数の値を取得してprint
     guard self.appInstance != nil else {
       print("Error: YourApp instance not found")
       return
     }
+  }
+
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    print("")
+      // アプリケーションがバックグラウンドに移行する直前に呼ばれる
+      // ここでバックグラウンドに移行する直前の処理を行う
   }
 }

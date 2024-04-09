@@ -23,7 +23,7 @@ struct GroupListView: View {
   
   @State private var isActive = false
   
-//  @State private var selectItem: GroupInfo?
+  @State private var selectItem: GroupInfo?
   
   var body: some View {
     VStack {
@@ -37,25 +37,21 @@ struct GroupListView: View {
                   .padding([.leading, .trailing, .top, .bottom], 20)
                   .frame(maxWidth: .infinity, alignment: .leading)
                   .onTapGesture {
-//                    self.selectItem = item
                     isActive = true
                     
-                    self.viewModel.currentGroup = item
-
+                    self.selectItem = item
                   }
                 
                 Spacer()
                 Button(action: {
                   isEditing.toggle()
                 }, label: {
-                  Image(systemName: "pencil")
+                  Image(systemName: "square.and.pencil")
                 })
                 .padding(.trailing, 20)
                 
                 Button(action:{
                   do {
-                    self.viewModel.currentGroup = item
-
                     try self.viewModel.playGroup(groupInfo: item)
                   } catch {
                     self.errorMessage = error.localizedDescription
@@ -77,9 +73,15 @@ struct GroupListView: View {
           }))
         }
         .background(
+          NavigationLink(destination: SoundListView(targetGroup: self.selectItem, viewModel: _viewModel), isActive: $isActive) {
+            EmptyView()
+          })
+
+          /*
           NavigationLink(destination: SoundListView(targetGroup: self.viewModel.currentGroup, viewModel: _viewModel), isActive: $isActive) {
             EmptyView()
           })
+           */
       }
       .onAppear{
       }

@@ -21,6 +21,14 @@ class Player: NSObject, AVAudioPlayerDelegate {
   // Player
   private var soundPlayer:AVAudioPlayer!
   
+  var isPlaying: Bool {
+    get {
+      if let _soundPlayer = self.soundPlayer {
+        return _soundPlayer.isPlaying
+      }
+      return false
+    }
+  }
   /// 再生時間表示タイマー
   private var timer: Timer?
   
@@ -107,6 +115,10 @@ class Player: NSObject, AVAudioPlayerDelegate {
     if let _soundPlayer = self.soundPlayer {
       _soundPlayer.pause()
     }
+    // 再生時間表示タイマー
+    if self.timer != nil {
+      self.timer?.invalidate()
+    }
   }
   
   /// ボリューム設定
@@ -156,12 +168,14 @@ class Player: NSObject, AVAudioPlayerDelegate {
     return TimeInterval.zero
   }
   
+  /*
   func isPlaying() -> Bool {
     if let _soundPlayer = self.soundPlayer {
       return _soundPlayer.isPlaying
     }
     return false
   }
+   */
   
   func getSoundUrl() -> URL? {
     return self.soundPlayer.url

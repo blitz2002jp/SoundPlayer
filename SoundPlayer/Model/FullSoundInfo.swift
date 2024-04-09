@@ -11,6 +11,6 @@ class FullSoundInfo: GroupInfo {
   }
   
   required init(from decoder: any Decoder) throws {
-    fatalError("init(from:) has not been implemented")
+    try super.init(from: decoder)
   }
 }

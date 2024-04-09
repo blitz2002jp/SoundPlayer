@@ -9,16 +9,26 @@ import Foundation
 import AVFoundation
 
 class SoundInfo: Codable, Identifiable {
+  var isSelected = false
   var foldersName: String = ""                      // フォルダ名(Documentフォルダより下位のフォルダ)
   var fileName: String = ""                         // ファイル名
-  var text: String = ""                             // 表示
-  var comment: String = ""                          // コメント
-  var currentTimeStr: String = ""                   // 現在再生時間("HH:MM:SS")
-  var currentTime: TimeInterval {                   // 現在再生時間
+  
+  var fileNameNoExt: String {                       // ファイル名(拡張子なし)
     get {
-      return utility.stringToTimeInterval(HHMMSS: self.currentTimeStr)
+      if let _path = self.path {
+        return _path.deletingPathExtension().lastPathComponent
+      }
+      return ""
     }
   }
+  var text: String = ""                             // 表示
+  var comment: String = ""                          // コメント
+  var currentTimeStr: String {                     // 現在再生時間("HH:MM:SS")
+    get {
+      return utility.timeIntervalToString(timeInterval: self.currentTime)
+    }
+  }
+  var currentTime: TimeInterval = TimeInterval.zero                   // 現在再生時間
   var startTimeStr: String = ""                     // 再生開始時間(文字列)
   var startTime: TimeInterval {                     // 再生開始時間
     get {
@@ -68,26 +78,27 @@ class SoundInfo: Codable, Identifiable {
   // Cron
   func copy() -> SoundInfo{
     let res = SoundInfo()
+    res.isSelected = self.isSelected
     res.foldersName = self.foldersName                     // フォルダ名(Documentフォルダより下位のフォルダ)
     res.fileName = self.fileName                          // ファイル名
     res.text = self.text                              // 表示
     res.comment = self.comment                           // コメント
-    res.currentTimeStr = self.currentTimeStr                  // 現在再生時間
+//    res.currentTimeStr = self.currentTimeStr                  // 現在再生時間
+    res.currentTime = self.currentTime                  // 現在再生時間
     res.startTimeStr = self.startTimeStr                    // 再生開始時間
     res.volume = self.volume                             // ボリューム
     res.repeatMode = self.repeatMode                    // 繰り返し
     res.sortKey = self.sortKey                              // ソートキー
     
-    
     return res
   }
   
   /*
-  ///  Equal
+   ///  Equal
    static func ==(lhs: SoundInfo, rhs: SoundInfo) -> Bool {
    return lhs.id == rhs.id
    }
-*/
+   */
   
   //  func getFolderName() -> String {
   //    return ""

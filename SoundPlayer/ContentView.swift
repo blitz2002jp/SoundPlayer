@@ -64,16 +64,7 @@ struct ContentView: View {
     }
     
     // フッター
-    Fotter()
-    /*
-    HStack {
-      Text("\(viewModel.currentFileName)")
-        .font(.footnote)
-      
-      // 繰り返しボタン
-      RepeatButton()
-    }
-*/
+    Fotter(enableTap: true)
   }
 }
 
