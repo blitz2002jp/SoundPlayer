@@ -44,9 +44,16 @@ struct CreateTestDataView: View {
     Spacer()
     Button("Saveデータ読み込み") {
 #if DEBUG
-          utility.SaveDataDebugPrint(viewModel: viewModel)
+      utility.DebugPrintSaveData(viewModel: viewModel)
 #endif
     }
+    Spacer()
+    
+    Button("TEST") {
+      let a = utility.emptyArtwork
+      let b = utility.emptyArtwork
+    }
+    
     Spacer()
     Button("Close"){
       dismiss()
@@ -96,8 +103,8 @@ struct CreateTestDataView: View {
     
     /// コピー(MP3ファイル)
     private func copyMp3Files(docUrl: URL) {
-      let rootFileNames = ["001", "002", "003", "004"]
-      let wedFileNames = ["おまえ本当に大学出たのか", "ここをキャンプ地とする！", "トンネルだトンネルだ", "みっちゃん", "糸ようじ"]
+      let rootFileNames = ["001.mp3", "002.mp3", "003.mp3", "004.mp3"]
+      let wedFileNames = ["おまえ本当に大学出たのか.mp3", "ここをキャンプ地とする！.mp3", "トンネルだトンネルだ.mp3", "みっちゃん.mp3", "糸ようじ.mp3"]
       
       do {
         // コピー(Documentフォルダ直下に置くファイル)
@@ -121,7 +128,7 @@ struct CreateTestDataView: View {
       let fileManager = FileManager.default
       
       for fileName in files {
-        if let path = Bundle.main.url(forResource: fileName, withExtension: "mp3") {
+        if let path = Bundle.main.url(forResource: fileName, withExtension: "") {
           let distinationUrl = to.appendingPathComponent(path.lastPathComponent)
           try fileManager.copyItem(at: path, to: distinationUrl)
         }
@@ -135,7 +142,7 @@ struct CreateTestDataView: View {
           // ファイルのデータを読み込む
           let jsonData = try Data(contentsOf: path)
         
-          if let jsonString = String(data: try Data(contentsOf: path), encoding: .utf8) {
+          if let _ = String(data: try Data(contentsOf: path), encoding: .utf8) {
             print("")
           }
           // JsonDataをPlayListInfo配列に変換

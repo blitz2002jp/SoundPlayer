@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		580F9F7B2BCCD03800DFC9D0 /* EmptyArtWork.png in Resources */ = {isa = PBXBuildFile; fileRef = 580F9F7A2BCCD03800DFC9D0 /* EmptyArtWork.png */; };
 		5840EBC82BA7E81D0043C3EA /* ContentViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5840EBBB2BA7E81D0043C3EA /* ContentViewTest.swift */; };
 		5840EBC92BA7E8F70043C3EA /* おまえ本当に大学出たのか.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBAF2BA7E81D0043C3EA /* おまえ本当に大学出たのか.mp3 */; };
 		5840EBCA2BA7E8F70043C3EA /* ここをキャンプ地とする！.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBB02BA7E81D0043C3EA /* ここをキャンプ地とする！.mp3 */; };
@@ -56,6 +57,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		580F9F7A2BCCD03800DFC9D0 /* EmptyArtWork.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = EmptyArtWork.png; sourceTree = "<group>"; };
 		5840EBAD2BA7E81D0043C3EA /* PlayList.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = PlayList.json; sourceTree = "<group>"; };
 		5840EBAF2BA7E81D0043C3EA /* おまえ本当に大学出たのか.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "おまえ本当に大学出たのか.mp3"; sourceTree = "<group>"; };
 		5840EBB02BA7E81D0043C3EA /* ここをキャンプ地とする！.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "ここをキャンプ地とする！.mp3"; sourceTree = "<group>"; };
@@ -116,6 +118,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		580F9F792BCCCF3B00DFC9D0 /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				580F9F7A2BCCD03800DFC9D0 /* EmptyArtWork.png */,
+			);
+			path = Resource;
+			sourceTree = "<group>";
+		};
 		5840EBAE2BA7E81D0043C3EA /* Json */ = {
 			isa = PBXGroup;
 			children = (
@@ -197,6 +207,7 @@
 		5894E4342BA56F110014C60E /* SoundPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				580F9F792BCCCF3B00DFC9D0 /* Resource */,
 				5894E46F2BA56FA80014C60E /* SoundPlayerApp.swift */,
 				5894E47A2BA571760014C60E /* ContentView.swift */,
 				5894E4392BA56F120014C60E /* Assets.xcassets */,
@@ -382,6 +393,7 @@
 				5840EBD02BA7E8F70043C3EA /* 003.mp3 in Resources */,
 				5840EBD12BA7E8F70043C3EA /* 004.mp3 in Resources */,
 				5894E43D2BA56F120014C60E /* Preview Assets.xcassets in Resources */,
+				580F9F7B2BCCD03800DFC9D0 /* EmptyArtWork.png in Resources */,
 				5894E43A2BA56F120014C60E /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

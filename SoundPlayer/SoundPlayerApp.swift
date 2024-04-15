@@ -22,7 +22,7 @@ struct SoundPlayerApp: App {
       ContentView().environmentObject(viewModel)
         .onAppear(){
 #if DEBUG
-          utility.SaveDataDebugPrint(viewModel: viewModel)
+          utility.DebugPrintSaveData(viewModel: viewModel)
 #endif
         }
     }

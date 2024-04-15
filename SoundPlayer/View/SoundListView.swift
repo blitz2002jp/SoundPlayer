@@ -25,6 +25,10 @@ struct SoundListView: View {
 
   @State private var shouldHideImage = true // 初
   
+  @State private var effectBounce = false   // イメージEffect
+  @State private var sliderValSpeed: Double = 1.0   // イメージEffect Speed
+  @State private var speakerEffect = false
+  
   var body: some View {
     ScrollView {
       LazyVStack {
@@ -32,16 +36,56 @@ struct SoundListView: View {
           ForEach(_targetGroup.soundInfos, id: \.id) { item in
             VStack {
               HStack {
-                if viewModel.player.isPlaying {
-                  Image(systemName: "speaker.zzz")
-                    .opacity(item.isSelected ? 1 : 0)
-                    .frame(width: 10)
-                } else {
-                  Image(systemName: "speaker")
-                    .opacity(item.isSelected ? 1 : 0)
-                    .frame(width: 10)
+                if let _imageData = item.artWork {
+                  if let _uiImage = UIImage(data: _imageData) {
+                    Image(uiImage: _uiImage)
+                      .resizable()
+                      .aspectRatio(contentMode: .fit)
+                      .overlay(utility.getPlayingImage(isPlaying: viewModel.isPlayingSound(groupInfo: _targetGroup, soundInfo: item), isSelected: item.isSelected, item: item)
+                        .scaleEffect(self.speakerEffect ? 1 : 0.8)
+                        .onAppear() {
+                          withAnimation(.default.repeatForever().speed(viewModel.isPlayingSound(groupInfo: _targetGroup, soundInfo: item) ? 2.0 : 0.0)) {
+                            self.speakerEffect.toggle()
+                          }
+                        }
+                      )
+                      .frame(width: 30, height: 30)
+                  }
                 }
-                Text(item.text == "" ? item.fileName : item.text)
+
+                    
+                    
+
+                    
+                    
+                    
+                /*
+                if let _artWork = utility.getArtWorkImage(url: item.fullPath) {
+                  if viewModel.player.isPlaying {
+                    _artWork
+                      .resizable()
+                      .aspectRatio(contentMode: .fit)
+                      .overlay(utility.getPlayingImage(isPlaying: viewModel.player.isPlaying, isSelected: item.isSelected)
+                        .scaleEffect(self.speakerEffect ? 1 : 0.8)
+                        .onAppear() {
+                          withAnimation(.default.repeatForever().speed(viewModel.player.isPlaying ? 2.0 : 0.0)) {
+                            self.speakerEffect.toggle()
+                          }
+                        }
+                      )
+                      .frame(width: 30, height: 30)
+                  } else {
+                    _artWork
+                      .resizable()
+                      .aspectRatio(contentMode: .fit)
+                      .overlay(utility.getPlayingImage(isPlaying: viewModel.player.isPlaying, isSelected: item.isSelected)
+                      )
+                      .frame(width: 30, height: 30)
+                  }
+                }
+                 */
+
+                Text(item.text == "" ? item.fileNameNoExt : item.text)
                   .lineLimit(1)
                   .padding([.leading, .trailing, .top, .bottom], 20)
                   .frame(maxWidth: .infinity, alignment: .leading)

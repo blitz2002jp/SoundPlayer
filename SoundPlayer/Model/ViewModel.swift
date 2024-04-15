@@ -27,6 +27,9 @@ enum TimeFormat: String, Codable {
 
 
 class ViewModel: ObservableObject, PlayerDelegate {
+  
+  var emptyArtWork: Data?
+  
   // 現在再生時間
   @Published var currentTime: TimeInterval = TimeInterval.zero
 
@@ -79,15 +82,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
     }
   }
   
-  var currentFileName: String {
-    get {
-      if let _currentSound = self.getCurrentSelectedSound() {
-        return _currentSound.fileName
-      }
-      return ""
-    }
-  }
-  
   var currentSoundDuration: TimeInterval {
     get {
       return utility.getCurrentSoundDuration()
@@ -125,6 +119,17 @@ class ViewModel: ObservableObject, PlayerDelegate {
     
     // イヤホン
     self.player.addRemoteCommandEvent()
+    
+    // ArtWork無し用の画像
+    if let path = Bundle.main.url(forResource: "EmptyArtWork.png", withExtension: "") {
+      if let image = UIImage(named: path.path()) {
+          if let imageData = image.pngData() {
+            self.emptyArtWork = imageData
+          }
+      }
+
+    }
+
   }
   
   /// 音声の選択フラグを設定
@@ -158,6 +163,22 @@ class ViewModel: ObservableObject, PlayerDelegate {
     }
   }
   
+  func isPlayingSound(groupInfo: GroupInfo, soundInfo: SoundInfo) -> Bool {
+    if self.player.isPlaying {
+      if let _currentGroup = self.currentGroup {
+        if let _currentSelectedSound =   self.getCurrentSelectedSound() {
+          if _currentGroup.text == groupInfo.text
+              && _currentGroup.groupType == groupInfo.groupType {
+            if _currentSelectedSound.fullPath?.absoluteString == soundInfo.fullPath?.absoluteString {
+              return true
+            }
+          }
+        }
+      }
+    }
+    return false
+  }
+  
   // 再生時間の通知 デリゲート
   func notifyCurrentTime(currentTime: TimeInterval) {
     var currentTimeStr: String = utility.timeIntervalToString(timeFormat: .HHMMSS, timeInterval: currentTime)
@@ -172,7 +193,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
     utility.saveCurrentPlayTime(currentTime: currentTimeStr)
     
     // 再描画
-    self.redraw()
+//    self.redraw()
   }
   
   // 再生終了の通知 デリゲート
@@ -256,6 +277,14 @@ class ViewModel: ObservableObject, PlayerDelegate {
   /// 指定された音声を再生
   func playSound(targetGroup: GroupInfo?, targetSound: SoundInfo?) throws {
     
+    // 現在の音声のPath取得
+    var oldPath = ""
+    if let _currentSound = self.getCurrentSelectedSound() {
+      if let _oldPath = _currentSound.path {
+        oldPath = _oldPath.absoluteString
+      }
+    }
+    
     if let _targetGroup = targetGroup {
       if let _targetSound = targetSound {
         
@@ -264,23 +293,15 @@ class ViewModel: ObservableObject, PlayerDelegate {
         
         // 音声の長さを保存
         self.currentSoundDuration = _targetSound.duration()
-#if DEBUG
-        print("duration : \(utility.timeIntervalToString(timeInterval: self.currentSoundDuration))")
-#endif
         
         if self.player.isPlaying {
           // Pause
           self.player.pauseSound()
           
-          if let _currentSound = self.getCurrentSelectedSound() {
-            if let _oldPath = _currentSound.path {
-              if let _newPath = _targetSound.path {
-                if _oldPath.absoluteString != _newPath.absoluteString {
-                  
-                  // Play
-                  try self.player.Play(url: _targetSound.fullPath, startTime: _targetSound.currentTime, volume: utility.getCurrentVolume())
-                }
-              }
+          if let _newPath = _targetSound.path {
+            if oldPath != _newPath.absoluteString {
+              // Play
+              try self.player.Play(url: _targetSound.fullPath, startTime: _targetSound.currentTime, volume: utility.getCurrentVolume())
             }
           }
         } else {
@@ -353,6 +374,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
   
   // 再描画
   func redraw(){
+    print("redraw")
     objectWillChange.send()
   }
 }

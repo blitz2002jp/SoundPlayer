@@ -7,6 +7,10 @@
 
 import Foundation
 import AVFAudio
+import AVFoundation
+import SwiftUI
+import UIKit
+
 
 struct utility {
   // UserDefaultのキー
@@ -24,7 +28,38 @@ struct utility {
   
   private static let SETTING_FILE_DIRECTORY = "Setteing"
   private static let SANDBOX_DIRECRORY = "private"
-  private static let SOUND_FILE_EXTENSIONS = ["mp3"]
+  private static let SOUND_FILE_EXTENSIONS = ["mp3", "m4v"]
+  
+  private static let ID3TAG_KEY_TITLE = "title"
+  
+  private static let ID3TAG_KEY_COPYRIGHTS = "copyrights"
+  
+  private static let ID3TAG_KEY_ARTIST = "artist"
+  
+  private static let ID3TAG_KEY_AUTHOR = "author"
+  
+  private static let ID3TAG_KEY_ALBUM_NAME = "albumName"
+  
+  private static let ID3TAG_KEY_ARTWORK = "artwork"
+  
+  private static var _emptyArtwork: Data?
+  static var emptyArtwork: Data? {
+    get {
+      if let res = self._emptyArtwork {
+        return res
+      }
+      if let url = Bundle.main.url(forResource: "EmptyArtWork.png", withExtension: "") {
+        do {
+          self._emptyArtwork = try Data(contentsOf: url)
+          // imageDataを使用して必要な処理を行う
+        } catch {
+          print("Error loading image data: \(error)")
+        }
+      }
+      return self._emptyArtwork
+    }
+  }
+
   
   /// Documentディレクトリ取得
   static func getDocumentDirectory() -> URL?{
@@ -256,7 +291,95 @@ struct utility {
     }
     return nil
   }
+
+  // MP3のID3タグを取得
+  static func getID3Tags(mp3Url: URL) -> [String: Any]? {
+    do {
+      // AVAssetを使用してMP3ファイルを読み込む
+      let asset = AVAsset(url: mp3Url)
+
+      // AVAssetからID3メタデータを取得
+      let metadata = asset.metadata
+      
+      // ID3メタデータから必要な情報を抽出する
+      var id3Tags: [String: Any] = [:]
+      for item in metadata {
+        if let key = item.commonKey?.rawValue, let value = item.value {
+          id3Tags[key] = value
+        }
+      }
+      
+      return id3Tags
+    } catch {
+      print("Failed to extract ID3 tags: \(error.localizedDescription)")
+      return nil
+    }
+  }
   
+  // ID3タグのテキスト情報を取得
+  static func getID3TagText(id3Tags: [String : Any], key: String) -> String {
+    if let tag = id3Tags.first(where: {$0.key == key}) {
+      if let txt = tag.value as? String {
+        return txt
+      }
+    }
+    return ""
+  }
+  
+  // ArtWork Data取得
+  static func getArtWorkData(url: URL?) -> Data? {
+    if let _url = url {
+      if let _id3Tags = utility.getID3Tags(mp3Url: _url) {
+        if let _artworkTag = _id3Tags.first(where: {$0.key == ID3TAG_KEY_ARTWORK}) {
+          return _artworkTag.value as? Data
+        }
+      }
+    }
+    return nil
+  }
+  
+  // ArtWork Image取得
+  static func getArtWorkImage(url: URL?) -> Image? {
+    print("getArtWorkImage")
+    if let _url = url {
+      if let _id3Tags = utility.getID3Tags(mp3Url: _url) {
+        if let _artworkTag = _id3Tags.first(where: {$0.key == ID3TAG_KEY_ARTWORK}) {
+          if let _imageData = _artworkTag.value as? Data {
+            if let _uiImage = UIImage(data: _imageData) {
+              return Image(uiImage: _uiImage)
+            }
+          }
+        }
+      }
+    }
+    return Image(systemName: "cat")
+  }
+
+  static func getPlayingImage(isPlaying: Bool, isSelected: Bool, item: SoundInfo) -> some View {
+    print("fileName : \(item.fileNameNoExt)")
+  if isPlaying {
+      return Image(systemName: "speaker.zzz")
+        .opacity(isSelected ? 1.0 : 0)
+        .frame(width: 50, height: 50)
+    }
+    return Image(systemName: "speaker")
+    .opacity(isSelected ? 1.0 : 0)
+      .frame(width: 50, height: 50)
+/*
+ if isPlayinxg {
+   return Image(systemName: "speaker.zzz")
+     .opacity(isSelected ? 0.5 : 0)
+     .frame(width: 30, height: 40)
+ }
+ return Image(systemName: "speaker")
+ .opacity(isSelected ? 0.5 : 0)
+   .frame(width: 30, height: 30)
+
+ */
+}
+  
+  
+
   // 処理時間計測
   static func measureExecutionTimeInMilliseconds(block: () -> Void) -> Double {
     let startTime = DispatchTime.now()
@@ -281,7 +404,7 @@ struct utility {
   }
   
 #if DEBUG
-  static func SaveDataDebugPrint(viewModel: ViewModel) {
+  static func DebugPrintSaveData(viewModel: ViewModel) {
     print("----------------------DEBUG PRINT START-------------------------------------------")
     // フォルダ
     if let _docUrl = self.getDocumentDirectory() {
@@ -302,6 +425,7 @@ struct utility {
       print("SelectedSound currentTime : \(_selectedSound.currentTime)")
       print("SelectedSound currentTimeStr : \(_selectedSound.currentTimeStr)")
     }
+    
     print("----------------------DEBUG PRINT END  -------------------------------------------")
   }
 #endif

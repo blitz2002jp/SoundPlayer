@@ -7,8 +7,23 @@
 
 import Foundation
 import AVFoundation
+import SwiftUI
 
 class SoundInfo: Codable, Identifiable {
+  
+  private var _artWork: Data?
+  var artWork: Data? {
+    get {
+      if let res = _artWork {
+        return res
+      }
+      return utility.emptyArtwork
+    }
+    set(val) {
+      self._artWork = val
+    }
+  }
+  
   var isSelected = false
   var foldersName: String = ""                      // フォルダ名(Documentフォルダより下位のフォルダ)
   var fileName: String = ""                         // ファイル名
@@ -72,6 +87,9 @@ class SoundInfo: Codable, Identifiable {
       ///  フォルダ名の設定
       // 先頭からDocumentフォルダまでを除去してfoldersNameにセット
       self.foldersName = fileName.deletingLastPathComponent().absoluteString.replacingOccurrences(of: removeDirName.absoluteString, with: "")
+      
+      // Art Work
+      self.artWork = utility.getArtWorkData(url: self.fullPath)
     }
   }
   

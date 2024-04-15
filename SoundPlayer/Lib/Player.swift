@@ -11,10 +11,15 @@ import MediaPlayer
 
 protocol PlayerDelegate {
   // 再生時間の通知
-  func notifyCurrentTime(currentTime: TimeInterval)
+//  func notifyCurrentTime(currentTime: TimeInterval)
   
   // 再生終了の通知
   func notifyTermination()
+}
+
+protocol PlayerDelegateCurrentTime {
+  // 再生時間の通知
+  func notifyCurrentTime(currentTime: TimeInterval)
 }
 
 class Player: NSObject, AVAudioPlayerDelegate {
@@ -29,12 +34,20 @@ class Player: NSObject, AVAudioPlayerDelegate {
       return false
     }
   }
+  
+  var soundUrl: URL? {
+    if let _soundPlayer = self.soundPlayer {
+      return _soundPlayer.url
+    }
+    return nil
+  }
   /// 再生時間表示タイマー
   private var timer: Timer?
   
   // 通知用デリゲート
   var delegate: PlayerDelegate?
-  
+  var delegateCurrentTime: PlayerDelegateCurrentTime?
+
   // 外部アクセサリ(イヤホンなど)、システムコントロールのイベントへの応答定義
   func addRemoteCommandEvent() {
     let commandCenter = MPRemoteCommandCenter.shared()
@@ -146,8 +159,8 @@ class Player: NSObject, AVAudioPlayerDelegate {
   
   // タイマーイベント
   @objc func timerEvent(){
-    // 終了通知
-    if let dg = self.delegate {
+    // 時間通知
+    if let dg = self.delegateCurrentTime {
       dg.notifyCurrentTime(currentTime: self.soundPlayer.currentTime)
     }
   }
@@ -176,11 +189,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
     return false
   }
    */
-  
-  func getSoundUrl() -> URL? {
-    return self.soundPlayer.url
-  }
-  
+
   // 再生終了デリゲート
   func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
     // 終了通知

@@ -285,13 +285,27 @@ struct TitleTimeInput: View {
 }
 
 /// 再生位置Slider
-struct PositionSlider: View {
+struct PositionSlider: View, PlayerDelegateCurrentTime {
   @EnvironmentObject var viewModel: ViewModel
-//  @State private var sliderVal: TimeInterval = TimeInterval.zero
   @Binding var sliderVal: TimeInterval
   @State var duration: TimeInterval
-//  @State private var sliderVal: TimeInterval = TimeInterval.zero
+  
+  // Playerからの再生時間通知デリゲート
+  func notifyCurrentTime(currentTime: TimeInterval) {
+    print("** notifyCurrentTime")
+    var currentTimeStr: String = utility.timeIntervalToString(timeFormat: .HHMMSS, timeInterval: currentTime)
+    self.viewModel.currentTime = currentTime
+    
+    // 音声情報に現在再生時間をセット
+    if let _currentSound = self.viewModel.getCurrentSelectedSound() {
+      _currentSound.currentTime = currentTime
+    }
+    
+    // 現在再生時間の保存
+    utility.saveCurrentPlayTime(currentTime: currentTimeStr)
 
+  }
+  
   var body: some View {
     VStack {
       HStack {
@@ -313,7 +327,14 @@ struct PositionSlider: View {
           .font(.footnote)
           .foregroundStyle(Color.gray.opacity(0.7))
       }
-
+    }
+    .onAppear() {
+      // 再生時間通知デリゲート開始
+      viewModel.player.delegateCurrentTime = self
+    }
+    .onDisappear() {
+      // 再生時間通知デリゲート終了
+      viewModel.player.delegateCurrentTime = nil
     }
   }
 }
@@ -356,7 +377,7 @@ struct Fotter: View {
   
   var body: some View {
     HStack {
-      Text("\(viewModel.currentFileName)")
+      Text("\(viewModel.getCurrentSelectedSound()?.fileNameNoExt ?? "")")
         .font(.footnote)
         .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .leading)
         .padding(.leading, 10)
@@ -417,6 +438,15 @@ struct PlayView: View {
         .font(.footnote)
         .foregroundStyle(Color.gray.opacity(0.5))
       Divider()
+      if let _sound = viewModel.getCurrentSelectedSound() {
+        if let _artWork = utility.getArtWorkImage(url: _sound.fullPath) {
+          _artWork
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 200, height: 200)
+        }
+      }
+
       Spacer()
       // 再生位置
       PositionSlider(sliderVal: $viewModel.currentTime, duration: viewModel.currentSoundDuration)
@@ -464,6 +494,7 @@ struct PlayView: View {
       Spacer()
       // ボリューム
       VolumeSlider(sliderVal: $volume)
+      
     }
     .onAppear() {
       if let _s = viewModel.getCurrentSelectedSound() {
