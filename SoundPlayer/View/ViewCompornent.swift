@@ -284,61 +284,6 @@ struct TitleTimeInput: View {
   }
 }
 
-/// 再生位置Slider
-struct PositionSlider: View, PlayerDelegateCurrentTime {
-  @EnvironmentObject var viewModel: ViewModel
-  @Binding var sliderVal: TimeInterval
-  @State var duration: TimeInterval
-  
-  // Playerからの再生時間通知デリゲート
-  func notifyCurrentTime(currentTime: TimeInterval) {
-    print("** notifyCurrentTime")
-    var currentTimeStr: String = utility.timeIntervalToString(timeFormat: .HHMMSS, timeInterval: currentTime)
-    self.viewModel.currentTime = currentTime
-    
-    // 音声情報に現在再生時間をセット
-    if let _currentSound = self.viewModel.getCurrentSelectedSound() {
-      _currentSound.currentTime = currentTime
-    }
-    
-    // 現在再生時間の保存
-    utility.saveCurrentPlayTime(currentTime: currentTimeStr)
-
-  }
-  
-  var body: some View {
-    VStack {
-      HStack {
-        Slider(value:$sliderVal, in: 0.0...Double(viewModel.currentSoundDuration) + 1, step: 0.01)
-        {}onEditingChanged: { isEditing in
-          viewModel.setPlayTime(time: sliderVal)
-        }
-        .padding([.trailing, .leading], 0)
-        .onAppear() {
-          sliderVal = viewModel.getCurrentTime()
-        }
-      }
-      HStack {
-        Text("\(utility.timeIntervalToString(timeInterval: viewModel.getCurrentTime()))")
-          .font(.footnote)
-          .foregroundStyle(Color.gray.opacity(0.7))
-        Spacer()
-        Text("\(utility.timeIntervalToString(timeInterval: viewModel.currentSoundDuration))")
-          .font(.footnote)
-          .foregroundStyle(Color.gray.opacity(0.7))
-      }
-    }
-    .onAppear() {
-      // 再生時間通知デリゲート開始
-      viewModel.player.delegateCurrentTime = self
-    }
-    .onDisappear() {
-      // 再生時間通知デリゲート終了
-      viewModel.player.delegateCurrentTime = nil
-    }
-  }
-}
-
 /// ボリュームSlider
 struct VolumeSlider: View {
   @EnvironmentObject var viewModel: ViewModel
@@ -439,7 +384,8 @@ struct PlayView: View {
         .foregroundStyle(Color.gray.opacity(0.5))
       Divider()
       if let _sound = viewModel.getCurrentSelectedSound() {
-        if let _artWork = utility.getArtWorkImage(url: _sound.fullPath) {
+        //        if let _artWork = utility.getArtWorkImage(url: _sound.fullPath) {
+        if let _artWork = utility.getArtWorkImage(imageData: _sound.artWork) {
           _artWork
             .resizable()
             .aspectRatio(contentMode: .fit)
@@ -449,7 +395,7 @@ struct PlayView: View {
 
       Spacer()
       // 再生位置
-      PositionSlider(sliderVal: $viewModel.currentTime, duration: viewModel.currentSoundDuration)
+      PositionSlider()
       Spacer()
 
       HStack {

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		580F9F7B2BCCD03800DFC9D0 /* EmptyArtWork.png in Resources */ = {isa = PBXBuildFile; fileRef = 580F9F7A2BCCD03800DFC9D0 /* EmptyArtWork.png */; };
+		582CDE7A2BCE41BE008C4980 /* PositionSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 582CDE792BCE41BE008C4980 /* PositionSlider.swift */; };
 		5840EBC82BA7E81D0043C3EA /* ContentViewTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5840EBBB2BA7E81D0043C3EA /* ContentViewTest.swift */; };
 		5840EBC92BA7E8F70043C3EA /* おまえ本当に大学出たのか.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBAF2BA7E81D0043C3EA /* おまえ本当に大学出たのか.mp3 */; };
 		5840EBCA2BA7E8F70043C3EA /* ここをキャンプ地とする！.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5840EBB02BA7E81D0043C3EA /* ここをキャンプ地とする！.mp3 */; };
@@ -58,6 +59,7 @@
 
 /* Begin PBXFileReference section */
 		580F9F7A2BCCD03800DFC9D0 /* EmptyArtWork.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = EmptyArtWork.png; sourceTree = "<group>"; };
+		582CDE792BCE41BE008C4980 /* PositionSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionSlider.swift; sourceTree = "<group>"; };
 		5840EBAD2BA7E81D0043C3EA /* PlayList.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = PlayList.json; sourceTree = "<group>"; };
 		5840EBAF2BA7E81D0043C3EA /* おまえ本当に大学出たのか.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "おまえ本当に大学出たのか.mp3"; sourceTree = "<group>"; };
 		5840EBB02BA7E81D0043C3EA /* ここをキャンプ地とする！.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "ここをキャンプ地とする！.mp3"; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 				5894E4702BA56FA80014C60E /* SoundListView.swift */,
 				5894E4712BA56FA80014C60E /* ViewCompornent.swift */,
 				5894E45F2BA56F350014C60E /* GroupListView.swift */,
+				582CDE792BCE41BE008C4980 /* PositionSlider.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -422,6 +425,7 @@
 				5894E4672BA56F740014C60E /* Utility.swift in Sources */,
 				58729EE72BABD6A100FB28BB /* PlayListInfo.swift in Sources */,
 				5840EBC82BA7E81D0043C3EA /* ContentViewTest.swift in Sources */,
+				582CDE7A2BCE41BE008C4980 /* PositionSlider.swift in Sources */,
 				5853A5552BA68D9A0047F2EF /* ContentView.swift in Sources */,
 				5894E4742BA56FA80014C60E /* ViewCompornent.swift in Sources */,
 				58729EE52BABD67000FB28BB /* FolderInfo.swift in Sources */,

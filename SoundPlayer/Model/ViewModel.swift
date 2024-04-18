@@ -30,9 +30,6 @@ class ViewModel: ObservableObject, PlayerDelegate {
   
   var emptyArtWork: Data?
   
-  // 現在再生時間
-  @Published var currentTime: TimeInterval = TimeInterval.zero
-
   // 音声データ
   var soundInfos = [SoundInfo]()
   var fullSoundInfos = [FullSoundInfo]()
@@ -170,6 +167,8 @@ class ViewModel: ObservableObject, PlayerDelegate {
           if _currentGroup.text == groupInfo.text
               && _currentGroup.groupType == groupInfo.groupType {
             if _currentSelectedSound.fullPath?.absoluteString == soundInfo.fullPath?.absoluteString {
+              print("isPlayingSound:\(soundInfo.fileNameNoExt) : TRUE")
+
               return true
             }
           }
@@ -182,8 +181,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
   // 再生時間の通知 デリゲート
   func notifyCurrentTime(currentTime: TimeInterval) {
     var currentTimeStr: String = utility.timeIntervalToString(timeFormat: .HHMMSS, timeInterval: currentTime)
-    self.currentTime = currentTime
-    
+
     // 音声情報に現在再生時間をセット
     if let _currentSound = self.getCurrentSelectedSound() {
       _currentSound.currentTime = currentTime
@@ -193,7 +191,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
     utility.saveCurrentPlayTime(currentTime: currentTimeStr)
     
     // 再描画
-//    self.redraw()
+    self.redraw()
   }
   
   // 再生終了の通知 デリゲート

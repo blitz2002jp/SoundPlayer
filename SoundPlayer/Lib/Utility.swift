@@ -28,7 +28,7 @@ struct utility {
   
   private static let SETTING_FILE_DIRECTORY = "Setteing"
   private static let SANDBOX_DIRECRORY = "private"
-  private static let SOUND_FILE_EXTENSIONS = ["mp3", "m4v"]
+  private static let SOUND_FILE_EXTENSIONS = ["mp3", "m4a"]
   
   private static let ID3TAG_KEY_TITLE = "title"
   
@@ -339,24 +339,16 @@ struct utility {
   }
   
   // ArtWork Image取得
-  static func getArtWorkImage(url: URL?) -> Image? {
-    print("getArtWorkImage")
-    if let _url = url {
-      if let _id3Tags = utility.getID3Tags(mp3Url: _url) {
-        if let _artworkTag = _id3Tags.first(where: {$0.key == ID3TAG_KEY_ARTWORK}) {
-          if let _imageData = _artworkTag.value as? Data {
-            if let _uiImage = UIImage(data: _imageData) {
-              return Image(uiImage: _uiImage)
-            }
-          }
-        }
+  static func getArtWorkImage(imageData: Data?) -> Image? {
+    if let _imageData = imageData {
+      if let _uiImage = UIImage(data: _imageData) {
+        return Image(uiImage: _uiImage)
       }
     }
     return Image(systemName: "cat")
   }
-
+  
   static func getPlayingImage(isPlaying: Bool, isSelected: Bool, item: SoundInfo) -> some View {
-    print("fileName : \(item.fileNameNoExt)")
   if isPlaying {
       return Image(systemName: "speaker.zzz")
         .opacity(isSelected ? 1.0 : 0)

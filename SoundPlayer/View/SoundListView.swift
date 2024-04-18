@@ -36,9 +36,9 @@ struct SoundListView: View {
           ForEach(_targetGroup.soundInfos, id: \.id) { item in
             VStack {
               HStack {
-                if let _imageData = item.artWork {
-                  if let _uiImage = UIImage(data: _imageData) {
-                    Image(uiImage: _uiImage)
+                if let _artWorkImageData = item.artWork {
+                  if let _artWorkUIImage = UIImage(data: _artWorkImageData) {
+                    Image(uiImage: _artWorkUIImage)
                       .resizable()
                       .aspectRatio(contentMode: .fit)
                       .overlay(utility.getPlayingImage(isPlaying: viewModel.isPlayingSound(groupInfo: _targetGroup, soundInfo: item), isSelected: item.isSelected, item: item)
@@ -53,43 +53,11 @@ struct SoundListView: View {
                   }
                 }
 
-                    
-                    
-
-                    
-                    
-                    
-                /*
-                if let _artWork = utility.getArtWorkImage(url: item.fullPath) {
-                  if viewModel.player.isPlaying {
-                    _artWork
-                      .resizable()
-                      .aspectRatio(contentMode: .fit)
-                      .overlay(utility.getPlayingImage(isPlaying: viewModel.player.isPlaying, isSelected: item.isSelected)
-                        .scaleEffect(self.speakerEffect ? 1 : 0.8)
-                        .onAppear() {
-                          withAnimation(.default.repeatForever().speed(viewModel.player.isPlaying ? 2.0 : 0.0)) {
-                            self.speakerEffect.toggle()
-                          }
-                        }
-                      )
-                      .frame(width: 30, height: 30)
-                  } else {
-                    _artWork
-                      .resizable()
-                      .aspectRatio(contentMode: .fit)
-                      .overlay(utility.getPlayingImage(isPlaying: viewModel.player.isPlaying, isSelected: item.isSelected)
-                      )
-                      .frame(width: 30, height: 30)
-                  }
-                }
-                 */
-
                 Text(item.text == "" ? item.fileNameNoExt : item.text)
                   .lineLimit(1)
                   .padding([.leading, .trailing, .top, .bottom], 20)
                   .frame(maxWidth: .infinity, alignment: .leading)
-
+                
                 Button(action: {
                   isPresented.toggle()
                 }, label: {Image(systemName: "square.and.pencil")})
@@ -127,6 +95,12 @@ struct SoundListView: View {
     } message: {
       // アラートのメッセージ...
       Text("エラーが発生しました\n\(self.errorMessage)")
+    }
+    
+    Button("test") {
+      withAnimation(.default.repeatForever().speed(2.0)) {
+        self.speakerEffect.toggle()
+      }
     }
   }
 }

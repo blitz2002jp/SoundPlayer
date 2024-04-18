@@ -50,8 +50,6 @@ struct CreateTestDataView: View {
     Spacer()
     
     Button("TEST") {
-      let a = utility.emptyArtwork
-      let b = utility.emptyArtwork
     }
     
     Spacer()
