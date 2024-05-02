@@ -5,6 +5,7 @@
 //  Created by masazumi oeda on 2024/01/20.
 //
 
+import Foundation
 import SwiftUI
 
 /// Repeateボタン
@@ -14,17 +15,17 @@ struct RepeatButton: View {
   var body: some View {
     
     Button(action: {
-      if let _currentGroup = self.viewModel.currentGroup {
+      if let _playingGroup = self.viewModel.playingGroup {
         // アイコンをクリックした時のアクション
-        switch _currentGroup.repeatMode {
+        switch _playingGroup.repeatMode {
         case .noRepeate:
-          _currentGroup.repeatMode = .repeateAll
+          _playingGroup.repeatMode = .repeateAll
           break
         case .repeateOne:
-          _currentGroup.repeatMode = .noRepeate
+          _playingGroup.repeatMode = .noRepeate
           break
         case .repeateAll:
-          _currentGroup.repeatMode = .repeateOne
+          _playingGroup.repeatMode = .repeateOne
           break
         }
       }
@@ -32,8 +33,8 @@ struct RepeatButton: View {
       self.viewModel.redraw()
     })
     {
-      if let _currentGroup = self.viewModel.currentGroup {
-        switch _currentGroup.repeatMode {
+      if let _playingGroup = self.viewModel.playingGroup {
+        switch _playingGroup.repeatMode {
         case .noRepeate:
           Image(systemName: "repeat")
             .foregroundColor(.gray)
@@ -73,7 +74,7 @@ struct PlayButton: View {
   var body: some View {
     Button(action: {
 #if DEBUG
-      if let _selectedSound = viewModel.getCurrentSelectedSound() {
+      if let _selectedSound = viewModel.getPlayingSound() {
       }
 #endif
       
@@ -158,6 +159,7 @@ struct TitleInput: View {
   
   @State var inputTitle = ""
   var body: some View {
+/*
     HStack {
       Button("Cancel"){
         dismiss()
@@ -199,6 +201,8 @@ struct TitleInput: View {
         TextField("Title", text: $inputTitle)
       }
     }
+ */
+    Text("oooo")
   }
 }
 
@@ -207,80 +211,114 @@ struct TitleTimeInput: View {
   @State var model: TitleTimeModel
   @Binding var result: ResultSaveView
   @State var title = ""
-  //  var soundInfo: SoundInfo
-  
   @Environment(\.dismiss) var dismiss
   @State var showingAlert = false
-  
   @State var selectedTitle = ""
   @State var inputTitle = ""
   
+  @State private var selectedValues = [0, 0]
+  let values1 = [0,1,2,3,4,5,6,7,8,9]
+  let values2 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+  
   var body: some View {
-    HStack{
-      Button("Cancel"){
-        
-        dismiss()
+    if let _playingGroup = viewModel.playingGroup {
+      if let _playingSound = viewModel.getPlayingSound() {
+        VStack {
+          TitleView(titleName: _playingSound.fileNameNoExt, groupName: _playingGroup.text, targetSound: _playingSound, showMenuIcon: false)
+          
+          HStack{
+            Button("Cancel"){
+              dismiss()
+            }
+            Spacer()
+            Button("OK"){
+              self.result = .ok
+              self.model.title = self.inputTitle
+              dismiss()
+            }
+            .disabled(self.inputTitle.count <= 0)
+          }
+          .padding([.leading, .trailing], 20 )
+          
+          Section(header: Text("プレイリスト名")) {
+            
+            TextField("Title", text: self.$inputTitle)
+            
+            Picker("タイトル", selection: self.$selectedTitle) {
+              ForEach(self.viewModel.playListInfos){ item in
+                Text(item.text).tag(item.text)
+              }
+            }
+            .onChange(of: self.selectedTitle) { item in
+              self.inputTitle = item
+            }
+            .pickerStyle(WheelPickerStyle())
+          }
+
+          
+          if utility.isPrivateMode() {
+#warning("Pickerの時分秒に指定する値の上限値を決める")
+            // Duration取得
+            let (hours, minutes, seconds) = utility.getHMS(time: _playingSound.duration())
+            Section(header: Text("再生開始時間")) {
+              HStack {
+                Picker(selection: $selectedValues[0], label: Text("")) {
+                  ForEach(0..<hours, id: \.self) { index in
+                    Text("\(index)")
+                  }
+                }
+                .pickerStyle(WheelPickerStyle())
+                .frame(width: 70, height: 100) // ピッカーの高さを指定
+                Text(":")
+                
+                Picker(selection: $selectedValues[1], label: Text("")) {
+                  ForEach(0..<60) { index in
+                    Text("\(index)")
+                  }
+                }
+                .pickerStyle(WheelPickerStyle())
+                .frame(width: 70, height: 100) // ピッカーの高さを指定
+                Text(":")
+                
+                Picker(selection: $selectedValues[1], label: Text("")) {
+                  ForEach(0..<60) { index in
+                    Text("\(index)")
+                  }
+                }
+                .pickerStyle(WheelPickerStyle())
+                .frame(width: 70, height: 100) // ピッカーの高さを指定
+              }
+            }
+          }
+          /*
+           Section(header: Text("分")) {
+           Stepper(value: $model.minutes, in: 0...59, step: 1, onEditingChanged: {
+           editing in
+           if( editing == false ){
+           model.strMinutes = String(model.minutes)
+           }
+           })
+           {
+           TextField("", text: $model.strMinutes)
+           }
+           }
+           
+           Section(header: Text("秒")) {
+           Stepper(value: $model.seconds, in: 0...59, step: 1, onEditingChanged: {
+           editing in
+           if( editing == false ){
+           model.strSeconds = String(model.seconds)
+           }
+           })
+           {
+           TextField("", text: $model.strSeconds)
+           }
+           }
+           */
+          //    }
+        }
       }
-      Spacer()
-      Button("OK"){
-        self.result = .ok
-        self.model.title = self.inputTitle
-        dismiss()
-      }
-      .disabled(self.inputTitle.count <= 0)
     }
-    .padding([.leading, .trailing], 20 )
-    
-//    Form {
-      Section(header: Text("タイトル")) {
-        Picker("タイトル", selection: self.$selectedTitle) {
-          ForEach(self.viewModel.playListInfos){ item in
-            Text(item.text).tag(item.text)
-          }
-        }
-        .onChange(of: self.selectedTitle) { item in
-          self.inputTitle = item
-        }
-        
-        TextField("Title", text: self.$inputTitle)
-        
-      }
-      
-      Section(header: Text("時")) {
-        Stepper(value: $model.hours, in: 0...4, step: 1, onEditingChanged: {
-          editing in
-          if( editing == false ){
-            model.strHours = String(model.hours)
-          }
-        })
-        {
-          TextField("", text: $model.strHours)
-        }
-      }
-      Section(header: Text("分")) {
-        Stepper(value: $model.minutes, in: 0...59, step: 1, onEditingChanged: {
-          editing in
-          if( editing == false ){
-            model.strMinutes = String(model.minutes)
-          }
-        })
-        {
-          TextField("", text: $model.strMinutes)
-        }
-      }
-      
-      Section(header: Text("秒")) {
-        Stepper(value: $model.seconds, in: 0...59, step: 1, onEditingChanged: {
-          editing in
-          if( editing == false ){
-            model.strSeconds = String(model.seconds)
-          }
-        })
-        {
-          TextField("", text: $model.strSeconds)
-        }
-      }
-//    }
   }
 }
 
@@ -292,9 +330,10 @@ struct VolumeSlider: View {
   var body: some View {
     HStack {
       Button(action: {
-        sliderVal = sliderVal > 0.0 ? sliderVal - 0.1 : 0.0
+        sliderVal = sliderVal > 0.0 ? sliderVal - 0.05 : 0.0
         viewModel.volome = sliderVal
-      }, label: { Image(systemName: "speaker.minus")})
+      }, label: { Image(systemName: "speaker.minus") })
+      .foregroundStyle(.primary)
 
       Slider(value: $viewModel.volome, in: 0...1.0, step: 0.1)
         .onChange(of: sliderVal) { newValue in
@@ -304,13 +343,14 @@ struct VolumeSlider: View {
           sliderVal = viewModel.volome
         }
       Button(action: {
-        sliderVal = sliderVal < 1.0 ? sliderVal + 0.1 : 1.0
+        sliderVal = sliderVal < 1.0 ? sliderVal + 0.05 : 1.0
         viewModel.volome = sliderVal
-      }, label: { Image(systemName: "speaker.plus")})
+      }, label: { Image(systemName: "speaker.plus") })
+      .foregroundStyle(.primary)
     }
   }
   func volumeAdjust() {
-    sliderVal = sliderVal > 0.0 ? sliderVal - 0.1 : 0.0
+    sliderVal = sliderVal > 0.0 ? sliderVal - 0.05 : 0.0
     viewModel.volome = sliderVal
   }
 }
@@ -318,28 +358,40 @@ struct VolumeSlider: View {
 struct Fotter: View {
   @EnvironmentObject var viewModel: ViewModel
   @State var isShowSheet = false
-  @State var enableTap: Bool
   
   var body: some View {
     HStack {
-      Text("\(viewModel.getCurrentSelectedSound()?.fileNameNoExt ?? "")")
+      Button(action: { self.isShowSheet = true })
+      {
+        Text("\(viewModel.getPlayingSound()?.fileNameNoExt ?? "")")
         .font(.footnote)
         .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .leading)
         .padding(.leading, 10)
+      }
+      .foregroundStyle(.primary)
+/*
+      Text("\(viewModel.getPlayingSound()?.fileNameNoExt ?? "")")
+        .font(.footnote)
+        .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .leading)
+        .padding(.leading, 10)
+        .onTapGesture {
+          // Play Sheet表示
+          self.isShowSheet = true
+        }
+        .foregroundStyle(.primary)
+*/
       Spacer()
       Image(systemName: viewModel.playMode == .play ? "pause" : "play.fill")
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .frame(width: 50, height: 50)
+        .imageScale(.large)
         .padding(.trailing, 10)
         .onTapGesture {
-          if let _currentGroup = self.viewModel.currentGroup {
-            if let _selectedSound = self.viewModel.getCurrentSelectedSound() {
-              try? self.viewModel.playSound(targetGroup: _currentGroup, targetSound: _selectedSound)
+          if let _playingGroup = self.viewModel.playingGroup {
+            if let _selectedSound = self.viewModel.getPlayingSound() {
+              try? self.viewModel.playSound(targetGroup: _playingGroup, targetSound: _selectedSound)
             }
           }
         }
-      
+
       Image(systemName: "forward.fill")
         .imageScale(.large)
         .padding(.trailing, 10)
@@ -358,171 +410,55 @@ struct Fotter: View {
       // 背景に透明なViewを追加して、それをタップしたときにシートが表示されるようにする
       Color.gray
         .contentShape(Rectangle())
+/*
         .onTapGesture {
-          // タップジェスチャーが有効なら
-          if self.enableTap == true {
-            // Play Sheet表示
-            self.isShowSheet = true
-          }
+          // Play Sheet表示
+          self.isShowSheet = true
         }
+ */
     )
   }
 }
 
-struct PlayView: View {
-  @EnvironmentObject var viewModel: ViewModel
+struct TitleView: View {
+  var titleName: String = ""
+  var groupName: String = ""
+  var targetSound: SoundInfo?
+  var showMenuIcon = true
+  @State private var showMenu = false
   @Environment(\.dismiss) var dismiss
-  @State var volume: Float = 0
   
   var body: some View {
     VStack {
-      Spacer()
-      Text(viewModel.getCurrentSelectedSound()?.fileNameNoExt ?? "")
-        .font(.title3)
-      Text(viewModel.currentGroup?.text ?? "")
+      HStack {
+        Image(systemName: "chevron.down")
+          .onTapGesture {
+            dismiss()
+          }
+        Spacer() // Imageを右寄せにするためにSpacerを追加
+        Text(titleName)
+          .font(.title3)
+          .frame(maxWidth: .infinity) // Textを水平方向に拡張して中央寄せにする
+          .multilineTextAlignment(.center) // 複数行の場合にも中央寄せにする
+        if self.showMenuIcon {
+          Image(systemName: "ellipsis.circle")
+            .onTapGesture {
+              self.showMenu = true
+            }
+            .sheet(isPresented: self.$showMenu)
+          {
+            if let _targetSound = self.targetSound {
+              SoundActionMenu(targetSound: _targetSound)
+                .presentationDetents([.medium])
+            }
+          }
+        }
+      }
+      Text(groupName)
         .font(.footnote)
         .foregroundStyle(Color.gray.opacity(0.5))
       Divider()
-      if let _sound = viewModel.getCurrentSelectedSound() {
-        //        if let _artWork = utility.getArtWorkImage(url: _sound.fullPath) {
-        if let _artWork = utility.getArtWorkImage(imageData: _sound.artWork) {
-          _artWork
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 200, height: 200)
-        }
-      }
-
-      Spacer()
-      // 再生位置
-      PositionSlider()
-      Spacer()
-
-      HStack {
-        Image(systemName: "goforward.10")
-          .font(.title3)
-          .padding(.trailing, 30)
-          .onTapGesture {
-            viewModel.adjustPlayTime(seconds: 10)
-          }
-
-        Image(systemName: "backward.fill")
-          .font(.title3)
-          .padding(.trailing, 30)
-          .onTapGesture {
-            viewModel.playPrevSound()
-          }
-
-        Image(systemName: viewModel.player.isPlaying ? "pause.fill" :  "play.fill")
-          .font(.title3)
-          .padding(.trailing, 30)
-          .onTapGesture {
-            do {
-              try viewModel.playSound(targetGroup: viewModel.currentGroup, targetSound: viewModel.getCurrentSelectedSound())
-            } catch {
-              print(error.localizedDescription)
-            }
-          }
-
-        Image(systemName: "forward.fill")
-          .font(.title3)
-          .padding(.trailing, 30)
-          .onTapGesture {
-            viewModel.playNextSound()
-          }
-        Image(systemName: "gobackward.10")
-          .font(.title3)
-          .onTapGesture {
-            viewModel.adjustPlayTime(seconds: -10)
-          }
-      }
-
-      Spacer()
-      // ボリューム
-      VolumeSlider(sliderVal: $volume)
-      
     }
-    .onAppear() {
-      if let _s = viewModel.getCurrentSelectedSound() {
-        print("\(_s.currentTimeStr) : \(_s.currentTime)")
-      }
-      print()
-
-    }
-    .padding([.leading, .trailing], 10)
-    
-    // フッター
-//    Fotter(enableTap: false)
+    .padding([.top, .leading, .trailing], 10)
   }
 }
-
-struct SoundFileMenu: View {
-  @EnvironmentObject var viewModel: ViewModel
-  @Environment(\.dismiss) var dismiss
-  @State private var titleTime: TitleTimeModel = TitleTimeModel(title: "")
-  @State private var saveViewResult: ResultSaveView = .cancel
-  @State private var isPresented:Bool = false
-  //var soundInfo: SoundInfo
-  
-  var body: some View {
-    VStack {
-      List {
-        Section {
-          HStack {
-            Image(systemName: "note.text.badge.plus")
-            Text("プレイリストへ追加")
-              .onTapGesture {
-                let (hours, minutes, seconds) = utility.getHMS(time: viewModel.getCurrentTime())
-                self.titleTime.hours = hours
-                self.titleTime.minutes = minutes
-                self.titleTime.seconds = seconds
-                self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
-                self.isPresented.toggle()
-              }
-              .sheet(isPresented: $isPresented, onDismiss: {
-                if self.saveViewResult == .ok {
-                  if let _currentSound = viewModel.getCurrentSelectedSound() {
-                    // 追加するSoundInfoの作成
-                    let addSoundInfo = _currentSound.copy()
-                    addSoundInfo.currentTime = utility.stringToTimeInterval(HHMMSS: "\(self.titleTime.strHours):\(self.titleTime.strMinutes):\(self.titleTime.strSeconds)")
-                    
-                    // PlayList作成
-                    var playList = viewModel.playListInfos.first(where: {$0.text == self.titleTime.title})
-                    if playList == nil {
-                      playList = PlayListInfo(text: self.titleTime.title)
-                      viewModel.playListInfos.append(playList!)
-                    }
-                    playList?.soundInfos.append(addSoundInfo)
-                    
-                    utility.saveGroupInfo(outputInfos: viewModel.playListInfos)
-                  }
-                }
-              })
-            {
-              if #available(iOS 16.0, *) {
-                TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
-                  .presentationDetents([.medium])
-              } else {
-                TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
-              }
-            }
-          }
-          HStack {
-            Image(systemName: "trash")
-            Text("削除")
-              .onTapGesture {
-                print("")
-              }
-          }
-        }
-      }
-/*
-      Button("Close"){
-        dismiss()
-      }
- */
-      Spacer()
-    }
-  }
-}
-

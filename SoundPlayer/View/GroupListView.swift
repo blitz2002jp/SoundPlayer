@@ -23,8 +23,9 @@ struct GroupListView: View {
   
   @State private var isActive = false
   
-  @State private var selectItem: GroupInfo?
-  
+  @State private var selectItemSoundList: GroupInfo?
+  @State private var selectItemMenu: GroupInfo?
+
   var body: some View {
     VStack {
       NavigationView {
@@ -37,22 +38,28 @@ struct GroupListView: View {
                   .padding([.leading, .trailing, .top, .bottom], 20)
                   .frame(maxWidth: .infinity, alignment: .leading)
                   .onTapGesture {
+                    self.selectItemSoundList = item
                     isActive = true
-                    
-                    self.selectItem = item
                   }
-                
-                Spacer()
-                Button(action: {
-                  isEditing.toggle()
-                }, label: {
-                  Image(systemName: "square.and.pencil")
-                })
-                .padding(.trailing, 20)
-                
+
+                if !(item is FullSoundInfo) {
+                  Button(action: {
+                    self.selectItemMenu = item
+                  }, label: {Image(systemName: "contextualmenu.and.cursorarrow")})
+                  .sheet(item: self.$selectItemMenu, onDismiss: {} )
+                  { item in
+                    if #available(iOS 16.0, *) {
+                      GroupActionMenu(targetGroup: item)
+                        .presentationDetents([.medium])
+                    } else {
+                      GroupActionMenu(targetGroup: item)
+                    }
+                  }
+                }
+ 
                 Button(action:{
                   do {
-                    try self.viewModel.playGroup(groupInfo: item)
+                    try self.viewModel.playGroup(targetGroupInfo: item)
                   } catch {
                     self.errorMessage = error.localizedDescription
                     self.isShowAlert = true
@@ -73,15 +80,9 @@ struct GroupListView: View {
           }))
         }
         .background(
-          NavigationLink(destination: SoundListView(targetGroup: self.selectItem, viewModel: _viewModel), isActive: $isActive) {
+          NavigationLink(destination: SoundListView(targetGroup: self.selectItemSoundList, viewModel: _viewModel), isActive: $isActive) {
             EmptyView()
           })
-
-          /*
-          NavigationLink(destination: SoundListView(targetGroup: self.viewModel.currentGroup, viewModel: _viewModel), isActive: $isActive) {
-            EmptyView()
-          })
-           */
       }
       .onAppear{
       }

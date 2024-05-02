@@ -12,7 +12,7 @@ import os.log
 @main
 struct SoundPlayerApp: App {
   // AppDelegate を利用する
-  @UIApplicationDelegateAdaptor(CustomAppDelegate.self) var appDelegate
+  //@UIApplicationDelegateAdaptor(CustomAppDelegate.self) var appDelegate
   
   // アプリ全体で使用可能な変数のインスタンスを作成
   @StateObject internal var viewModel = ViewModel()
@@ -24,6 +24,26 @@ struct SoundPlayerApp: App {
 #if DEBUG
           utility.DebugPrintSaveData(viewModel: viewModel)
 #endif
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { notification in
+          print("アクティブになった。")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
+          print("非活性になるよ。")
+          // 現在の情報保存
+          viewModel.saveGroupInfos()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { notification in
+          print("バックグランドになった。")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { notification in
+          print("フォアグラウンドになるよ。")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification)) { notification in
+          print("アプリ終了するよ。")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
+          print("画面が回転したよ")
         }
     }
   }

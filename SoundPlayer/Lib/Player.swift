@@ -10,9 +10,6 @@ import AVFoundation
 import MediaPlayer
 
 protocol PlayerDelegate {
-  // 再生時間の通知
-//  func notifyCurrentTime(currentTime: TimeInterval)
-  
   // 再生終了の通知
   func notifyTermination()
 }

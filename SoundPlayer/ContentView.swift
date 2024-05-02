@@ -16,43 +16,43 @@ enum subViews1: String{
 }
 
 struct ContentView: View {
+  @Environment(\.colorScheme) var xxcolorScheme
   @EnvironmentObject var viewModel: ViewModel
   @State private var nextView: subViews1 = .topView
   @State private var showTestSheet = false
 
   var body: some View {
+    let textColor: Color = xxcolorScheme == .dark ? .white : .black
+
     switch nextView {
     case .topView:
-      List{
+      List {
         HStack {
           Image(systemName: "internaldrive")
-          Text("全曲")
-            .onTapGesture{
-              nextView = .AllSoundView
-            }
+          Button(action: { nextView = .AllSoundView })
+          { Text("全曲")}
+            .foregroundStyle(.primary)
+          
         }
         HStack {
           Image(systemName: "folder")
-          Text("フォルダ")
-            .onTapGesture{
-              nextView = .folderView
-            }
+          Button(action: { nextView = .folderView })
+          { Text("フォルダ") }
+            .foregroundStyle(.primary)
         }
         HStack {
           Image(systemName: "music.note.list")
-          Text("プレイリスト")
-            .onTapGesture{
-              nextView = .playListView
-            }
+          Button(action: { nextView = .playListView })
+          { Text("プレイリスト") }
+            .foregroundStyle(.primary)
         }
 #if DEBUG
-        Text("テスト")
-          .onTapGesture{
-            showTestSheet.toggle()
-          }
-          .sheet(isPresented: $showTestSheet){
-            CreateTestDataView()
-          }
+        HStack {
+          Image(systemName: "wand.and.stars.inverse")
+          Button(action: { showTestSheet.toggle() })
+          { Text("テスト") }
+            .foregroundStyle(.primary)
+        }
 #endif
       }
     case .AllSoundView:
@@ -64,7 +64,7 @@ struct ContentView: View {
     }
     
     // フッター
-    Fotter(enableTap: true)
+    Fotter()
   }
 }
 

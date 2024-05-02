@@ -86,7 +86,7 @@ class SoundInfo: Codable, Identifiable {
       
       ///  フォルダ名の設定
       // 先頭からDocumentフォルダまでを除去してfoldersNameにセット
-      self.foldersName = fileName.deletingLastPathComponent().absoluteString.replacingOccurrences(of: removeDirName.absoluteString, with: "")
+      self.foldersName = fileName.deletingLastPathComponent().absoluteString.replacingOccurrences(of: removeDirName.absoluteString, with: "").replacingOccurrences(of: "/", with: "")
       
       // Art Work
       self.artWork = utility.getArtWorkData(url: self.fullPath)
@@ -107,6 +107,7 @@ class SoundInfo: Codable, Identifiable {
     res.volume = self.volume                             // ボリューム
     res.repeatMode = self.repeatMode                    // 繰り返し
     res.sortKey = self.sortKey                              // ソートキー
+    res.artWork = self.artWork
     
     return res
   }

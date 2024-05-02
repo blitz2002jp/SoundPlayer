@@ -13,4 +13,5 @@ class FullSoundInfo: GroupInfo {
   required init(from decoder: any Decoder) throws {
     try super.init(from: decoder)
   }
+  
 }

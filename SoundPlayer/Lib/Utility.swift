@@ -13,23 +13,28 @@ import UIKit
 
 
 struct utility {
+  // Private Modeファイル名
+  private static let PRIVATE_FILE_NAME = ".PrivateMode"             // PrivateModeにするためのファイル名
   // UserDefaultのキー
   private static let FULL_SOUND_INFO = "FULL_SOUND_INFO"            // FullSoundのJsonデータ
   private static let FOLDER_INFO = "FOLDER_INFO"                    // FolderのJsonデータ
   private static let PLAY_LIST_INFO = "PLAY_LIST_INFO"              // PlayListのJsonデータ
+  private static let SELECTED_GROUP_TYPE = "SELECTED_GROUP_TYPE"
+  private static let SELECTED_GROUP_TEXT = "SELECTED_GROUP_TEXT"
+  private static let PLAYING_GROUP_TYPE = "PLAYING_GROUP_TYPE"        // 現在のグループType
+  private static let PLAYING_GROUP_TEXT = "PLAYING_GROUP_TEXT"        // 現在のグループ(フォルダ名、プレイリスト名)
+  private static let PLAYING_SOUND_DURATION = "PLAYING_SOUND_DURATION"  // 現在の再生時間
+  private static let PLAYING_SOUND_TIME = "PLAYING_SOUND_TIME"          // 現在の再生時間
+  private static let PLAYING_SOUND_VOLUME = "PLAYING_SOUND_VOLUME"      // 音量
+  private static let SETTING_FILE_DIRECTORY = "SETTING_FILE_DIRECTORY"
   
-  private static let CURRENT_GROUP_TYPE = "CurrentGroupType"        // 現在のグループType
-  // (Full,Folde,Playlist)
-  private static let CURRENT_GROUP_TEXT = "CurrentGroupText"          // 現在のグループ(フォルダ名、プレイリスト名)
-  private static let CURRENT_SOUND_DURATION = "CURRENT_SOUND_DURATION"          // 現在の再生時間
-  private static let CURRENT_PLAY_TIME = "CurrentPlayTime"          // 現在の再生時間
-  
-  private static let CURRENT_VOLUME = "CurrentVolume"               // 音量
-  
-  private static let SETTING_FILE_DIRECTORY = "Setteing"
+  // SoundBoxフォルダ
   private static let SANDBOX_DIRECRORY = "private"
-  private static let SOUND_FILE_EXTENSIONS = ["mp3", "m4a"]
   
+  // 拡張子
+  private static let SOUND_FILE_EXTENSIONS = ["mp3", "m4a"]
+
+  // ID2タグキー
   private static let ID3TAG_KEY_TITLE = "title"
   
   private static let ID3TAG_KEY_COPYRIGHTS = "copyrights"
@@ -189,12 +194,12 @@ struct utility {
     return [GroupInfo]()
   }
   
-  /// PlayList情報をJson形式で保存(UserDefaults)
+  /// Group情報をJson形式で保存(UserDefaults)
   static func saveGroupInfo(outputInfos:[GroupInfo]) {
     do {
       if outputInfos.count > 0 {
         if let saveKey = getGroupInfoSaveKey(groupInfo: outputInfos[0]) {
-          // PlayListInfoの配列をjsonDataにエンコード
+          // Group情報の配列をjsonDataにエンコード
           let jsonData = try JSONEncoder().encode(outputInfos)
           
           // JSONデータをStringに変換
@@ -224,32 +229,40 @@ struct utility {
     try JSONEncoder().encode(groupinfo).write(to:outputFullUrl)
   }
   
-  // 現在のグループ情報の保存
-  static func saveCurrentGroupInfo(groupInfo: GroupInfo?) {
+  // 再生対象のグループ情報の保存
+  static func savePlayingGroupType(groupInfo: GroupInfo?) {
     if let _groupInfo = groupInfo {
-      UserDefaults.standard.set(_groupInfo.groupType.rawValue , forKey: CURRENT_GROUP_TYPE)
-      UserDefaults.standard.set(_groupInfo.text , forKey: CURRENT_GROUP_TEXT)
+      UserDefaults.standard.set(_groupInfo.groupType.rawValue , forKey: PLAYING_GROUP_TYPE)
+      UserDefaults.standard.set(_groupInfo.text , forKey: PLAYING_GROUP_TEXT)
     }
   }
-  
+
+  // 現在選択されているグループ情報の保存
+  static func saveSelectedGroupType(groupInfo: GroupInfo?) {
+    if let _groupInfo = groupInfo {
+      UserDefaults.standard.set(_groupInfo.groupType.rawValue , forKey: SELECTED_GROUP_TYPE)
+      UserDefaults.standard.set(_groupInfo.text , forKey: SELECTED_GROUP_TEXT)
+    }
+  }
+
   // 現在の音声の再生時間保存
-  static func saveCurrentPlayTime(currentTime: String) {
-    UserDefaults.standard.set(currentTime , forKey: CURRENT_PLAY_TIME)
+  static func savePlayingSoundTime(currentTime: String) {
+    UserDefaults.standard.set(currentTime , forKey: PLAYING_SOUND_TIME)
   }
   
   // 現在の音声の再生時間長保存
-  static func saveCurrentSoundDuration(currentSoundDuration: TimeInterval) {
-    UserDefaults.standard.set(currentSoundDuration , forKey: CURRENT_SOUND_DURATION)
+  static func savePlayingSoundDuration(duration: TimeInterval) {
+    UserDefaults.standard.set(duration , forKey: PLAYING_SOUND_DURATION)
   }
   
   // 現在の音量の保存
-  static func saveCurrentVolume(currentVolume: Float) {
-    UserDefaults.standard.set(currentVolume , forKey: CURRENT_VOLUME)
+  static func savePlayingSoundVolume(volume: Float) {
+    UserDefaults.standard.set(volume , forKey: PLAYING_SOUND_VOLUME)
   }
   
   // 現在の音量の取得
-  static func getCurrentVolume() -> Float {
-    return UserDefaults.standard.float(forKey: CURRENT_VOLUME)
+  static func getPlayingSoundVolume() -> Float {
+    return UserDefaults.standard.float(forKey: PLAYING_SOUND_VOLUME)
   }
   
   /// グループ情報(Full、Folder、Playlist)保存キーの取得
@@ -267,26 +280,39 @@ struct utility {
   }
   
   // 現在の音声の再生時間取得
-  static func getCurrentPlayTime() -> String {
-    if let _currentTime = UserDefaults.standard.string(forKey: CURRENT_PLAY_TIME) {
+  static func getPlayingSoundTime() -> String {
+    if let _currentTime = UserDefaults.standard.string(forKey: PLAYING_SOUND_TIME) {
       return _currentTime
     }
     return "00:00:00"
   }
   
   // 現在の音声の再生時間取得
-  static func getCurrentSoundDuration() -> TimeInterval {
-    return UserDefaults.standard.double(forKey: CURRENT_SOUND_DURATION)
+  static func getPlayingSoundDuration() -> TimeInterval {
+    return UserDefaults.standard.double(forKey: PLAYING_SOUND_DURATION)
   }
   
   // 現在のグループ名(text)取得
-  static func getCurrentGroupText() -> String? {
-    return UserDefaults.standard.string(forKey: CURRENT_GROUP_TEXT)
+  static func getPlayingGroupText() -> String? {
+    return UserDefaults.standard.string(forKey: PLAYING_GROUP_TEXT)
   }
-  
+
+  // 現在選択されているグループ名(text)取得
+  static func getSelectedGroupText() -> String? {
+    return UserDefaults.standard.string(forKey: SELECTED_GROUP_TEXT)
+  }
+
   // 現在のグループタイプ(GroupType)取得
-  static func getCurrentGroupType() -> GroupType? {
-    if let _groupType = UserDefaults.standard.string(forKey: CURRENT_GROUP_TYPE) {
+  static func getPlayingGroupType() -> GroupType? {
+    if let _groupType = UserDefaults.standard.string(forKey: PLAYING_GROUP_TYPE) {
+      return GroupType(rawValue: _groupType)
+    }
+    return nil
+  }
+
+  // 現在選択されているグループタイプ(GroupType)取得
+  static func getSelectedGroupType() -> GroupType? {
+    if let _groupType = UserDefaults.standard.string(forKey: SELECTED_GROUP_TYPE) {
       return GroupType(rawValue: _groupType)
     }
     return nil
@@ -349,37 +375,69 @@ struct utility {
   }
   
   static func getPlayingImage(isPlaying: Bool, isSelected: Bool, item: SoundInfo) -> some View {
-  if isPlaying {
+    if isPlaying {
       return Image(systemName: "speaker.zzz")
         .opacity(isSelected ? 1.0 : 0)
-        .frame(width: 50, height: 50)
+        .frame(width: 20, height: 20)
+        .foregroundStyle(.primary)
+    } else {
+      return Image(systemName: "speaker")
+        .opacity(isSelected ? 1.0 : 0)
+        .frame(width: 20, height: 20)
+        .foregroundStyle(.primary)
     }
-    return Image(systemName: "speaker")
-    .opacity(isSelected ? 1.0 : 0)
-      .frame(width: 50, height: 50)
-/*
- if isPlayinxg {
-   return Image(systemName: "speaker.zzz")
-     .opacity(isSelected ? 0.5 : 0)
-     .frame(width: 30, height: 40)
- }
- return Image(systemName: "speaker")
- .opacity(isSelected ? 0.5 : 0)
-   .frame(width: 30, height: 30)
-
- */
-}
+  }
+  // PNGファイルにSave
+  static func saveArtWork(imageData: Data?, fileName: String = UUID().uuidString) {
+    if let _imageData = imageData {
+      if let _uiImage = UIImage(data: _imageData) {
+        if let _docUrl = utility.getDocumentDirectory() {
+          // PNG形式で画像を保存
+          do {
+            let _saveUrl = _docUrl.appendingPathComponent(fileName)
+            try _uiImage.pngData()?.write(to: _saveUrl)
+            print("Image saved to: \(_saveUrl.absoluteString)")
+          } catch {
+            print("Error saving image:", error.localizedDescription)
+          }
+        }
+      }
+    }
+  }
   
-  
+  // 参照の削除
+  static func removeReference(targetGroups: [GroupInfo] ,targetSound: SoundInfo) {
+    targetGroups.forEach { item in
+      item.soundInfos.removeAll(where: {$0.fullPath == targetSound.fullPath})
+    }
+  }
 
   // 処理時間計測
-  static func measureExecutionTimeInMilliseconds(block: () -> Void) -> Double {
+  static func measureExecutionTimeInMilliseconds(block: () -> Void) -> String {
     let startTime = DispatchTime.now()
     block()
     let endTime = DispatchTime.now()
     let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
     let milliseconds = Double(nanoseconds) / 1_000_000 // ナノ秒をミリ秒に変換
-    return milliseconds
+    
+    
+    let millisecondsInt = Int(milliseconds)
+    let millisecondsPart = millisecondsInt % 1000
+    let secondsPart = (millisecondsInt / 1000) % 60
+    let minutesPart = (millisecondsInt / (1000 * 60)) % 60
+    let hoursPart = (millisecondsInt / (1000 * 60 * 60)) % 24
+    let sss = String(format: "%02d:%02d:%02d.%03d", hoursPart, minutesPart, secondsPart, millisecondsPart)
+    print(sss)
+    return String(format: "%02d:%02d:%02d.%03d", hoursPart, minutesPart, secondsPart, millisecondsPart)
+  }
+  
+  /// プライベートモード判定
+  static func isPrivateMode() -> Bool {
+    if let _documentDirectory = self.getDocumentDirectory() {
+      
+      return FileManager.default.fileExists(atPath: _documentDirectory.appendingPathComponent(PRIVATE_FILE_NAME).path())
+    }
+    return false
   }
   
   /// 環境がサンドボックスか
@@ -405,13 +463,17 @@ struct utility {
       print("DocumentDirectory なし")
     }
     
-    print("CURRENT_GROUP_TYPE:\(String(describing: self.getCurrentGroupType()))")
-    print("CURRENT_GROUP_TEXT:\(String(describing: self.getCurrentGroupText() ?? ""))")
-    print("CURRENT_PLAY_TIME:\(self.getCurrentPlayTime())")          // 現在の再生時間
-    print("CURRENT_SOUND_DURATION:\(self.getCurrentSoundDuration())")
-    print("CURRENT_VOLUME:\(self.getCurrentVolume())")               // 音量
     
-    if let _selectedSound = viewModel.getCurrentSelectedSound() {
+    print("SELECTED_GROUP_TYPE:\(String(describing: self.getSelectedGroupType()))")
+    print("SELECTED_GROUP_TEXT:\(String(describing: self.getPlayingGroupText() ?? ""))")
+
+    print("PLAYING_GROUP_TYPE:\(String(describing: self.getPlayingGroupType()))")
+    print("PLAYING_GROUP_TEXT:\(String(describing: self.getPlayingGroupText() ?? ""))")
+    print("PLAYING_SOUND_TIME:\(self.getPlayingSoundTime())")          // 現在の再生時間
+    print("PLAYING_SOUND_DURATION:\(self.getPlayingSoundDuration())")
+    print("PLAYING_SOUND_VOLUME:\(self.getPlayingSoundVolume())")               // 音量
+    
+    if let _selectedSound = viewModel.getPlayingSound() {
       print("SelectedSound FileName : \(_selectedSound.fileName)")
       print("SelectedSound currentTime : \(_selectedSound.currentTime)")
       print("SelectedSound currentTime : \(_selectedSound.currentTime)")

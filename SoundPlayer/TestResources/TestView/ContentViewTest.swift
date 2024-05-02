@@ -32,9 +32,7 @@ struct CreateTestDataView: View {
         title: Text("データ保存"),
         message: Text("保存しますか？"),
         primaryButton: .default(Text("OK")) {
-          utility.saveGroupInfo(outputInfos: viewModel.fullSoundInfos)
-          utility.saveGroupInfo(outputInfos: viewModel.folderInfos)
-          utility.saveGroupInfo(outputInfos: viewModel.playListInfos)
+          viewModel.saveGroupInfos()
         },
         secondaryButton: .cancel()
       )
@@ -50,6 +48,9 @@ struct CreateTestDataView: View {
     Spacer()
     
     Button("TEST") {
+      if let _soundInfo = viewModel.soundInfos.first(where: {$0.fileName == "04_MA TICARICA.m4a"}) {
+        utility.saveArtWork(imageData: _soundInfo.artWork, fileName: "artImage.PNG")
+      }
     }
     
     Spacer()
@@ -154,3 +155,5 @@ struct CreateTestDataView: View {
     }
   }
 }
+
+

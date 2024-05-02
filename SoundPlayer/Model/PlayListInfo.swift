@@ -13,4 +13,10 @@ class PlayListInfo: GroupInfo {
   required init(from decoder: Decoder) throws {
     try super.init(from: decoder)
   }
+  
+  /// Sound Infoの削除
+  override func removeSoundFile(removeSound: SoundInfo) {
+    // 参照の削除
+    self.soundInfos.removeAll(where: {$0.fullPath == removeSound.fullPath})
+  }
 }
