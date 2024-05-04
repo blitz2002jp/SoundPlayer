@@ -5,7 +5,6 @@
 //  Created by masazumi oeda on 2024/05/01.
 //
 
-#warning("名称変更、グループ削除の処理から実装の続き")
 import SwiftUI
 
 struct GroupActionMenu: View {

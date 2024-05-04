@@ -73,12 +73,8 @@ struct PlayButton: View {
   
   var body: some View {
     Button(action: {
-#if DEBUG
-      if let _selectedSound = viewModel.getPlayingSound() {
-      }
-#endif
-      
       self.action()
+      
       // 再描画
       viewModel.redraw()
     })
@@ -257,7 +253,6 @@ struct TitleTimeInput: View {
 
           
           if utility.isPrivateMode() {
-#warning("Pickerの時分秒に指定する値の上限値を決める")
             // Duration取得
             let (hours, minutes, seconds) = utility.getHMS(time: _playingSound.duration())
             Section(header: Text("再生開始時間")) {

@@ -42,6 +42,7 @@
 		5894E4722BA56FA80014C60E /* SoundPlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5894E46F2BA56FA80014C60E /* SoundPlayerApp.swift */; };
 		5894E4732BA56FA80014C60E /* SoundListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5894E4702BA56FA80014C60E /* SoundListView.swift */; };
 		5894E4742BA56FA80014C60E /* ViewCompornent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5894E4712BA56FA80014C60E /* ViewCompornent.swift */; };
+		58F70DB12BE60F19003F6B73 /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F70DB02BE60F19003F6B73 /* ToDo.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +102,7 @@
 		5894E4712BA56FA80014C60E /* ViewCompornent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewCompornent.swift; sourceTree = "<group>"; };
 		5894E4752BA570140014C60E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5894E47A2BA571760014C60E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		58F70DB02BE60F19003F6B73 /* ToDo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +220,7 @@
 			isa = PBXGroup;
 			children = (
 				580F9F792BCCCF3B00DFC9D0 /* Resource */,
+				58F70DB02BE60F19003F6B73 /* ToDo.swift */,
 				5894E46F2BA56FA80014C60E /* SoundPlayerApp.swift */,
 				5894E47A2BA571760014C60E /* ContentView.swift */,
 				5894E4392BA56F120014C60E /* Assets.xcassets */,
@@ -445,6 +448,7 @@
 				586C100F2BE1F71F000BAD9E /* CustomDefine.swift in Sources */,
 				5894E4612BA56F350014C60E /* GroupListView.swift in Sources */,
 				586C100B2BE0A991000BAD9E /* SoundActionMenu.swift in Sources */,
+				58F70DB12BE60F19003F6B73 /* ToDo.swift in Sources */,
 				58729EE32BABD63D00FB28BB /* FullSoundInfo.swift in Sources */,
 				586C10092BDF3BD0000BAD9E /* PlayView.swift in Sources */,
 				586C100D2BE1D1BC000BAD9E /* GroupActionMenu.swift in Sources */,

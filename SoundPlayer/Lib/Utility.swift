@@ -320,26 +320,20 @@ struct utility {
 
   // MP3のID3タグを取得
   static func getID3Tags(mp3Url: URL) -> [String: Any]? {
-    do {
-      // AVAssetを使用してMP3ファイルを読み込む
-      let asset = AVAsset(url: mp3Url)
-
-      // AVAssetからID3メタデータを取得
-      let metadata = asset.metadata
-      
-      // ID3メタデータから必要な情報を抽出する
-      var id3Tags: [String: Any] = [:]
-      for item in metadata {
-        if let key = item.commonKey?.rawValue, let value = item.value {
-          id3Tags[key] = value
-        }
+    // AVAssetを使用してMP3ファイルを読み込む
+    let asset = AVAsset(url: mp3Url)
+    
+    // AVAssetからID3メタデータを取得
+    let metadata = asset.metadata
+    
+    // ID3メタデータから必要な情報を抽出する
+    var id3Tags: [String: Any] = [:]
+    for item in metadata {
+      if let key = item.commonKey?.rawValue, let value = item.value {
+        id3Tags[key] = value
       }
-      
-      return id3Tags
-    } catch {
-      print("Failed to extract ID3 tags: \(error.localizedDescription)")
-      return nil
     }
+    return id3Tags
   }
   
   // ID3タグのテキスト情報を取得
