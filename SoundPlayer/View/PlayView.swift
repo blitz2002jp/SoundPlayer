@@ -13,14 +13,13 @@ struct PlayView: View {
   @State var volume: Float = 0
   @State var randomBackColor: Color = .clear
   @State var repeateBackColor: Color = .clear
-
+  
   var body: some View {
-    if let _playingGroup = viewModel.playingGroup {
-      if let _playingSound = viewModel.getPlayingSound() {
-        VStack {
-          TitleView(titleName: viewModel.getPlayingSound()?.fileNameNoExt ?? "", groupName: viewModel.playingGroup?.text ?? "", targetSound: viewModel.getPlayingSound())
-          
-          //        if let _artWork = utility.getArtWorkImage(url: _sound.fullPath) {
+    VStack {
+      TitleView(titleName: viewModel.getPlayingSound()?.fileNameNoExt ?? "", groupName: viewModel.playingGroup?.text ?? "", targetSound: viewModel.getPlayingSound())
+      Spacer()
+      if let _playingGroup = viewModel.playingGroup {
+        if let _playingSound = viewModel.getPlayingSound() {
           if let _artWork = utility.getArtWorkImage(imageData: _playingSound.artWork) {
             _artWork
               .resizable()
@@ -84,11 +83,12 @@ struct PlayView: View {
           Spacer()
           // ボリューム
           VolumeSlider(sliderVal: $volume)
-          
+        } else { //_playingSound
         }
-        .padding([.leading, .trailing], 10)
+      } else { //_playingGroup
       }
     }
+    .padding([.leading, .trailing], 10)
   }
   
   func getRandomBackColor(idRandom: Bool) -> Color {

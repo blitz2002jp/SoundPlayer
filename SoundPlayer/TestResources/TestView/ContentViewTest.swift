@@ -5,6 +5,7 @@ struct CreateTestDataView: View {
   @State private var showingCreateDataAlert = false
   @State private var showingSaveAlert = false
   @Environment(\.dismiss) var dismiss
+  @State private var dataClearAlert: Bool = false
 
   var body: some View {
     Spacer()
@@ -44,6 +45,17 @@ struct CreateTestDataView: View {
 #if DEBUG
       utility.DebugPrintSaveData(viewModel: viewModel)
 #endif
+    }
+    Spacer()
+    
+    Button("データ削除(UserDefaults)") {
+      self.dataClearAlert.toggle()
+    }
+    .alert("削除しますか？", isPresented: self.$dataClearAlert) {
+      Button("cancel"){}
+      Button("ok"){
+        utility.clearData()
+      }
     }
     Spacer()
     

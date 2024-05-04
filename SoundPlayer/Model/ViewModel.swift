@@ -148,7 +148,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
     
     // ArtWork無し用の画像
     if let path = Bundle.main.url(forResource: "EmptyArtWork.png", withExtension: "") {
-      if let image = UIImage(named: path.path()) {
+      if let image = UIImage(named: path.path) {
           if let imageData = image.pngData() {
             self.emptyArtWork = imageData
           }

@@ -66,6 +66,7 @@ struct SoundListView: View {
                 }
               }
             }
+            
             .padding([.leading, .trailing], 20)
             .onTapGesture {
               do {

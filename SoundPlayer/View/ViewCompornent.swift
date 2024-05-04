@@ -369,17 +369,7 @@ struct Fotter: View {
         .padding(.leading, 10)
       }
       .foregroundStyle(.primary)
-/*
-      Text("\(viewModel.getPlayingSound()?.fileNameNoExt ?? "")")
-        .font(.footnote)
-        .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .leading)
-        .padding(.leading, 10)
-        .onTapGesture {
-          // Play Sheet表示
-          self.isShowSheet = true
-        }
-        .foregroundStyle(.primary)
-*/
+
       Spacer()
       Image(systemName: viewModel.playMode == .play ? "pause" : "play.fill")
         .imageScale(.large)
@@ -448,8 +438,12 @@ struct TitleView: View {
             .sheet(isPresented: self.$showMenu)
           {
             if let _targetSound = self.targetSound {
-              SoundActionMenu(targetSound: _targetSound)
-                .presentationDetents([.medium])
+              if #available(iOS 16.0, *) {
+                SoundActionMenu(targetSound: _targetSound)
+                  .presentationDetents([.medium])
+              } else {
+                SoundActionMenu(targetSound: _targetSound)
+              }
             }
           }
         }

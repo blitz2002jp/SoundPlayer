@@ -10,7 +10,7 @@ import SwiftUI
 struct GroupListView: View {
   var viewTitle = "View Title"
   @EnvironmentObject var viewModel: ViewModel
-  @Binding var nextView: subViews1
+  @Binding var nextView: subViews
   var targetGroupInfos: [GroupInfo]
   @State private var isPresented = false
   
@@ -93,6 +93,15 @@ struct GroupListView: View {
         // アラートのメッセージ...
         Text("エラーが発生しました\n\(self.errorMessage)")
       }
+    }
+  }
+}
+
+
+struct nextTest2View: View {
+  var body: some View {
+    Button("return") {
+      
     }
   }
 }

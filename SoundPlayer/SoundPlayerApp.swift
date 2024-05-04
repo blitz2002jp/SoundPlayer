@@ -25,25 +25,25 @@ struct SoundPlayerApp: App {
           utility.DebugPrintSaveData(viewModel: viewModel)
 #endif
         }
+      // アクティブになった
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { notification in
-          print("アクティブになった。")
         }
+      // 非活性になるよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
-          print("非活性になるよ。")
           // 現在の情報保存
           viewModel.saveGroupInfos()
         }
+      // バックグランドになった。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { notification in
-          print("バックグランドになった。")
         }
+      // フォアグラウンドになるよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { notification in
-          print("フォアグラウンドになるよ。")
         }
+      // アプリ終了するよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification)) { notification in
-          print("アプリ終了するよ。")
         }
+      // 画面が回転したよ
         .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-          print("画面が回転したよ")
         }
     }
   }
@@ -72,7 +72,6 @@ class CustomAppDelegate: UIResponder, UIApplicationDelegate {
   }
   
   func applicationWillTerminate(_ application: UIApplication) {
-    print("")
     // YourAppからインスタンスを取得し、アプリ全体で使用可能な変数の値を取得してprint
     guard self.appInstance != nil else {
       print("Error: YourApp instance not found")
@@ -81,7 +80,6 @@ class CustomAppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   func applicationDidEnterBackground(_ application: UIApplication) {
-    print("")
       // アプリケーションがバックグラウンドに移行する直前に呼ばれる
       // ここでバックグラウンドに移行する直前の処理を行う
   }

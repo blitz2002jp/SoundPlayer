@@ -32,7 +32,7 @@ struct utility {
   private static let SANDBOX_DIRECRORY = "private"
   
   // 拡張子
-  private static let SOUND_FILE_EXTENSIONS = ["mp3", "m4a"]
+  private static let SOUND_FILE_EXTENSIONS = ["mp3", "m4a", "aif", "caf", "wav"]
 
   // ID2タグキー
   private static let ID3TAG_KEY_TITLE = "title"
@@ -435,7 +435,7 @@ struct utility {
   static func isPrivateMode() -> Bool {
     if let _documentDirectory = self.getDocumentDirectory() {
       
-      return FileManager.default.fileExists(atPath: _documentDirectory.appendingPathComponent(PRIVATE_FILE_NAME).path())
+      return FileManager.default.fileExists(atPath: _documentDirectory.appendingPathComponent(PRIVATE_FILE_NAME).path)
     }
     return false
   }
@@ -452,6 +452,18 @@ struct utility {
     
     return false
   }
+  
+#if DEBUG
+  static func clearData() {
+    UserDefaults.standard.removeObject(forKey: SELECTED_GROUP_TYPE)
+    UserDefaults.standard.removeObject(forKey: PLAYING_GROUP_TEXT)
+    UserDefaults.standard.removeObject(forKey: PLAYING_GROUP_TYPE)
+    UserDefaults.standard.removeObject(forKey: PLAYING_GROUP_TEXT)
+    UserDefaults.standard.removeObject(forKey: PLAYING_SOUND_TIME)
+    UserDefaults.standard.removeObject(forKey: PLAYING_SOUND_DURATION)
+    UserDefaults.standard.removeObject(forKey: PLAYING_SOUND_VOLUME)
+  }
+#endif
   
 #if DEBUG
   static func DebugPrintSaveData(viewModel: ViewModel) {

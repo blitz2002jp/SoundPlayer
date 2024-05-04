@@ -8,7 +8,7 @@
 import SwiftUI
 import AVFoundation
 
-enum subViews1: String{
+enum subViews: String{
   case topView
   case AllSoundView
   case folderView
@@ -18,12 +18,10 @@ enum subViews1: String{
 struct ContentView: View {
   @Environment(\.colorScheme) var xxcolorScheme
   @EnvironmentObject var viewModel: ViewModel
-  @State private var nextView: subViews1 = .topView
+  @State private var nextView: subViews = .topView
   @State private var showTestSheet = false
 
   var body: some View {
-    let textColor: Color = xxcolorScheme == .dark ? .white : .black
-
     switch nextView {
     case .topView:
       List {
@@ -49,9 +47,12 @@ struct ContentView: View {
 #if DEBUG
         HStack {
           Image(systemName: "wand.and.stars.inverse")
-          Button(action: { showTestSheet.toggle() })
+          Button(action: { self.showTestSheet.toggle() })
           { Text("テスト") }
             .foregroundStyle(.primary)
+            .sheet(isPresented: self.$showTestSheet) {
+              CreateTestDataView()
+            }
         }
 #endif
       }
@@ -63,13 +64,15 @@ struct ContentView: View {
       GroupListView(viewTitle: "プレイリスト", nextView: $nextView, targetGroupInfos: viewModel.playListInfos)
     }
     
-    // フッター
-    Fotter()
+    if self.viewModel.playingGroup != nil {
+      // フッター
+      Fotter()
+    }
   }
 }
 
 struct otherView: View {
-  @Binding var nextView: subViews1
+  @Binding var nextView: subViews
   
   var body: some View {
     Text("Other View")
