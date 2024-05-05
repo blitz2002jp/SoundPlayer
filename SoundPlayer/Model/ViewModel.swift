@@ -26,7 +26,7 @@ enum TimeFormat: String, Codable {
 }
 
 
-class ViewModel: ObservableObject, PlayerDelegate {
+class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   
   var emptyArtWork: Data?
   
@@ -142,6 +142,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
     
     // Playerデリゲート
     player.delegate = self
+    player.delegateEarphoneControl = self
     
     // イヤホン
     self.player.addRemoteCommandEvent()
@@ -153,9 +154,7 @@ class ViewModel: ObservableObject, PlayerDelegate {
             self.emptyArtWork = imageData
           }
       }
-
     }
-
   }
   
   /// 音声の選択フラグを設定
@@ -213,6 +212,42 @@ class ViewModel: ObservableObject, PlayerDelegate {
       _playingSound.currentTime = TimeInterval.zero
       self.playNextSound()
     }
+  }
+
+  // イヤホン操作のデリゲート(センターボタン)
+  func notifyEarphoneTogglePlayPause() {
+    if self.player.isPlaying {
+      self.player.pauseSound()
+    } else {
+      do {
+        try self.player.Play()
+      } catch {
+        print(error.localizedDescription)
+      }
+    }
+  }
+  // イヤホン操作のデリゲート(プレイボタン)
+  func notifyEarphonePlay() {
+    do {
+      try self.player.Play()
+    } catch {
+      print(error.localizedDescription)
+    }
+  }
+  
+  // イヤホン操作のデリゲート(ポーズボタン)
+  func notifyEarphonePause() {
+    self.player.pauseSound()
+  }
+  
+  // イヤホン操作のデリゲート(次へボタン)
+  func notifyEarphoneNextTrack() {
+    self.playNextSound()
+  }
+  
+  // イヤホン操作のデリゲート(前へボタン)
+  func notifyEarphonePrevTrack() {
+    self.playPrevSound()
   }
 
   /// デバイスに登録されているファイルからSoundInfoを作成する

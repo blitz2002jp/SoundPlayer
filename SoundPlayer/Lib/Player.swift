@@ -9,14 +9,23 @@ import Foundation
 import AVFoundation
 import MediaPlayer
 
+// 再生終了の通知
 protocol PlayerDelegate {
-  // 再生終了の通知
   func notifyTermination()
 }
 
+// 再生時間の通知
 protocol PlayerDelegateCurrentTime {
-  // 再生時間の通知
   func notifyCurrentTime(currentTime: TimeInterval)
+}
+
+// イヤホン操作の通知
+protocol EarphoneControlDelegate {
+   func notifyEarphoneTogglePlayPause()
+   func notifyEarphonePlay()
+   func notifyEarphonePause()
+   func notifyEarphoneNextTrack()
+   func notifyEarphonePrevTrack()
 }
 
 class Player: NSObject, AVAudioPlayerDelegate {
@@ -44,6 +53,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
   // 通知用デリゲート
   var delegate: PlayerDelegate?
   var delegateCurrentTime: PlayerDelegateCurrentTime?
+  var delegateEarphoneControl: EarphoneControlDelegate?
 
   // 外部アクセサリ(イヤホンなど)、システムコントロールのイベントへの応答定義
   func addRemoteCommandEvent() {
@@ -73,33 +83,45 @@ class Player: NSObject, AVAudioPlayerDelegate {
   // イヤホンのセンターボタンを押した時の処理
   func remoteTogglePlayPause(_ event: MPRemoteCommandEvent) {
     print("イヤホンのセンターボタンを押した時の処理")
+    if let dg = delegateEarphoneControl {
+      dg.notifyEarphoneTogglePlayPause()
+    }
     // （今回は再生中なら停止、停止中なら再生をおこなっています）
   }
   
   func remotePlay(_ event: MPRemoteCommandEvent) {
     // プレイボタンが押された時の処理
     print("プレイボタンが押された時の処理")
+    if let dg = delegateEarphoneControl {
+      dg.notifyEarphonePlay()
+    }
     // （今回は再生をおこなっています）
   }
   
   func remotePause(_ event: MPRemoteCommandEvent) {
     // ポーズボタンが押された時の処理
     print("ポーズが押された時の処理")
-    // （今回は停止をおこなっています）
+    if let dg = delegateEarphoneControl {
+      dg.notifyEarphonePause()
+    }
   }
   
   func remoteNextTrack(_ event: MPRemoteCommandEvent) {
     // 「次へ」ボタンが押された時の処理
-    // （略）
+    if let dg = delegateEarphoneControl {
+      dg.notifyEarphoneNextTrack()
+    }
   }
   
   func remotePrevTrack(_ event: MPRemoteCommandEvent) {
     // 「前へ」ボタンが押された時の処理
-    // （略）
+    if let dg = delegateEarphoneControl {
+      dg.notifyEarphonePrevTrack()
+    }
   }
   
   // Play
-  func Play(url: URL?, startTime: TimeInterval = TimeInterval.zero, volume: Float, isLoop: Bool = false) throws {
+  func Play(url: URL? = nil, startTime: TimeInterval = TimeInterval.zero, volume: Float = Float.zero, isLoop: Bool = false) throws {
     
     // バックグラウンド再生のために追加
     try AVAudioSession.sharedInstance().setActive(true)
@@ -117,6 +139,8 @@ class Player: NSObject, AVAudioPlayerDelegate {
         self.timer?.invalidate()
       }
       self.timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(timerEvent), userInfo: nil, repeats: true)
+    } else {
+      self.soundPlayer.play()
     }
   }
   

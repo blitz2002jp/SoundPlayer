@@ -85,5 +85,6 @@ struct SoundActionMenu: View {
         }
       }
     }
+    .padding([.leading, .trailing], 10)
   }
 }

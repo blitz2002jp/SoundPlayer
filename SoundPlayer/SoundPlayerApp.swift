@@ -20,13 +20,25 @@ struct SoundPlayerApp: App {
   var body: some Scene {
     WindowGroup {
       ContentView().environmentObject(viewModel)
-        .onAppear(){
+        .onAppear() {
 #if DEBUG
           utility.DebugPrintSaveData(viewModel: viewModel)
 #endif
         }
       // アクティブになった
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { notification in
+          // アプリの起動直後に現在再生対象の音声を一瞬再生し停止する（イヤホンのでの再生開始に対応するため）
+          // ◆◆　イヤホンの再生ボタンイベントはアプリで一度再生を開始しないと発火しない
+          if let _playingGroup = viewModel.playingGroup {
+            if let _playingSound = viewModel.getPlayingSound() {
+              do {
+                try viewModel.playSound(targetGroup: _playingGroup, targetSound: _playingSound)
+                viewModel.player.pauseSound()
+              } catch {
+                print(error.localizedDescription)
+              }
+            }
+          }
         }
       // 非活性になるよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
@@ -58,7 +70,7 @@ class CustomAppDelegate: UIResponder, UIApplicationDelegate {
 
   // アプリの起動完了(UIApplicationDelegateのメソッド)
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-    // YourAppのインスタンスを設定
+    // Appのインスタンスを設定
     self.appInstance = SoundPlayerApp()
 
     // バックグラウンド再生のために追加

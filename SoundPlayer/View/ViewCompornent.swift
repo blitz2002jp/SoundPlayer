@@ -211,10 +211,8 @@ struct TitleTimeInput: View {
   @State var showingAlert = false
   @State var selectedTitle = ""
   @State var inputTitle = ""
-  
   @State private var selectedValues = [0, 0]
-  let values1 = [0,1,2,3,4,5,6,7,8,9]
-  let values2 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
+  @State private var selectedPlayListIndex: Int? = nil
   
   var body: some View {
     if let _playingGroup = viewModel.playingGroup {
@@ -238,8 +236,15 @@ struct TitleTimeInput: View {
           
           Section(header: Text("プレイリスト名")) {
             
-            TextField("Title", text: self.$inputTitle)
-            
+//            TextField("Title", text: self.$inputTitle)
+
+            List(selection: $selectedPlayListIndex) {
+              ForEach(Array(self.viewModel.playListInfos.enumerated()), id: \.element.id) { index, item in
+                Text(item.text).tag(item.text).tag(index)
+              }
+            }
+            .environment(\.editMode, .constant(.active))
+            /*
             Picker("タイトル", selection: self.$selectedTitle) {
               ForEach(self.viewModel.playListInfos){ item in
                 Text(item.text).tag(item.text)
@@ -249,6 +254,7 @@ struct TitleTimeInput: View {
               self.inputTitle = item
             }
             .pickerStyle(WheelPickerStyle())
+ */
           }
 
           
@@ -425,20 +431,20 @@ struct TitleView: View {
           .font(.title3)
           .frame(maxWidth: .infinity) // Textを水平方向に拡張して中央寄せにする
           .multilineTextAlignment(.center) // 複数行の場合にも中央寄せにする
-        if self.showMenuIcon {
-          Image(systemName: "ellipsis.circle")
-            .onTapGesture {
-              self.showMenu = true
-            }
-            .sheet(isPresented: self.$showMenu)
-          {
-            if let _targetSound = self.targetSound {
-              if #available(iOS 16.0, *) {
-                SoundActionMenu(targetSound: _targetSound)
-                  .presentationDetents([.medium])
-              } else {
-                SoundActionMenu(targetSound: _targetSound)
-              }
+        Image(systemName: "ellipsis.circle")
+          .onTapGesture {
+            self.showMenu = true
+          }
+          .disabled(!self.showMenuIcon)
+          .opacity(self.showMenuIcon ? 1.0 : 0.0)
+          .sheet(isPresented: self.$showMenu)
+        {
+          if let _targetSound = self.targetSound {
+            if #available(iOS 16.0, *) {
+              SoundActionMenu(targetSound: _targetSound)
+                .presentationDetents([.medium])
+            } else {
+              SoundActionMenu(targetSound: _targetSound)
             }
           }
         }
