@@ -6,8 +6,8 @@
 //
 
 class PlayListInfo: GroupInfo {
-  init(text: String, soundInfos: [SoundInfo] = [SoundInfo](), repeatMode: RepeatMode = RepeatMode.repeateAll, comment: String = "", sortKey: Int = 0) {
-    super.init(groupType: GroupType.PlayList ,text: text, soundInfos: soundInfos, repeatMode: repeatMode, comment: comment, sortKey: sortKey)
+  init(text: String, soundInfos: [SoundInfo] = [SoundInfo](), comment: String = "", sortKey: Int = 0, isRandom: Bool = false) {
+    super.init(groupType: GroupType.PlayList ,text: text, soundInfos: soundInfos, comment: comment, sortKey: sortKey)
   }
   
   required init(from decoder: Decoder) throws {

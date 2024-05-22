@@ -10,19 +10,24 @@ import SwiftUI
 struct GroupActionMenu: View {
   @EnvironmentObject var viewModel: ViewModel
   @Environment(\.dismiss) var dismiss
-  @State private var showReNameDialog = false
+  @State private var showReNameAlert = false
+  @State private var showReNameAlert15 = false
   @State private var showDeleteAlert = false
   @State private var renameText = ""
+  @State private var okCancel: OkCancel = .cancel
   
   /// 操作対象Sound
-  var targetGroup: GroupInfo
+  var targetGroup: GroupInfo?
+
   /// 削除メッセージ
   var removeMessage: String = "削除しますか？"
   
   var body: some View {
     VStack {
-      TitleView(titleName: self.targetGroup.text, showMenuIcon: false)
-      
+      if let _targetGroup = self.targetGroup {
+        TitleView(title: _targetGroup.text, subTitle: "", targetGroup: targetGroup, targetSound: nil, trailingItem: .none)
+      }
+
       List {
         Section {
           HStack {
@@ -30,19 +35,46 @@ struct GroupActionMenu: View {
             
             Text("名称変更")
               .onTapGesture {
-                self.showReNameDialog.toggle()
+                if #available(iOS 16.0, *) {
+                  self.showReNameAlert.toggle()
+                } else {
+                  self.showReNameAlert15.toggle()
+                }
               }
-              .alert("名称変更", isPresented: self.$showReNameDialog) {
-                TextField("User ID", text: self.$renameText)
+              // iOS 16 以降の場合はAlertで名称変更する
+              .alert("名称変更", isPresented: self.$showReNameAlert) {
+                TextField("", text: self.$renameText)
                 Button("Cancel"){  }
                 Button("OK") {
                   do {
                     // GroupName 変更
-                    try self.viewModel.renameGroupName(targetGroup: self.targetGroup, newGroupName: self.renameText)
+                    if let _targetGroup = self.targetGroup {
+                      try self.viewModel.renameGroupName(targetGroup: _targetGroup, newGroupName: self.renameText)
+                      // 再表示
+                      viewModel.redraw()
+                    }
                   } catch {
                     print(error.localizedDescription)
                   }
                 }
+                .disabled(!self.viewModel.validationGroupName(text: self.renameText))
+              }
+              .sheet(isPresented: self.$showReNameAlert15, onDismiss: {
+                if self.okCancel == .ok {
+                  do {
+                    // GroupName 変更
+                    try self.viewModel.renameGroupName(targetGroup: self.targetGroup, newGroupName: self.renameText)
+                    
+                    self.okCancel = .ok
+                  } catch {
+                    print(error.localizedDescription)
+                  }
+                }
+                // 再表示
+                viewModel.redraw()
+
+              }) {
+                InputTextView(okCancel: self.$okCancel, title: "名称変更", targetGroup: self.targetGroup, inputText: self.$renameText)
               }
           }
           HStack {
@@ -57,6 +89,8 @@ struct GroupActionMenu: View {
                   do {
                     // 削除
                     try self.viewModel.removeGroup(targetGroup: targetGroup)
+                    // 再表示
+                    viewModel.redraw()
                   } catch {
                     print(error.localizedDescription)
                   }
@@ -68,8 +102,63 @@ struct GroupActionMenu: View {
         }
       }
       .onAppear() {
-        self.renameText = self.targetGroup.text
+        if let _targetGroup = self.targetGroup {
+          self.renameText = _targetGroup.text
+        }
       }
     }
+  }
+}
+
+struct InputTextView: View {
+  @EnvironmentObject var viewModel: ViewModel
+  @Environment(\.dismiss) var dismiss
+  @Binding var okCancel: OkCancel
+  var title: String = "テキスト"
+  /// 操作対象Sound
+  var targetGroup: GroupInfo?
+
+  @Binding var inputText: String
+  
+  var body: some View {
+    TitleView(title: self.title, subTitle: "", targetGroup: targetGroup, targetSound: nil, trailingItem: .none)
+    
+    Spacer()
+    
+    VStack {
+      TextField("", text: self.$inputText)
+        .onAppear() {
+          if let _targetGroup = self.targetGroup {
+            self.inputText = _targetGroup.text
+          }
+        }
+        .textFieldStyle(RoundedBorderTextFieldStyle())
+        .padding(.bottom, 50)
+      
+      HStack {
+        Spacer()
+        Button("Cancel") {
+          self.okCancel = .cancel
+          dismiss()
+        }
+        .frame(width: 170, height: 50) // 幅と高さを指定
+        .background(.blue)
+        .foregroundStyle(.primary)
+
+        Spacer()
+
+        Button("OK") {
+          self.okCancel = .ok
+          dismiss()
+        }
+        .frame(width: 170, height: 50) // 幅と高さを指定
+        .background(self.viewModel.validationGroupName(text: self.inputText) ? Color.blue : Color.gray) // 背景色を指定
+        .foregroundStyle(.white)
+        .disabled(!self.viewModel.validationGroupName(text: self.inputText))
+
+      }
+    }
+    .padding([.leading, .trailing], 20)
+    Spacer()
   }
 }

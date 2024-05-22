@@ -11,7 +11,7 @@
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
-		<string>SystemYellow</string>
+		<string>LaunchBackColor</string>
 		<key>UIImageName</key>
 		<string>LaunchImage</string>
 	</dict>

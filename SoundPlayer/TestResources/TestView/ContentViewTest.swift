@@ -9,6 +9,10 @@ struct CreateTestDataView: View {
 
   var body: some View {
     Spacer()
+    Button("Selected Sound") {
+      utility.selectedSoundCheck(viewModel: viewModel)
+    }
+    Spacer()
     Button("CreateTestData") {
       // 確認ダイアログ表示
       self.showingCreateDataAlert = true
@@ -77,25 +81,30 @@ struct CreateTestDataView: View {
     func create() {
       if let docFolder = utility.getDocumentDirectory() {
         
-        /// Documenフォルダのファイルを全て削除
-        self.cleanDocFolder(docUrl: docFolder)
-        
-        /// コピー(MP3ファイル)
+        // Documenフォルダ内のフォルダとファイルを全て削除
+        utility.clearData()
+
+        // コピー(MP3ファイル)
         self.copyMp3Files(docUrl: docFolder)
         
-        /// PlayList情報設定(ResourceにあるJsonファイルを実行環境に設定する)
+        // PlayList情報設定(ResourceにあるJsonファイルを実行環境に設定する)
         self.createPlayList()
         
-        // ViewMOdelに作成したテストデータをセット
-        print(self.viewModel.soundInfos[0].fileName)
-        self.viewModel.createSoundInfo()
-        self.viewModel.createFolderInfo()
-        self.viewModel.getPlayListInfo()
+        // ViewModelへ作成したテストデータをセット
+        self.viewModel.createDataModel()
+
+        // 保存
+        self.viewModel.saveGroupInfos()
+
+        // Privateモードファイル作成
+        utility.CreatePrivateModeFile()
+
       }
     }
     
-    /// Documenフォルダのファイルを全て削除
+    /// Documenフォルダ内のフォルダとファイルを全て削除
     private func cleanDocFolder(docUrl: URL) {
+/*
       do {
         let fileManager = FileManager.default
         
@@ -110,24 +119,25 @@ struct CreateTestDataView: View {
       } catch {
         print("フォルダの内容を削除できませんでした: \(error.localizedDescription)")
       }
+ */
     }
     
     /// コピー(MP3ファイル)
     private func copyMp3Files(docUrl: URL) {
-      let rootFileNames = ["001.mp3", "002.mp3", "003.mp3", "004.mp3"]
-      let wedFileNames = ["おまえ本当に大学出たのか.mp3", "ここをキャンプ地とする！.mp3", "トンネルだトンネルだ.mp3", "みっちゃん.mp3", "糸ようじ.mp3"]
+      let rootFileNames = ["S1.mp3", "S2.mp3"]
+      let subFolder = ["S3.mp3"]
       
       do {
         // コピー(Documentフォルダ直下に置くファイル)
         try self.copyMp3File(files: rootFileNames, to: docUrl)
         
         // Document/Wedenesdayフォルダ作成
-        let wedUrl = docUrl.appendingPathComponent("Wedenesday")
+        let wedUrl = docUrl.appendingPathComponent("SubFolder")
         let fileManager = FileManager.default
         try fileManager.createDirectory(at: wedUrl, withIntermediateDirectories: true, attributes: nil)
         
         // コピー(Document/Wedenesdayフォルダ直下に置くファイル)
-        try self.copyMp3File(files: wedFileNames, to: wedUrl)
+        try self.copyMp3File(files: subFolder, to: wedUrl)
         
       } catch {
         print("copyMp3Filesでエラー:\(error.localizedDescription)")
@@ -153,9 +163,10 @@ struct CreateTestDataView: View {
           // ファイルのデータを読み込む
           let jsonData = try Data(contentsOf: path)
         
-          if let _ = String(data: try Data(contentsOf: path), encoding: .utf8) {
-            print("")
+          if let _a = String(data: try Data(contentsOf: path), encoding: .utf8) {
+            print("\(_a.count)")
           }
+
           // JsonDataをPlayListInfo配列に変換
           let playListInfo = try JSONDecoder().decode([PlayListInfo].self, from: jsonData)
           

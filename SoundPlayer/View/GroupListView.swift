@@ -11,19 +11,29 @@ struct GroupListView: View {
   var viewTitle = "View Title"
   @EnvironmentObject var viewModel: ViewModel
   @Binding var nextView: subViews
-  var targetGroupInfos: [GroupInfo]
-  @State private var isPresented = false
+  
+  // 対象データ・タイプ
+  var targetGroupType: GroupType
+  
+  @State private var idx = -1
+  
+  // 対象データ
+  var targetGroupInfos: [GroupInfo] {
+    get {
+      if let _targetGroupInfos = viewModel.getGroupInfos(groupType: self.targetGroupType) {
+        return _targetGroupInfos
+      }
+      
+      return [GroupInfo]()
+    }
+  }
   
   // アラート表示SwitchとMessage
   @State private var isShowAlert = false
-  @State private var errorMessage = ""
-  
-  //
-  @State private var isEditing = false
   
   @State private var isActive = false
   
-  @State private var selectItemSoundList: GroupInfo?
+  @State private var selectItemGroup: GroupInfo?
   @State private var selectItemMenu: GroupInfo?
 
   var body: some View {
@@ -33,19 +43,19 @@ struct GroupListView: View {
           VStack {
             ForEach(self.targetGroupInfos, id: \.id) { item in
               HStack{
-                Text(item.text.count < 1 ? "Document" : item.text)
+                Text(getGroupName(groupInfo: item))
                   .lineLimit(1)
                   .padding([.leading, .trailing, .top, .bottom], 20)
                   .frame(maxWidth: .infinity, alignment: .leading)
                   .onTapGesture {
-                    self.selectItemSoundList = item
+                    self.selectItemGroup = item
                     isActive = true
                   }
-
                 if !(item is FullSoundInfo) {
                   Button(action: {
                     self.selectItemMenu = item
-                  }, label: {Image(systemName: "contextualmenu.and.cursorarrow")})
+                  }, label: {Image(systemName: "ellipsis")})
+                  .disabled(item.text == "")
                   .sheet(item: self.$selectItemMenu, onDismiss: {} )
                   { item in
                     if #available(iOS 16.0, *) {
@@ -56,12 +66,12 @@ struct GroupListView: View {
                     }
                   }
                 }
- 
+                
                 Button(action:{
                   do {
                     try self.viewModel.playGroup(targetGroupInfo: item)
                   } catch {
-                    self.errorMessage = error.localizedDescription
+                    print(error.localizedDescription)
                     self.isShowAlert = true
                   }
                 }, label: {
@@ -80,28 +90,50 @@ struct GroupListView: View {
           }))
         }
         .background(
-          NavigationLink(destination: SoundListView(targetGroup: self.selectItemSoundList, viewModel: _viewModel), isActive: $isActive) {
+          NavigationLink(destination: SoundListView(viewTitle: self.getGroupName(groupInfo:  self.selectItemGroup), targetGroup: self.selectItemGroup, viewModel: _viewModel), isActive: $isActive) {
             EmptyView()
           })
       }
-      .onAppear{
-      }
-      .alert("Error", isPresented: $isShowAlert) {
-        // ダイアログ内で行うアクション処理...
-        
-      } message: {
-        // アラートのメッセージ...
-        Text("エラーが発生しました\n\(self.errorMessage)")
-      }
+    }
+    .onAppear() {
+//      self.viewModel.createDataModel()
     }
   }
-}
-
-
-struct nextTest2View: View {
-  var body: some View {
-    Button("return") {
-      
+  
+  // Group名取得
+  func getGroupName(groupInfo: GroupInfo?) -> String {
+    if let _groupInfo = groupInfo {
+      if _groupInfo.groupType == .Folder {
+        if _groupInfo.text.count < 1 {
+          return "Document"
+        }
+      }
+      return _groupInfo.text
     }
+    return ""
   }
+  
+  #if DEBUG
+  private func getIndex(idx: Int) -> Int {
+    return idx + 1
+  }
+  
+  private func debug1(group: GroupInfo?) -> Int {
+    if var _group = group {
+      withUnsafePointer(to: &_group) { pointer in
+        utility.debugPrint(msg: "\(pointer)")
+      }
+    }
+    return 0
+  }
+  private func debug2(groups: [GroupInfo]) -> Int {
+    groups.forEach { item in
+      var _item = item
+      withUnsafePointer(to: &_item) { pointer in
+        utility.debugPrint(msg: "\(pointer)")
+      }
+    }
+    return 0
+  }
+  #endif
 }

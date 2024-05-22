@@ -32,6 +32,16 @@ class Player: NSObject, AVAudioPlayerDelegate {
   // Player
   private var soundPlayer:AVAudioPlayer!
   
+  // 現在再生時間
+  var currentTime: TimeInterval {
+    get {
+      if let _soundPlayer = self.soundPlayer {
+        return _soundPlayer.currentTime
+      }
+      return TimeInterval.zero
+    }
+  }
+  
   var isPlaying: Bool {
     get {
       if let _soundPlayer = self.soundPlayer {
@@ -82,7 +92,6 @@ class Player: NSObject, AVAudioPlayerDelegate {
   
   // イヤホンのセンターボタンを押した時の処理
   func remoteTogglePlayPause(_ event: MPRemoteCommandEvent) {
-    print("イヤホンのセンターボタンを押した時の処理")
     if let dg = delegateEarphoneControl {
       dg.notifyEarphoneTogglePlayPause()
     }
@@ -91,7 +100,6 @@ class Player: NSObject, AVAudioPlayerDelegate {
   
   func remotePlay(_ event: MPRemoteCommandEvent) {
     // プレイボタンが押された時の処理
-    print("プレイボタンが押された時の処理")
     if let dg = delegateEarphoneControl {
       dg.notifyEarphonePlay()
     }
@@ -100,7 +108,6 @@ class Player: NSObject, AVAudioPlayerDelegate {
   
   func remotePause(_ event: MPRemoteCommandEvent) {
     // ポーズボタンが押された時の処理
-    print("ポーズが押された時の処理")
     if let dg = delegateEarphoneControl {
       dg.notifyEarphonePause()
     }

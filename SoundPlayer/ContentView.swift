@@ -10,61 +10,71 @@ import AVFoundation
 
 enum subViews: String{
   case topView
-  case AllSoundView
+//  case AllSoundView
   case folderView
   case playListView
 }
 
 struct ContentView: View {
-  @Environment(\.colorScheme) var xxcolorScheme
   @EnvironmentObject var viewModel: ViewModel
   @State private var nextView: subViews = .topView
   @State private var showTestSheet = false
-
+  
+  @State private var textFieldValue = ""
+  @State private var shouldShowAlertTextField = false
+  
   var body: some View {
     switch nextView {
     case .topView:
       List {
         HStack {
-          Image(systemName: "internaldrive")
-          Button(action: { nextView = .AllSoundView })
-          { Text("全曲")}
-            .foregroundStyle(.primary)
-          
-        }
-        HStack {
           Image(systemName: "folder")
-          Button(action: { nextView = .folderView })
-          { Text("フォルダ") }
+          Button(action: {
+            // データモデル再作成
+            self.viewModel.createDataModel()
+
+            nextView = .folderView
+          })
+          { Text("全曲") }
             .foregroundStyle(.primary)
         }
         HStack {
           Image(systemName: "music.note.list")
-          Button(action: { nextView = .playListView })
+          Button(action: {
+            // データモデル再作成
+//            self.viewModel.createDataModel()
+
+            nextView = .playListView
+          })
           { Text("プレイリスト") }
             .foregroundStyle(.primary)
         }
-#if DEBUG
-        HStack {
-          Image(systemName: "wand.and.stars.inverse")
-          Button(action: { self.showTestSheet.toggle() })
-          { Text("テスト") }
-            .foregroundStyle(.primary)
-            .sheet(isPresented: self.$showTestSheet) {
-              CreateTestDataView()
-            }
+        
+        if utility.isPrivateMode() {
+          HStack {
+            Image(systemName: "wand.and.stars.inverse")
+            Button(action: { self.showTestSheet.toggle() })
+            { Text("テスト") }
+              .foregroundStyle(.primary)
+              .sheet(isPresented: self.$showTestSheet) {
+                CreateTestDataView()
+              }
+          }
         }
-#endif
       }
-    case .AllSoundView:
-      GroupListView(viewTitle: "全曲", nextView: $nextView, targetGroupInfos: viewModel.fullSoundInfos)
+      .onAppear() {
+//        utility.debugPrint(msg: "******* createDataModel (ContentView.onAppear)")
+        // データモデル再作成
+//        self.viewModel.createDataModel()
+      }
+
     case .folderView:
-      GroupListView(viewTitle: "フォルダ", nextView: $nextView, targetGroupInfos: viewModel.folderInfos)
+      GroupListView(viewTitle: "全曲", nextView: $nextView, targetGroupType: .Folder)
     case .playListView:
-      GroupListView(viewTitle: "プレイリスト", nextView: $nextView, targetGroupInfos: viewModel.playListInfos)
+      GroupListView(viewTitle: "プレイリスト", nextView: $nextView, targetGroupType: .PlayList)
     }
     
-    if self.viewModel.playingGroup != nil {
+    if self.viewModel.getPlayingSound() != nil {
       // フッター
       Fotter()
     }

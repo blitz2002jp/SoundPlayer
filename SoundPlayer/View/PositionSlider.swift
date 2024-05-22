@@ -11,17 +11,22 @@ import SwiftUI
 struct PositionSlider: View, PlayerDelegateCurrentTime {
   @EnvironmentObject var viewModel: ViewModel
   @StateObject private var sliderViewModel = SliderViewModel()
-  var playingSound: SoundInfo
+  
+  private var targetSound: SoundInfo {
+    get {
+      if let _playingSound = viewModel.getPlayingSound() {
+        return _playingSound
+      }
+      return SoundInfo()
+    }
+  }
   
   // Playerからの再生時間通知デリゲート
   func notifyCurrentTime(currentTime: TimeInterval) {
     self.sliderViewModel.tim = currentTime
     
     // 音声情報に現在再生時間をセット
-    playingSound.currentTime = currentTime
-    
-    // 現在再生時間の保存
-    utility.savePlayingSoundTime(currentTime: utility.timeIntervalToString(timeFormat: .HHMMSS, timeInterval: currentTime))
+    self.targetSound.currentTime = currentTime
   }
   
   var body: some View {
@@ -33,13 +38,13 @@ struct PositionSlider: View, PlayerDelegateCurrentTime {
             viewModel.adjustPlayTime(seconds: 10)
           }
         
-        Slider(value: self.$sliderViewModel.tim, in: 0.0...Double(playingSound.duration()) + 1, step: 0.01)
+        Slider(value: self.$sliderViewModel.tim, in: 0.0...Double(targetSound.duration()) + 1, step: 0.01)
         {}onEditingChanged: { isEditing in
-          playingSound.currentTime = self.sliderViewModel.tim
+          targetSound.currentTime = self.sliderViewModel.tim
           viewModel.setPlayTime(time: self.sliderViewModel.tim)
         }
         .onAppear() {
-          self.sliderViewModel.tim = playingSound.currentTime
+          self.sliderViewModel.tim = targetSound.currentTime
         }
         Image(systemName: "gobackward.10")
           .font(.title3)

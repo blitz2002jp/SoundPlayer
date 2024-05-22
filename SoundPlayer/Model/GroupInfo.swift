@@ -22,8 +22,6 @@ class GroupInfo: Codable, Identifiable{
   var groupType: GroupType                      // グループタイプ
   var text: String                              // 表示名
   var soundInfos: [SoundInfo]                   // 音声情報
-  var repeatMode: RepeatMode                    // 繰り返し
-  var isRandom = false                          // ランダム再生
   var comment: String                           // コメント
   var sortKey: Int                              // ソートキー
   
@@ -45,19 +43,20 @@ class GroupInfo: Codable, Identifiable{
         self.soundInfos.forEach { item in
           if _soundInfo.path == item.path {
             item.isSelected = true
+            utility.debugPrint(msg: "*******(TRUE)\(item.path?.absoluteString ?? "")")
           } else {
             item.isSelected = false
+            utility.debugPrint(msg: "*******(FALES)\(item.path?.absoluteString ?? "")")
           }
         }
       }
     }
   }
   
-  init(groupType: GroupType, text: String, soundInfos: [SoundInfo] = [SoundInfo](), repeatMode: RepeatMode = RepeatMode.repeateAll, comment: String = "", sortKey: Int = 0) {
+  init(groupType: GroupType, text: String, soundInfos: [SoundInfo] = [SoundInfo](), comment: String = "", sortKey: Int = 0) {
     self.groupType = groupType
     self.text = text
     self.soundInfos = soundInfos
-    self.repeatMode = repeatMode
     self.comment = comment
     self.sortKey = sortKey
   }
@@ -65,19 +64,17 @@ class GroupInfo: Codable, Identifiable{
   // Json Decode用のinit(Json Decoderから呼ばれる)
   required init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    groupType = try container.decode(GroupType.self, forKey: .groupType)
-    text = try container.decode(String.self, forKey: .text)
-    soundInfos = try container.decode([SoundInfo].self, forKey: .soundInfos)
-    repeatMode = try container.decode(RepeatMode.self, forKey: .repeatMode)
-    comment = try container.decode(String.self, forKey: .comment)
-    sortKey = try container.decode(Int.self, forKey: .sortKey)
+    self.groupType = try container.decode(GroupType.self, forKey: .groupType)
+    self.text = try container.decode(String.self, forKey: .text)
+    self.soundInfos = try container.decode([SoundInfo].self, forKey: .soundInfos)
+    self.comment = try container.decode(String.self, forKey: .comment)
+    self.sortKey = try container.decode(Int.self, forKey: .sortKey)
   }
   
   enum CodingKeys: String, CodingKey {
     case groupType
     case text
     case soundInfos
-    case repeatMode
     case comment
     case sortKey
   }
@@ -101,22 +98,11 @@ class GroupInfo: Codable, Identifiable{
   
   // フォルダ名の変更を行う(ただし、FolderInfoの場合）
   func renameFolder(newFolderName: String) throws {
-    if self is FolderInfo {
-      
-      if let _folder = self.folder {
-        let oldFolder = _folder.path
-        let newFolder = _folder.deletingLastPathComponent().appendingPathComponent(newFolderName).path
-        try FileManager.default.moveItem(atPath: oldFolder, toPath: newFolder)
-      }
-    }
+    self.text = newFolderName
   }
   
   // フォルダの削除を行う(ただし、FolderInfoの場合）
   func removeFolder() throws {
-    if self is FolderInfo {
-      if let _folder = self.folder {
-        try FileManager.default.removeItem(at: _folder)
-      }
-    }
   }
 }
+

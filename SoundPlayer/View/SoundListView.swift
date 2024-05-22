@@ -9,14 +9,9 @@ import SwiftUI
 
 /// SoundInfo List
 struct SoundListView: View {
+  var viewTitle = "View Title"
   var targetGroup: GroupInfo?
   @EnvironmentObject var viewModel: ViewModel
-  
-  @State private var isPresented = false
-  
-  // アラート表示SwitchとMessage
-  @State private var isShowAlert: Bool = false
-  @State private var errorMessage = ""
   
   @State private var sliderValSpeed: Double = 1.0   // イメージEffect Speed
   @State private var speakerEffect = false
@@ -28,22 +23,25 @@ struct SoundListView: View {
       LazyVStack {
         if let _targetGroup = targetGroup {
           ForEach(_targetGroup.soundInfos, id: \.id) { item in
+#if DEBUG
+              let _ = self.debug1(soundInfo: item)
+#endif
             HStack {
               if item.isSelected {
                 if viewModel.isPlayingSound(groupInfo: _targetGroup, soundInfo: item) {
                   HStack(spacing: 2) {
-                    utility.getPlayingImage(isPlaying: true, isSelected: true, item: item)
+                    utility.getPlayingImage(isPlaying: true, item: item)
                     self.getArtWorkImage(soundInfo: item)
                   }
                 } else {
                   HStack(spacing: 2) {
-                    utility.getPlayingImage(isPlaying: false, isSelected: true, item: item)
+                    utility.getPlayingImage(isPlaying: false, item: item)
                     self.getArtWorkImage(soundInfo: item)
                   }
                 }
               } else {
                 HStack(spacing: 2) {
-                  utility.getPlayingImage(isPlaying: false, isSelected: false, item: item)
+                  utility.getPlayingImage(isPlaying: false, item: item)
                   self.getArtWorkImage(soundInfo: item)
                 }
               }
@@ -54,39 +52,37 @@ struct SoundListView: View {
               
               Button(action: {
                 self.selectedItem = item
-              }, label: {Image(systemName: "contextualmenu.and.cursorarrow")})
+              }, label: {Image(systemName: "ellipsis")})
               .sheet(item: self.$selectedItem, onDismiss: {
               })
               { item in
                 if #available(iOS 16.0, *) {
-                  SoundActionMenu(targetSound: item)
+                  SoundActionMenu(targetGroup: _targetGroup, targetSound: item)
                     .presentationDetents([.medium])
                 } else {
-                  SoundActionMenu(targetSound: item)
+                  SoundActionMenu(targetGroup: _targetGroup, targetSound: item)
                 }
               }
             }
-            
             .padding([.leading, .trailing], 20)
             .onTapGesture {
               do {
                 try viewModel.playSound(targetGroup: _targetGroup,  targetSound: item)
               } catch {
-                self.isShowAlert = true
-                self.errorMessage = error.localizedDescription
+                print(error.localizedDescription)
               }
             }
-          }
-          .alert("Error", isPresented: $isShowAlert) {
-            // ダイアログ内で行うアクション処理...
-            
-          } message: {
-            // アラートのメッセージ...
-            Text("エラーが発生しました\n\(self.errorMessage)")
           }
         }
       }
     }
+    .navigationBarTitle(self.viewTitle)
+    .onAppear() {
+//      utility.debugPrint(msg: "******* createDataModel (SoundListView.onAppear)")
+      // データモデル再作成
+//      self.viewModel.createDataModel()
+    }
+    
   }
   
   func getArtWorkImage(soundInfo: SoundInfo) -> some View {
@@ -103,5 +99,15 @@ struct SoundListView: View {
       .aspectRatio(contentMode: .fit)
       .frame(width: 30, height: 30)
   }
+  
+#if DEBUG
+  private func debug1(soundInfo: SoundInfo) -> Int{
+    utility.debug3(soundInfo: soundInfo, tag: "SoundListView 1234567")
+    return 0
+  }
+private func getIndex(idx: Int) -> Int {
+  return idx + 1
+}
+#endif
 }
 

@@ -6,12 +6,19 @@
 //
 
 class FullSoundInfo: GroupInfo {
-  init(text: String, soundInfos: [SoundInfo] = [SoundInfo](), repeatMode: RepeatMode = RepeatMode.repeateAll, comment: String = "", sortKey: Int = 0) {
-    super.init(groupType: GroupType.FullSound ,text: text, soundInfos: soundInfos, repeatMode: repeatMode, comment: comment, sortKey: sortKey)
+  init(text: String, soundInfos: [SoundInfo] = [SoundInfo](), comment: String = "", sortKey: Int = 0, isRandom: Bool = false) {
+    super.init(groupType: GroupType.FullSound ,text: text, soundInfos: soundInfos, comment: comment, sortKey: sortKey)
   }
   
   required init(from decoder: any Decoder) throws {
     try super.init(from: decoder)
   }
   
+  override func renameFolder(newFolderName: String) throws {
+    
+  }
+  
+  override func removeFolder() throws {
+    
+  }
 }

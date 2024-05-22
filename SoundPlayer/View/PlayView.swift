@@ -16,10 +16,11 @@ struct PlayView: View {
   
   var body: some View {
     VStack {
-      TitleView(titleName: viewModel.getPlayingSound()?.fileNameNoExt ?? "", groupName: viewModel.playingGroup?.text ?? "", targetSound: viewModel.getPlayingSound())
-      Spacer()
       if let _playingGroup = viewModel.playingGroup {
         if let _playingSound = viewModel.getPlayingSound() {
+          TitleView(title: _playingSound.fileNameNoExt, subTitle: _playingGroup.text, targetGroup: viewModel.playingGroup, targetSound: viewModel.getPlayingSound(), trailingItem: .menu)
+          Spacer()
+
           if let _artWork = utility.getArtWorkImage(imageData: _playingSound.artWork) {
             _artWork
               .resizable()
@@ -29,21 +30,26 @@ struct PlayView: View {
           
           Spacer()
           // 再生位置
-          PositionSlider(playingSound: _playingSound)
+          PositionSlider()
           Spacer()
           
           HStack {
             Spacer()
+            RandomButton()
+/*
             Image(systemName: "shuffle")
               .font(.title3)
               .background(self.randomBackColor)
               .onTapGesture {
-                _playingGroup.isRandom = _playingGroup.isRandom ? false : true
-                self.randomBackColor = self.getRandomBackColor(idRandom: _playingGroup.isRandom)
+                var randomMode = utility.getRandomMode()
+                randomMode.toggle()
+                utility.saveRandomMode(randomMode: randomMode)
+                self.randomBackColor = self.getRandomBackColor(idRandom: randomMode)
               }
               .onAppear() {
-                self.randomBackColor = self.getRandomBackColor(idRandom: _playingGroup.isRandom)
+                self.randomBackColor = self.getRandomBackColor(idRandom: utility.getRandomMode())
               }
+ */
             Spacer()
             Image(systemName: "backward.fill")
               .font(.title3)
@@ -67,22 +73,14 @@ struct PlayView: View {
                 viewModel.playNextSound()
               }
             Spacer()
-            Image(systemName: "infinity")
-              .font(.title3)
-              .background(self.repeateBackColor)
-              .onTapGesture {
-                _playingGroup.repeatMode = _playingGroup.repeatMode == .repeateAll ? .noRepeate : .repeateAll
-                self.repeateBackColor = getRepeateColor(repeatMode: _playingGroup.repeatMode)
-              }
-              .onAppear() {
-                self.repeateBackColor = getRepeateColor(repeatMode: _playingGroup.repeatMode)
-              }
+            RepeatButton()
             Spacer()
           }
           
           Spacer()
           // ボリューム
           VolumeSlider(sliderVal: $volume)
+          Spacer()
         } else { //_playingSound
         }
       } else { //_playingGroup
@@ -92,12 +90,9 @@ struct PlayView: View {
   }
   
   func getRandomBackColor(idRandom: Bool) -> Color {
-    return idRandom ? .primary.opacity(0.2) : .clear
+    return idRandom ? .yellow.opacity(0.5) : .clear
   }
   func getRepeateColor(repeatMode: RepeatMode) -> Color {
-    if repeatMode != .repeateAll {
-      return .primary.opacity(0.2)
-    }
-    return .clear
+    return repeatMode == .repeateAll ? Color.yellow.opacity(0.5) : .clear
   }
 }

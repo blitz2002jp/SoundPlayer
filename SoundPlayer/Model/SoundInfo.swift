@@ -10,7 +10,7 @@ import AVFoundation
 import SwiftUI
 
 class SoundInfo: Codable, Identifiable {
-  
+
   private var _artWork: Data?
   var artWork: Data? {
     get {
@@ -24,7 +24,29 @@ class SoundInfo: Codable, Identifiable {
     }
   }
   
-  var isSelected = false
+  var isExsists: Bool {
+    get {
+      if let _fullPath = self.fullPath?.path {
+        return FileManager.default.fileExists(atPath: _fullPath)
+      }
+      return false
+    }
+  }
+  
+  private var _isSelected = false
+  var isSelected: Bool {
+    get {
+      return self._isSelected
+    }
+    set(val) {
+#if DEBUG
+      if val {
+//        print("getPlayingImage _isSelected \(self.fileNameNoExt)")
+      }
+#endif
+      self._isSelected = val
+    }
+  }
   var foldersName: String = ""                      // フォルダ名(Documentフォルダより下位のフォルダ)
   var fileName: String = ""                         // ファイル名
   
@@ -51,7 +73,6 @@ class SoundInfo: Codable, Identifiable {
     }
   }
   var volume: Float = Float.zero                    // ボリューム
-  var repeatMode: RepeatMode = .noRepeate           // 繰り返し
   var sortKey: Int = Int.zero                       // ソートキー
   // フルパス（ドキュメントフォルダを含むパス)
   var fullPath: URL? {
@@ -85,9 +106,11 @@ class SoundInfo: Codable, Identifiable {
       let removeDirName = URL(fileURLWithPath: docDir.path)
       
       ///  フォルダ名の設定
-      // 先頭からDocumentフォルダまでを除去してfoldersNameにセット
-      self.foldersName = fileName.deletingLastPathComponent().absoluteString.replacingOccurrences(of: removeDirName.absoluteString, with: "").replacingOccurrences(of: "/", with: "")
-      
+      // 先頭からDocumentフォルダまでを除去してfoldersNameにセット(%エンコーディングを変換する）
+      if let _foldersName = fileName.deletingLastPathComponent().absoluteString.replacingOccurrences(of: removeDirName.absoluteString, with: "").replacingOccurrences(of: "/", with: "").removingPercentEncoding {
+        self.foldersName = _foldersName
+      }
+
       // Art Work
       self.artWork = utility.getArtWorkData(url: self.fullPath)
     }
@@ -101,28 +124,14 @@ class SoundInfo: Codable, Identifiable {
     res.fileName = self.fileName                          // ファイル名
     res.text = self.text                              // 表示
     res.comment = self.comment                           // コメント
-//    res.currentTimeStr = self.currentTimeStr                  // 現在再生時間
     res.currentTime = self.currentTime                  // 現在再生時間
     res.startTimeStr = self.startTimeStr                    // 再生開始時間
     res.volume = self.volume                             // ボリューム
-    res.repeatMode = self.repeatMode                    // 繰り返し
     res.sortKey = self.sortKey                              // ソートキー
     res.artWork = self.artWork
     
     return res
   }
-  
-  /*
-   ///  Equal
-   static func ==(lhs: SoundInfo, rhs: SoundInfo) -> Bool {
-   return lhs.id == rhs.id
-   }
-   */
-  
-  //  func getFolderName() -> String {
-  //    return ""
-  //    return self.foldersName.joined(separator: "/")
-  //  }
   
   /// 再生時間
   func duration() -> TimeInterval{
@@ -137,3 +146,5 @@ class SoundInfo: Codable, Identifiable {
     return TimeInterval.zero
   }
 }
+
+

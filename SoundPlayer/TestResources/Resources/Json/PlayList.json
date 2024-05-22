@@ -1,46 +1,51 @@
 [
   {
-    "text": "おまえ本当に大学・・・",
+    "id" : "",
+    "text": "PlayList1",
     "soundInfos": [
       {
-        "parentText" : "おまえ本当に大学・・・",
         "sortKey": 0,
-        "fileName": "おまえ本当に大学出たのか.mp3",
-        "playMode": "play",
-        "isSelected": false,
-        "repeatMode": "noRepeate",
+        "fileName": "S1.mp3",
+        "_isSelected": false,
         "text": "",
         "comment": "",
         "currentTime": 0.0,
-        "startTimeStr": "0:3:32",
-        "foldersName": "Wedenesday",
+        "startTimeStr": "0:00:00",
+        "foldersName": "",
+        "volume": 0
+      },
+      {
+        "sortKey": 0,
+        "fileName": "S2.mp3",
+        "_isSelected": false,
+        "text": "",
+        "comment": "",
+        "currentTime": 0.0,
+        "startTimeStr": "0:00:00",
+        "foldersName": "",
         "volume": 0
       }
     ],
-    "repeatMode": "repeateAll",
     "comment": "",
     "sortKey": 0,
     "groupType": "PlayList"
   },
   {
-    "text": "ここをキャンプ地",
+    "id" : "",
+    "text": "PlayList2",
     "soundInfos": [
       {
-        "parentText" : "ここをキャンプ地",
         "sortKey": 0,
-        "fileName": "ここをキャンプ地とする！.mp3",
-        "playMode": "play",
-        "isSelected": false,
-        "repeatMode": "noRepeate",
+        "fileName": "S3.mp3",
+        "_isSelected": false,
         "text": "",
         "comment": "",
         "currentTime": 0.0,
-        "startTimeStr": "0:3:32",
-        "foldersName": "Wedenesday",
+        "startTimeStr": "0:0:0",
+        "foldersName": "SubFolder",
         "volume": 0
       }
     ],
-    "repeatMode": "repeateAll",
     "comment": "",
     "sortKey": 0,
     "groupType": "PlayList"

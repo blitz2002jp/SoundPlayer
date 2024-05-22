@@ -11,19 +11,22 @@ struct SoundActionMenu: View {
   @EnvironmentObject var viewModel: ViewModel
   @Environment(\.dismiss) var dismiss
   @State private var titleTime: TitleTimeModel = TitleTimeModel(title: "")
-  @State private var saveViewResult: ResultSaveView = .cancel
+  @State private var saveViewResult: OkCancel = .cancel
   @State private var showAddPlaylistDialod = false
   @State private var showDeleteAlert = false
-  /// 操作対象Sound
-  var targetSound: SoundInfo
+  /// 操作対象group Sound
+  var targetGroup: GroupInfo?
+  var targetSound: SoundInfo?
   /// 削除メッセージ
   var removeMessage: String = "削除しますか？"
   
-  
   var body: some View {
     VStack {
-      TitleView(titleName: self.targetSound.fileNameNoExt, groupName: viewModel.playingGroup?.text ?? "", targetSound: viewModel.getPlayingSound(), showMenuIcon: false)
-      
+      if let _targetGroup = targetGroup {
+        if let _targetSound = targetSound {
+          TitleView(title: _targetSound.fileNameNoExt, subTitle: _targetGroup.text, targetGroup: targetGroup, targetSound: targetSound, trailingItem: .none)
+        }
+      }
       List {
         Section {
           HStack {
@@ -37,29 +40,13 @@ struct SoundActionMenu: View {
                 self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
                 self.showAddPlaylistDialod.toggle()
               }
-              .sheet(isPresented: $showAddPlaylistDialod, onDismiss: {
-                if self.saveViewResult == .ok {
-                  // 追加するSoundInfoの作成
-                  let addSoundInfo = self.targetSound.copy()
-                  addSoundInfo.currentTime = utility.stringToTimeInterval(HHMMSS: "\(self.titleTime.strHours):\(self.titleTime.strMinutes):\(self.titleTime.strSeconds)")
-                  
-                  // PlayList作成
-                  var playList = viewModel.playListInfos.first(where: {$0.text == self.titleTime.title})
-                  if playList == nil {
-                    playList = PlayListInfo(text: self.titleTime.title)
-                    viewModel.playListInfos.append(playList!)
-                  }
-                  playList?.soundInfos.append(addSoundInfo)
-                  
-                  utility.saveGroupInfo(outputInfos: viewModel.playListInfos)
-                }
-              })
+              .sheet(isPresented: $showAddPlaylistDialod)
             {
               if #available(iOS 16.0, *) {
-                TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
+                TitleTimeInput(model: self.titleTime, targetGroup: targetGroup, targetSound: targetSound)
                   .presentationDetents([.medium])
               } else {
-                TitleTimeInput(model: self.titleTime, result: self.$saveViewResult)
+                TitleTimeInput(model: self.titleTime, targetGroup: targetGroup, targetSound: targetSound)
               }
             }
           }
@@ -74,7 +61,7 @@ struct SoundActionMenu: View {
                 }
                 Button("OK"){
                   // Sound削除
-                  self.viewModel.removeSound(targetSound: targetSound)
+                  self.viewModel.removeSound(targetGroup: targetGroup, targetSound: targetSound)
                   // 再描画
                   self.viewModel.redraw()
                   // ダイアログClose
@@ -83,8 +70,8 @@ struct SoundActionMenu: View {
               }
           }
         }
+        .padding([.leading, .trailing], 10)
       }
     }
-    .padding([.leading, .trailing], 10)
   }
 }
