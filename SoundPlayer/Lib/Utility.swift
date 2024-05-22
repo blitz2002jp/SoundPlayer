@@ -492,8 +492,8 @@ struct utility {
     }
   }
   
-#if DEBUG
   static func selectedSoundCheck(viewModel: ViewModel) {
+#if DEBUG
     if let _grpText = self.getPlayingGroupText() {
       utility.debugPrint(msg: "Save Group:\(_grpText)")
     } else {
@@ -508,9 +508,11 @@ struct utility {
         utility.debugPrint(msg: "Sound:")
       }
     }
+#endif
   }
   
   static func clearData() {
+#if DEBUG
 /*
     UserDefaults.standard.removeObject(forKey: SELECTED_GROUP_TYPE)
     UserDefaults.standard.removeObject(forKey: PLAYING_GROUP_TEXT)
@@ -550,11 +552,13 @@ struct utility {
      // 再生モード保存キー
      UserDefaults.standard.removeObject(forKey: REPEAT_MODE)                      // リピートモード
      UserDefaults.standard.removeObject(forKey: RANDOM_MODE)                      // ランダムモード
+#endif
   }
   
   
   
   static func DebugPrintSaveData(viewModel: ViewModel) {
+#if DEBUG
     self.debugPrint(msg: "----------------------DEBUG PRINT START-------------------------------------------")
     // フォルダ
     if let _docUrl = self.getDocumentDirectory() {
@@ -580,39 +584,49 @@ struct utility {
     }
     
     self.debugPrint(msg: "----------------------DEBUG PRINT END  -------------------------------------------")
+#endif
   }
   
   static func debug1(groupInfos: [GroupInfo], tag: String) {
+#if DEBUG
     groupInfos.forEach { item in
       self.debug2(groupInfo: item, tag: tag)
     }
+#endif
   }
   static func debug2(groupInfo: GroupInfo, tag: String) {
+#if DEBUG
     var _groupInfo = groupInfo
     
     self.debugPrint(msg: "\(tag)  \(groupInfo.text) \(self.getPointer(of: groupInfo))")
     groupInfo.soundInfos.forEach { item in
       self.debug3(soundInfo: item, tag: tag)
     }
+#endif
   }
   static func debug3(soundInfo: SoundInfo, tag: String) {
+#if DEBUG
     if soundInfo.isSelected {
       self.debugPrint(msg: "\(tag)  \(soundInfo.fileNameNoExt) ")
     }
+#endif
   }
   
   static func getPointer<T>(of value: T) -> String {
+#if DEBUG
     var _val = value
 //    var res: Any
     withUnsafePointer(to: &_val) { pointer in
       self.debugPrint(msg: "\(pointer)")
     }
+#endif
     return ""
   }
   
   static func debugPrint(msg: String) {
+#if DEBUG
     print(msg)
-  }
 #endif
-  
+  }
+
 }
