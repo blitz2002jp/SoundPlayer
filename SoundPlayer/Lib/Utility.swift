@@ -628,5 +628,15 @@ struct utility {
     print(msg)
 #endif
   }
+  
+  static func removePrivateModeFile() {
+    do {
+      if let _docDir = utility.getDocumentDirectory() {
+        try FileManager.default.removeItem(at: _docDir.appendingPathComponent(utility.PRIVATE_FILE_NAME))
+      }
+    } catch {
+      print(error.localizedDescription)
+    }
+  }
 
 }

@@ -9,6 +9,10 @@ struct CreateTestDataView: View {
 
   var body: some View {
     Spacer()
+    Button("Private Mode解除") {
+      utility.removePrivateModeFile()
+    }
+    Spacer()
     Button("Selected Sound") {
       utility.selectedSoundCheck(viewModel: viewModel)
     }
