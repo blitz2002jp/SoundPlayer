@@ -7,6 +7,9 @@
 
 import Foundation
 
+#warning("検索結果一覧がスクロールしない")
+#warning("ランダムに配列取得は「randomElement」でできる")
+
 #warning("Remove Sound 、　Rename Sound、Rename Group")
 
 /*

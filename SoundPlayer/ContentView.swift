@@ -76,7 +76,7 @@ struct ContentView: View {
     
     if self.viewModel.getPlayingSound() != nil {
       // フッター
-      Fotter()
+      Footer()
     }
   }
 }

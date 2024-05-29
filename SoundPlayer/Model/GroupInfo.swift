@@ -14,16 +14,12 @@ enum GroupType: String, Codable {
   case PlayList
 }
 
-class MyClass {
-    var property: Int = 42
-}
-
 class GroupInfo: Codable, Identifiable{
-  var groupType: GroupType                      // グループタイプ
-  var text: String                              // 表示名
-  var soundInfos: [SoundInfo]                   // 音声情報
-  var comment: String                           // コメント
-  var sortKey: Int                              // ソートキー
+  var groupType: GroupType = .FullSound                     // グループタイプ
+  var text = ""                             // 表示名
+  var soundInfos = [SoundInfo]()                   // 音声情報
+  var comment = ""                           // コメント
+  var sortKey = 0                              // ソートキー
   
   var folder: URL? {
     get {
@@ -61,6 +57,19 @@ class GroupInfo: Codable, Identifiable{
     self.sortKey = sortKey
   }
   
+  init(){
+  }
+
+  func copy(copyTo: GroupInfo) -> GroupInfo {
+    copyTo.groupType = self.groupType
+    copyTo.text = self.text
+    self.soundInfos.forEach { item in copyTo.soundInfos.append(item.copy())}
+    copyTo.comment = self.comment
+    copyTo.sortKey = self.sortKey
+
+    return copyTo
+  }
+
   // Json Decode用のinit(Json Decoderから呼ばれる)
   required init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -104,5 +113,48 @@ class GroupInfo: Codable, Identifiable{
   // フォルダの削除を行う(ただし、FolderInfoの場合）
   func removeFolder() throws {
   }
+  
+  /*
+   //PlayList
+   /// Sound Infoの削除
+   override func removeSoundFile(removeSound: SoundInfo) {
+     // 参照の削除
+     self.soundInfos.removeAll(where: {$0.fullPath == removeSound.fullPath})
+   }
+
+   // Full Sound
+   override func renameFolder(newFolderName: String) throws {
+     
+   }
+   
+   override func removeFolder() throws {
+     
+   }
+
+   
+   
+   // Folder
+   
+   /// Folder名変更
+   override func renameFolder(newFolderName: String) throws {
+     if let _folder = self.folder {
+       let oldFolder = _folder.path
+       let newFolder = _folder.deletingLastPathComponent().appendingPathComponent(newFolderName).path
+       try FileManager.default.moveItem(atPath: oldFolder, toPath: newFolder)
+
+       try super.renameFolder(newFolderName: newFolderName)
+     }
+   }
+   
+   ///  Folder削除
+   override func removeFolder() throws {
+     if let _folder = self.folder {
+       try super.removeFolder()
+       try FileManager.default.removeItem(at: _folder)
+     }
+   }
+
+   
+   */
 }
 

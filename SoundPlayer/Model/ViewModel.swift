@@ -284,8 +284,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     self.folderInfos.removeAll()
     
     // URLのパスコンポーネントを取得
-    self.soundInfos.forEach{
-      item in
+    self.soundInfos.forEach { item in
       let copyItem = item.copy()
       if let folder = self.folderInfos.first(where: {$0.text == item.foldersName}){
         folder.soundInfos.append(copyItem)
@@ -573,6 +572,118 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     }
     return false
   }
+  func searchSounds(searchText: String) -> [GroupInfo] {
+    var res = [GroupInfo]()
+    res.append(contentsOf: self.searchSounds(targetGroups: self.folderInfos, searchText: searchText) as! [FolderInfo])
+    res.append(contentsOf: self.searchSounds(targetGroups: self.playListInfos, searchText: searchText) as! [PlayListInfo])
+    
+    return res
+  }
+
+  private func searchSounds(targetGroups: [GroupInfo], searchText: String) -> [GroupInfo] {
+    var res = [GroupInfo]()
+
+    targetGroups.forEach { itemGrp in
+      let matchedSounds = self.searchSounds(searchText: searchText, targetGroup: itemGrp)
+      if matchedSounds.count > 0 {
+        var cop = GroupInfo()
+        switch itemGrp.groupType {
+        case .Folder:
+          cop = FolderInfo()
+          break
+        case .PlayList:
+          cop = PlayListInfo()
+          break
+        case .FullSound:
+          break
+        }
+        // GroupInfoのコピー
+        let copyGrp = itemGrp.copy(copyTo: cop)
+        
+        // コピーで作成されたSoundInfoを空にする
+        copyGrp.soundInfos.removeAll()
+        
+        // 検索されたSoundをコピー
+        matchedSounds.forEach { itemSound in
+//          copyGrp.soundInfos.append(itemSound.copy())
+          copyGrp.soundInfos.append(itemSound)
+        }
+
+        res.append(copyGrp)
+      }
+    }
+    return res
+  }
+  /*
+  func searchSounds(searchText: String) -> [GroupInfo] {
+    var grp = [GroupInfo]()
+
+    self.folderInfos.forEach { itemGrp in
+      let matchedSounds = self.searchSounds(searchText: searchText, targetGroup: itemGrp)
+      if matchedSounds.count > 0 {
+        // GroupInfoのコピー
+        let copyGrp = itemGrp.copy()
+        
+        // コピーで作成されたSoundInfoを空にする
+        copyGrp.soundInfos.removeAll()
+        
+        // 検索されたSoundをコピー
+        matchedSounds.forEach { itemSound in
+          copyGrp.soundInfos.append(itemSound.copy())
+        }
+
+        grp.append(copyGrp)
+      }
+    }
+/*
+      if let matchedSounds = self.searchSounds(searchText: searchText, targetGroup: itemGrp) {
+        let copyGrp = itemGrp.copy()
+        // コピーしたSoundを空にする
+        copyGrp.soundInfos = matchedSounds.map(itemGrp.copy())
+      }
+        a.forEach { itemSnd in
+          copyGrp.soundInfos.append(itemSnd.copy())
+        }
+      }
+    }
+ */
+      
+      
+/*
+    self.playListInfos.forEach { item in
+      res.append(contentsOf: self.searchSounds(searchText: searchText, targetGroup: item))
+    }
+*/
+    return sounds
+  }
+   */
+  
+  func searchSounds(searchText: String, targetGroup: GroupInfo) -> [SoundInfo] {
+    var res = [SoundInfo]()
+    targetGroup.soundInfos.forEach { item in
+      if item.fileNameNoExt.contains(searchText) {
+        res.append(item)
+      }
+    }
+    
+    return res
+  }
+  
+  func getArtWorkImage(soundInfo: SoundInfo) -> some View {
+    var image: Image
+    
+    if let _image = utility.getArtWorkImage(imageData: soundInfo.artWork) {
+      image = _image
+    } else {
+      image = Image(systemName: "clear")
+    }
+    
+    return image
+      .resizable()
+      .aspectRatio(contentMode: .fit)
+      .frame(width: 30, height: 30)
+  }
+
   
   // 再描画
   func redraw() {

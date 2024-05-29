@@ -38,6 +38,7 @@
 		5899ADEF2BFC608600AC075D /* S1.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5899ADEC2BFC608600AC075D /* S1.mp3 */; };
 		5899ADF02BFC608600AC075D /* S2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5899ADED2BFC608600AC075D /* S2.mp3 */; };
 		5899ADF12BFC608600AC075D /* S3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5899ADEE2BFC608600AC075D /* S3.mp3 */; };
+		5899AE292C01903000AC075D /* SearchSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5899AE282C01903000AC075D /* SearchSounds.swift */; };
 		58F70DB12BE60F19003F6B73 /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F70DB02BE60F19003F6B73 /* ToDo.swift */; };
 /* End PBXBuildFile section */
 
@@ -94,6 +95,7 @@
 		5899ADEC2BFC608600AC075D /* S1.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = S1.mp3; sourceTree = "<group>"; };
 		5899ADED2BFC608600AC075D /* S2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = S2.mp3; sourceTree = "<group>"; };
 		5899ADEE2BFC608600AC075D /* S3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = S3.mp3; sourceTree = "<group>"; };
+		5899AE282C01903000AC075D /* SearchSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSounds.swift; sourceTree = "<group>"; };
 		58F70DB02BE60F19003F6B73 /* ToDo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -272,6 +274,7 @@
 				586C100A2BE0A991000BAD9E /* SoundActionMenu.swift */,
 				586C100C2BE1D1BC000BAD9E /* GroupActionMenu.swift */,
 				583088022BF072820004999F /* TitleTimeInput.swift */,
+				5899AE282C01903000AC075D /* SearchSounds.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -423,6 +426,7 @@
 				583088032BF072820004999F /* TitleTimeInput.swift in Sources */,
 				586C100F2BE1F71F000BAD9E /* CustomDefine.swift in Sources */,
 				5894E4612BA56F350014C60E /* GroupListView.swift in Sources */,
+				5899AE292C01903000AC075D /* SearchSounds.swift in Sources */,
 				586C100B2BE0A991000BAD9E /* SoundActionMenu.swift in Sources */,
 				58F70DB12BE60F19003F6B73 /* ToDo.swift in Sources */,
 				58729EE32BABD63D00FB28BB /* FullSoundInfo.swift in Sources */,
@@ -606,7 +610,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -638,7 +642,7 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

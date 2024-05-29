@@ -386,7 +386,7 @@ struct utility {
     }
     return Image(systemName: "cat")
   }
-  
+
   static func getPlayingImage(isPlaying: Bool, item: SoundInfo) -> some View {
     if isPlaying {
       return Image(systemName: "speaker.zzz")
@@ -491,6 +491,8 @@ struct utility {
       fm.createFile(atPath: path.appendingPathComponent(self.PRIVATE_FILE_NAME).path, contents: nil)
     }
   }
+  
+  
   
   static func selectedSoundCheck(viewModel: ViewModel) {
 #if DEBUG
@@ -638,5 +640,4 @@ struct utility {
       print(error.localizedDescription)
     }
   }
-
 }
