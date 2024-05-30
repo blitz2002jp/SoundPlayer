@@ -122,6 +122,7 @@ class SoundInfo: Codable, Identifiable {
   func copy() -> SoundInfo{
     let res = SoundInfo()
     res.isSelected = self.isSelected
+    res.isSearched = self.isSearched
     res.foldersName = self.foldersName                     // フォルダ名(Documentフォルダより下位のフォルダ)
     res.fileName = self.fileName                          // ファイル名
     res.text = self.text                              // 表示
