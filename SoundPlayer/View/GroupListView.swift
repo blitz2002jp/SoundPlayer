@@ -111,8 +111,15 @@ struct GroupListView: View {
       return _groupInfo.text
     }
     return ""
+    /*
+     if let _groupInfo = groupInfo {
+     return _groupInfo.text
+     }
+     
+     return ""
+     */
   }
-  
+
   #if DEBUG
   private func getIndex(idx: Int) -> Int {
     return idx + 1

@@ -31,18 +31,18 @@ struct SoundListView: View {
                 if viewModel.isPlayingSound(groupInfo: _targetGroup, soundInfo: item) {
                   HStack(spacing: 2) {
                     utility.getPlayingImage(isPlaying: true, item: item)
-                    self.getArtWorkImage(soundInfo: item)
+                    viewModel.getArtWorkImage(soundInfo: item)
                   }
                 } else {
                   HStack(spacing: 2) {
                     utility.getPlayingImage(isPlaying: false, item: item)
-                    self.getArtWorkImage(soundInfo: item)
+                    viewModel.getArtWorkImage(soundInfo: item)
                   }
                 }
               } else {
                 HStack(spacing: 2) {
                   utility.getPlayingImage(isPlaying: false, item: item)
-                  self.getArtWorkImage(soundInfo: item)
+                  viewModel.getArtWorkImage(soundInfo: item)
                 }
               }
               Text(item.text == "" ? item.fileNameNoExt : item.text)
@@ -77,29 +77,8 @@ struct SoundListView: View {
       }
     }
     .navigationBarTitle(self.viewTitle)
-    .onAppear() {
-//      utility.debugPrint(msg: "******* createDataModel (SoundListView.onAppear)")
-      // データモデル再作成
-//      self.viewModel.createDataModel()
-    }
-    
   }
-  
-  func getArtWorkImage(soundInfo: SoundInfo) -> some View {
-    var image: Image
-    
-    if let _image = utility.getArtWorkImage(imageData: soundInfo.artWork) {
-      image = _image
-    } else {
-      image = Image(systemName: "clear")
-    }
-    
-    return image
-      .resizable()
-      .aspectRatio(contentMode: .fit)
-      .frame(width: 30, height: 30)
-  }
-  
+
 #if DEBUG
   private func debug1(soundInfo: SoundInfo) -> Int{
     utility.debug3(soundInfo: soundInfo, tag: "SoundListView 1234567")

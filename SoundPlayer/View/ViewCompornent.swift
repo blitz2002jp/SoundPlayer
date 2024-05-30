@@ -140,13 +140,19 @@ struct VolumeSlider: View {
   }
 }
 
-struct Fotter: View {
+struct Footer: View {
   @EnvironmentObject var viewModel: ViewModel
-  @State var isShowSheet = false
-  
+  @State private var showPlayViewSheet = false
+  @State private var showSearchSheet = false
+
   var body: some View {
     HStack {
-      Button(action: { self.isShowSheet = true })
+      Button(action: { self.showSearchSheet = true}, label: {
+        Image(systemName: "magnifyingglass")
+          .foregroundStyle(.black)
+      })
+        .padding(.leading, 20)
+      Button(action: { self.showPlayViewSheet = true })
       {
         Text("\(viewModel.getPlayingSound()?.fileNameNoExt ?? "")")
         .font(.footnote)
@@ -171,7 +177,7 @@ struct Fotter: View {
         .imageScale(.large)
         .padding(.trailing, 10)
     }
-    .sheet(isPresented: $isShowSheet, onDismiss: {
+    .sheet(isPresented: self.$showPlayViewSheet, onDismiss: {
     }) {
       if #available(iOS 16.0, *) {
         PlayView()
@@ -179,6 +185,10 @@ struct Fotter: View {
       } else {
         PlayView()
       }
+    }
+    .sheet(isPresented: self.$showSearchSheet , onDismiss: {
+    }) {
+      SearchSounds()
     }
     .frame(height: 40)
     .background(

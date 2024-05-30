@@ -9,7 +9,15 @@ class PlayListInfo: GroupInfo {
   init(text: String, soundInfos: [SoundInfo] = [SoundInfo](), comment: String = "", sortKey: Int = 0, isRandom: Bool = false) {
     super.init(groupType: GroupType.PlayList ,text: text, soundInfos: soundInfos, comment: comment, sortKey: sortKey)
   }
+
+  override init() {
+    super.init()
+  }
   
+  func copy() -> FolderInfo {
+    return super.copy(copyTo: FolderInfo()) as! FolderInfo
+  }
+
   required init(from decoder: Decoder) throws {
     try super.init(from: decoder)
   }

@@ -33,6 +33,8 @@ class SoundInfo: Codable, Identifiable {
     }
   }
   
+  var isSearched = false
+  
   private var _isSelected = false
   var isSelected: Bool {
     get {

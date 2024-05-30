@@ -11,6 +11,14 @@ class FolderInfo: GroupInfo {
     super.init(groupType: GroupType.Folder ,text: text, soundInfos: soundInfos, comment: comment, sortKey: sortKey)
   }
   
+  override init() {
+    super.init()
+  }
+  
+  func copy() -> FolderInfo {
+    return super.copy(copyTo: FolderInfo()) as! FolderInfo
+  }
+
   required init(from decoder: any Decoder) throws {
     try super.init(from: decoder)
   }

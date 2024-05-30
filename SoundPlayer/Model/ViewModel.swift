@@ -284,8 +284,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     self.folderInfos.removeAll()
     
     // URLのパスコンポーネントを取得
-    self.soundInfos.forEach{
-      item in
+    self.soundInfos.forEach { item in
       let copyItem = item.copy()
       if let folder = self.folderInfos.first(where: {$0.text == item.foldersName}){
         folder.soundInfos.append(copyItem)
@@ -573,6 +572,43 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     }
     return false
   }
+  
+  func SearchSound(searchText: String) {
+    // FolderInfoの検索
+    self.folderInfos.forEach { item in
+      self.SearchSound(targetGroup: item, searchText: searchText)
+    }
+    
+    // PlayListの検索
+    self.playListInfos.forEach { item in
+      self.SearchSound(targetGroup: item, searchText: searchText)
+    }
+  }
+  
+  func SearchSound(targetGroup: GroupInfo, searchText: String) {
+    targetGroup.soundInfos.forEach { item in
+      item.isSearched = false
+      if item.fileNameNoExt.contains(searchText) {
+        item.isSearched = true
+      }
+    }
+  }
+
+  func getArtWorkImage(soundInfo: SoundInfo) -> some View {
+    var image: Image
+    
+    if let _image = utility.getArtWorkImage(imageData: soundInfo.artWork) {
+      image = _image
+    } else {
+      image = Image(systemName: "clear")
+    }
+    
+    return image
+      .resizable()
+      .aspectRatio(contentMode: .fit)
+      .frame(width: 30, height: 30)
+  }
+
   
   // 再描画
   func redraw() {
