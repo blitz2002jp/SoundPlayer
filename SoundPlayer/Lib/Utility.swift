@@ -35,6 +35,9 @@ struct utility {
   private static let REPEAT_MODE = "REPEAT_MODE"                      // リピートモード
   private static let RANDOM_MODE = "RANDOM_MODE"                      // ランダムモード
   
+  // 検索キーワード保存キー
+  private static let SEARCH_KEYWORD = "SEARCH_KEYWORD"
+  
   // SoundBoxフォルダ
   private static let SANDBOX_DIRECRORY = "private"
   
@@ -287,6 +290,18 @@ struct utility {
     UserDefaults.standard.set(volume , forKey: PLAYING_SOUND_VOLUME)
   }
   
+  // 検索キーワード保存
+  static func saveSearchKeyword(searchKeyword: String) {
+    UserDefaults.standard.set(searchKeyword, forKey: SEARCH_KEYWORD)
+  }
+  // 検索キーワード取得
+  static func getSearchKeyword() -> String {
+    if let res = UserDefaults.standard.string(forKey: SEARCH_KEYWORD) {
+      return res
+    }
+    return ""
+  }
+
   // 現在の音量の取得
   static func getPlayingSoundVolume() -> Float {
     return UserDefaults.standard.float(forKey: PLAYING_SOUND_VOLUME)
