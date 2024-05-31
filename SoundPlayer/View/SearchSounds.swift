@@ -32,8 +32,10 @@ struct SearchSounds: View {
                 TextField("検索キーワード", text: self.$searchText)
               }
             })
-            .onChange(of: searchText) { oldState, newState in
+            .onChange(of: searchText) { newState in
               viewModel.SearchSound(searchText: newState)
+//            .onChange(of: searchText) { oldState, newState in
+//              viewModel.SearchSound(searchText: newState)
               
               // 検索キーワード保存
               utility.saveSearchKeyword(searchKeyword: newState)

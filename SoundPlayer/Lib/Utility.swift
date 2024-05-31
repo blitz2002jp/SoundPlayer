@@ -646,6 +646,15 @@ struct utility {
 #endif
   }
   
+  static func funcTime(_ log: String, action: () -> Void) {
+#if DEBUG
+    let startDate = Date()
+    action()
+    let endDate = Date()
+    print("\(log) \(endDate.timeIntervalSince(startDate))")
+#endif
+  }
+  
   static func removePrivateModeFile() {
     do {
       if let _docDir = utility.getDocumentDirectory() {

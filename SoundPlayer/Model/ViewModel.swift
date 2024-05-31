@@ -144,10 +144,10 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   
   init() {
     utility.debugPrint(msg: "******* createDataModel (ViewModel.init)")
+    
     // データモデル作成
     self.createDataModel()
-    
-    
+
     // Playerデリゲート
     player.delegate = self
     player.delegateEarphoneControl = self
@@ -167,6 +167,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   
   /// 音声の選択フラグを設定
   func setSelectedSound(newGroupInfos: [GroupInfo]) {
+    /*
     if newGroupInfos.count > 0 {
       var oldGroupInfos: [GroupInfo]? = nil
       
@@ -186,6 +187,31 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
               if let _targetSound = newItem.soundInfos.first(where: {$0.path?.absoluteString == oldSound.path?.absoluteString}) {
                 _targetSound.isSelected = oldSound.isSelected
                 _targetSound.currentTime = oldSound.currentTime
+              }
+            }
+          }
+        }
+      }
+    }
+     */
+    if newGroupInfos.count > 0 {
+      var oldGroupInfos: [GroupInfo]? = nil
+      
+      if newGroupInfos[0].groupType == .FullSound {
+        oldGroupInfos = utility.getSaveFullSoundInfo()
+      } else if newGroupInfos[0].groupType == .Folder {
+        oldGroupInfos = utility.getSaveFolderInfo()
+      } else if newGroupInfos[0].groupType == .PlayList {
+        oldGroupInfos = utility.getPlayListInfo()
+      }
+      
+      if let _oldFullSoundInfos = oldGroupInfos {
+        _oldFullSoundInfos.forEach { itemGrp in
+          if let selectedSound = itemGrp.soundInfos.first(where: {$0.isSelected}) {
+            if let findedGrp = newGroupInfos.first(where: {$0.text == itemGrp.text}) {
+              if let findedSnd = findedGrp.soundInfos.first(where: {$0.fullPath?.absoluteString == selectedSound.fullPath?.absoluteString}) {
+                findedSnd.isSelected = true
+                findedSnd.currentTime = selectedSound.currentTime
               }
             }
           }
