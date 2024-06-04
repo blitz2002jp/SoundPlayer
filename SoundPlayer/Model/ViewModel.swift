@@ -36,6 +36,9 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   var folderInfos = [FolderInfo]()
   var playListInfos = [PlayListInfo]()
   
+  var folderInfos_2 = [ListType]()
+  var playListInfos_2 = [ListType]()
+  
   
   var volome: Float {
     get {
@@ -136,7 +139,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     createSoundInfo()
     createFolderInfo()
     self.playListInfos = utility.getPlayListInfo().sorted { $0.sortKey < $1.sortKey }
-
+    
     // 音声の選択フラグを設定
     self.setSelectedSound(newGroupInfos: self.fullSoundInfos)
     self.setSelectedSound(newGroupInfos: self.folderInfos)
@@ -147,7 +150,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     
     // データモデル作成
     self.createDataModel()
-
+    
     // Playerデリゲート
     player.delegate = self
     player.delegateEarphoneControl = self
@@ -168,31 +171,31 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   /// 音声の選択フラグを設定
   func setSelectedSound(newGroupInfos: [GroupInfo]) {
     /*
-    if newGroupInfos.count > 0 {
-      var oldGroupInfos: [GroupInfo]? = nil
-      
-      if newGroupInfos[0].groupType == .FullSound {
-        oldGroupInfos = utility.getSaveFullSoundInfo()
-      } else if newGroupInfos[0].groupType == .Folder {
-        oldGroupInfos = utility.getSaveFolderInfo()
-      } else if newGroupInfos[0].groupType == .PlayList {
-        oldGroupInfos = utility.getPlayListInfo()
-      }
-      
-      if let _oldFullSoundInfos = oldGroupInfos {
-        _oldFullSoundInfos.forEach { oldItem in
-          // 一致するグループを取得
-          if let newItem = newGroupInfos.first( where: { $0.text == oldItem.text }) {
-            oldItem.soundInfos.forEach { oldSound in
-              if let _targetSound = newItem.soundInfos.first(where: {$0.path?.absoluteString == oldSound.path?.absoluteString}) {
-                _targetSound.isSelected = oldSound.isSelected
-                _targetSound.currentTime = oldSound.currentTime
-              }
-            }
-          }
-        }
-      }
-    }
+     if newGroupInfos.count > 0 {
+     var oldGroupInfos: [GroupInfo]? = nil
+     
+     if newGroupInfos[0].groupType == .FullSound {
+     oldGroupInfos = utility.getSaveFullSoundInfo()
+     } else if newGroupInfos[0].groupType == .Folder {
+     oldGroupInfos = utility.getSaveFolderInfo()
+     } else if newGroupInfos[0].groupType == .PlayList {
+     oldGroupInfos = utility.getPlayListInfo()
+     }
+     
+     if let _oldFullSoundInfos = oldGroupInfos {
+     _oldFullSoundInfos.forEach { oldItem in
+     // 一致するグループを取得
+     if let newItem = newGroupInfos.first( where: { $0.text == oldItem.text }) {
+     oldItem.soundInfos.forEach { oldSound in
+     if let _targetSound = newItem.soundInfos.first(where: {$0.path?.absoluteString == oldSound.path?.absoluteString}) {
+     _targetSound.isSelected = oldSound.isSelected
+     _targetSound.currentTime = oldSound.currentTime
+     }
+     }
+     }
+     }
+     }
+     }
      */
     if newGroupInfos.count > 0 {
       var oldGroupInfos: [GroupInfo]? = nil
@@ -316,6 +319,26 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
         folder.soundInfos.append(copyItem)
       } else {
         self.folderInfos.append(FolderInfo(text: item.foldersName, soundInfos: [copyItem]))
+      }
+    }
+    
+    self.folderInfos_2.removeAll()
+    // URLのパスコンポーネントを取得
+    self.soundInfos.forEach { item in
+      if let _docPath = utility.getDocumentDirectory() {
+        if let _path = item.fullPath {
+          let __path = _path.path.replacingOccurrences(of: _docPath.path, with: "")
+          let folders = __path.split(separator: "/")
+          folders.enumerated().forEach { index, itemFolder in
+            if folders.count - 1 <= index {
+            } else {
+            }
+          }
+//          __path.pathComponents.forEach { itemFolder in
+//            utility.debugPrint(msg: itemFolder)
+//            let a = ListInfo(type: .Group, text: itemFolder)
+//          }
+        }
       }
     }
   }

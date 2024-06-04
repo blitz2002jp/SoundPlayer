@@ -39,6 +39,7 @@
 		5899ADF02BFC608600AC075D /* S2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5899ADED2BFC608600AC075D /* S2.mp3 */; };
 		5899ADF12BFC608600AC075D /* S3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 5899ADEE2BFC608600AC075D /* S3.mp3 */; };
 		5899AE292C01903000AC075D /* SearchSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5899AE282C01903000AC075D /* SearchSounds.swift */; };
+		5899AE332C0AB69500AC075D /* ListInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5899AE322C0AB69500AC075D /* ListInfo.swift */; };
 		58F70DB12BE60F19003F6B73 /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F70DB02BE60F19003F6B73 /* ToDo.swift */; };
 /* End PBXBuildFile section */
 
@@ -96,6 +97,7 @@
 		5899ADED2BFC608600AC075D /* S2.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = S2.mp3; sourceTree = "<group>"; };
 		5899ADEE2BFC608600AC075D /* S3.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = S3.mp3; sourceTree = "<group>"; };
 		5899AE282C01903000AC075D /* SearchSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSounds.swift; sourceTree = "<group>"; };
+		5899AE322C0AB69500AC075D /* ListInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListInfo.swift; sourceTree = "<group>"; };
 		58F70DB02BE60F19003F6B73 /* ToDo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -258,6 +260,7 @@
 				58729EE22BABD63D00FB28BB /* FullSoundInfo.swift */,
 				58729EE42BABD67000FB28BB /* FolderInfo.swift */,
 				58729EE62BABD6A100FB28BB /* PlayListInfo.swift */,
+				5899AE322C0AB69500AC075D /* ListInfo.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -423,6 +426,7 @@
 				5894E4742BA56FA80014C60E /* ViewCompornent.swift in Sources */,
 				58729EE52BABD67000FB28BB /* FolderInfo.swift in Sources */,
 				5894E46D2BA56F820014C60E /* SoundInfo.swift in Sources */,
+				5899AE332C0AB69500AC075D /* ListInfo.swift in Sources */,
 				583088032BF072820004999F /* TitleTimeInput.swift in Sources */,
 				586C100F2BE1F71F000BAD9E /* CustomDefine.swift in Sources */,
 				5894E4612BA56F350014C60E /* GroupListView.swift in Sources */,
