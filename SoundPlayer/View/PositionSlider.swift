@@ -32,10 +32,10 @@ struct PositionSlider: View, PlayerDelegateCurrentTime {
   var body: some View {
     VStack {
       HStack {
-        Image(systemName: "goforward.10")
+        Image(systemName: "gobackward.10")
           .font(.title3)
           .onTapGesture {
-            viewModel.adjustPlayTime(seconds: 10)
+            viewModel.adjustPlayTime(seconds: -10)
           }
         
         Slider(value: self.$sliderViewModel.tim, in: 0.0...Double(targetSound.duration()) + 1, step: 0.01)
@@ -46,10 +46,10 @@ struct PositionSlider: View, PlayerDelegateCurrentTime {
         .onAppear() {
           self.sliderViewModel.tim = targetSound.currentTime
         }
-        Image(systemName: "gobackward.10")
+        Image(systemName: "goforward.10")
           .font(.title3)
           .onTapGesture {
-            viewModel.adjustPlayTime(seconds: -10)
+            viewModel.adjustPlayTime(seconds: 10)
           }
       }
       HStack {

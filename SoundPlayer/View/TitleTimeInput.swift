@@ -11,7 +11,7 @@ struct TitleTimeInput: View {
   @EnvironmentObject var viewModel: ViewModel
   @State var model: TitleTimeModel
   @Environment(\.dismiss) var dismiss
-  @State private var selectedValues = [0, 0]
+  @State private var selectedValues = [0, 0, 0]
   @State private var selectedPlayList: String = ""
   @State private var pickerItems: [String]?
   @State private var showInputNewNameArert = false
@@ -104,6 +104,7 @@ struct TitleTimeInput: View {
                     Text("\(index)")
                   }
                 }
+                .disabled(hours < 1)
                 .pickerStyle(WheelPickerStyle())
                 .frame(width: 70, height: 100) // ピッカーの高さを指定
                 Text(":")
@@ -117,7 +118,7 @@ struct TitleTimeInput: View {
                 .frame(width: 70, height: 100) // ピッカーの高さを指定
                 Text(":")
                 
-                Picker(selection: $selectedValues[1], label: Text("")) {
+                Picker(selection: $selectedValues[2], label: Text("")) {
                   ForEach(0..<60) { index in
                     Text("\(index)")
                   }
@@ -133,6 +134,7 @@ struct TitleTimeInput: View {
             if let _targetPlayList = self.viewModel.playListInfos.first(where: {$0.text == self.selectedPlayList}) {
               if let _targetSound = self.targetSound {
                 let copySound = _playingSound.copy()
+                copySound.startTimeStr = String("\(selectedValues[0]):\(selectedValues[1]):\(selectedValues[2])")
                 copySound.isSelected = false
                 _targetPlayList.soundInfos.append(copySound)
                 // 保存
