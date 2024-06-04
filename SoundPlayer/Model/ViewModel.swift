@@ -362,7 +362,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   
   /// 再生時間調整
   func adjustPlayTime(seconds: Double) {
-    let newTime = self.player.getPlayTime() + seconds
+    let newTime = self.player.getCurrentTime() + seconds
     if newTime <= self.playingSoundDuration {
       self.player.setPlayPosition(position: newTime)
     }
@@ -492,8 +492,6 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   // 音声の現在再生時間
   func getPlayingTime() -> TimeInterval {
     if let _selectedSound = self.getPlayingSound() {
-      utility.debugPrint(msg: "getCurrentTime:\(_selectedSound.currentTimeStr)")
-      utility.debugPrint(msg: "\(_selectedSound.fileNameNoExt) : \(_selectedSound.currentTimeStr)")
       return _selectedSound.currentTime
     }
     return TimeInterval.zero
