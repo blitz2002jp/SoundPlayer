@@ -141,6 +141,9 @@ class Player: NSObject, AVAudioPlayerDelegate {
     // バックグラウンド再生のために追加
     try AVAudioSession.sharedInstance().setActive(true)
     
+    // Player(音声の中断を通知する設定)
+    self.setupNotifications()
+
     if let _url = url {
       self.soundPlayer = try AVAudioPlayer(contentsOf: _url)
       self.soundPlayer.currentTime = startTime
@@ -241,7 +244,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
   
 
   /// 音声の中断を通知する設定
-  func setupNotifications() {
+  private func setupNotifications() {
     // Get the default notification center instance.
     let nc = NotificationCenter.default
     nc.addObserver(self,
@@ -251,7 +254,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
   }
   
   /// 音声の中断通知ハンドリング
-  @objc func handleInterruption(notification: Notification) {
+  @objc private func handleInterruption(notification: Notification) {
     // To implement.
     guard let userInfo = notification.userInfo,
           let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,

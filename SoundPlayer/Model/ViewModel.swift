@@ -154,8 +154,6 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate, Play
     self.player.delegateEarphoneControl = self
     self.player.delegateInterruption = self
     
-    // Player(音声の中断を通知する設定)
-    self.player.setupNotifications()
     // イヤホン
     self.player.addRemoteCommandEvent()
     
