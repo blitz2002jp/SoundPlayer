@@ -26,16 +26,21 @@ enum TimeFormat: String, Codable {
 }
 
 
-class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
+class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate, PlayerDelegateInterruption {
   
   var emptyArtWork: Data?
-  
+
+  // Player
+  var player = Player()
+
   // 音声データ
   var soundInfos = [SoundInfo]()
   var fullSoundInfos = [FullSoundInfo]()
   var folderInfos = [FolderInfo]()
   var playListInfos = [PlayListInfo]()
   
+  // 設定データ
+  var settingInfo = SettingModel()
   
   var volome: Float {
     get {
@@ -125,15 +130,13 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
       return .pause
     }
   }
-  
-  
-  // Player
-  var player = Player()
-  
+
   // データモデル作成
   func createDataModel() {
-    utility.debugPrint(msg: "******* createDataModel")
-    createSoundInfo()
+    // 設定情報取得
+    self.settingInfo = utility.getSettingInfo()
+    utility.funcTime("funcTime:createSoundInfo", action: {createSoundInfo()})
+    //createSoundInfo()
     createFolderInfo()
     self.playListInfos = utility.getPlayListInfo().sorted { $0.sortKey < $1.sortKey }
 
@@ -143,15 +146,16 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   }
   
   init() {
-    utility.debugPrint(msg: "******* createDataModel (ViewModel.init)")
-    
     // データモデル作成
     self.createDataModel()
 
     // Playerデリゲート
-    player.delegate = self
-    player.delegateEarphoneControl = self
+    self.player.delegate = self
+    self.player.delegateEarphoneControl = self
+    self.player.delegateInterruption = self
     
+    // Player(音声の中断を通知する設定)
+    self.player.setupNotifications()
     // イヤホン
     self.player.addRemoteCommandEvent()
     
@@ -239,14 +243,19 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     return false
   }
   
-  // 再生終了の通知 デリゲート
+  /// 再生終了の通知 デリゲート
   func notifyTermination() {
     if let _playingSound = self.getPlayingSound() {
       _playingSound.currentTime = TimeInterval.zero
-      
-      
       self.playNextSound()
     }
+  }
+  
+  /// 再生中断開始デリゲート
+  func notifyBeginInterruption() {
+    utility.debugPrint(msg: "delegate:notifyBeginInterruption")
+    // 再描画
+    self.redraw()
   }
   
   // イヤホン操作のデリゲート(センターボタン)
@@ -291,7 +300,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     utility.getSoundFiles().forEach { item in
       self.soundInfos.append(SoundInfo(fileName: item))
     }
-    
+
     // ソート（フォルダ名＋ファイル名）
     self.soundInfos.sort{
       let d0 = $0.fullPath?.absoluteString ?? ""
@@ -358,6 +367,11 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     }
   }
   
+  /// 停止
+  func pauseSound() {
+    self.player.pauseSound()
+  }
+  
   /// 指定された音声を再生
   func playSound(targetGroup: GroupInfo?, targetSound: SoundInfo?, volume: Float = utility.getPlayingSoundVolume()) throws {
     // 現在の音声のPath取得
@@ -387,27 +401,23 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
           // 再生時間保存
           currentPlayingSound.currentTime = self.player.getCurrentTime()
           
+          utility.debugPrint(msg: "currentTime:\(currentPlayingSound.fileNameNoExt):\(utility.timeIntervalToString(timeInterval: currentPlayingSound.currentTime))")
+          
           if let _newPath = _targetSound.path {
             if oldPath != _newPath.absoluteString {
               // Play
               try self.player.Play(url: _targetSound.fullPath, startTime: _targetSound.currentTime, volume: volume)
-              utility.debugPrint(msg: "******* PLAY1")
             }
           }
         } else {
           // Play
           try self.player.Play(url: _targetSound.fullPath, startTime: _targetSound.currentTime, volume: volume)
-          utility.debugPrint(msg: "******* PLAY2")
         }
         // Playing Gropu設定
         self.playingGroup = _targetGroup
         
         // 現在の情報保存
         self.saveGroupInfos()
-        
-        utility.debugPrint(msg: "① 1234567  \(_targetSound.fileNameNoExt)")
-        utility.debug1(groupInfos: utility.getSaveFolderInfo(), tag: "② 1234567 ------")
-        utility.debug3(soundInfo: _targetSound, tag: "③ 1234567")
       }
     }
     
@@ -621,7 +631,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
   func getArtWorkImage(soundInfo: SoundInfo) -> some View {
     var image: Image
     
-    if let _image = utility.getArtWorkImage(imageData: soundInfo.artWork) {
+    if let _image = utility.getArtWorkImage(imageData: soundInfo.artWork, showArtWork:   self.settingInfo.showArtWork) {
       image = _image
     } else {
       image = Image(systemName: "clear")

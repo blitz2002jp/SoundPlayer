@@ -23,6 +23,8 @@ struct utility {
   private static let FULL_SOUND_INFO = "FULL_SOUND_INFO"            // FullSoundのJsonデータ
   private static let FOLDER_INFO = "FOLDER_INFO"                    // FolderのJsonデータ
   private static let PLAY_LIST_INFO = "PLAY_LIST_INFO"              // PlayListのJsonデータ
+  private static let SETTING_INFO = "SETTING_INFO"                  // 設定情報Json保存
+  private static let SETTING_INFO2 = "SETTING_INFO2"                  // 設定情報Json保存
   private static let SELECTED_GROUP_TYPE = "SELECTED_GROUP_TYPE"
   private static let SELECTED_GROUP_TEXT = "SELECTED_GROUP_TEXT"
   private static let PLAYING_GROUP_TYPE = "PLAYING_GROUP_TYPE"        // 現在のグループType
@@ -173,7 +175,47 @@ struct utility {
     let fetchedFolders: [GroupInfo] = self.getGroupInfo(saveKey: PLAY_LIST_INFO)
     return fetchedFolders.map { $0 as! PlayListInfo }
   }
-  
+  /// 保存されている設定情報取得
+  static func getSettingInfo() -> SettingModel {
+    if let jsonString = UserDefaults.standard.string(forKey: SETTING_INFO) {
+      if let jsonData = jsonString.data(using: .utf8) {
+        do {
+          return try JSONDecoder().decode(SettingModel.self, from: jsonData)
+        } catch {
+          print(error.localizedDescription)
+        }
+      }
+    }
+    return SettingModel()
+  }
+  /// 保存されている設定情報保存
+  static func saveSettingInfo(outputInfo: SettingModel) {
+    do {
+      // Group情報の配列をjsonDataにエンコード
+      let jsonData = try JSONEncoder().encode(outputInfo)
+      
+      // JSONデータをStringに変換
+      if let jsonString = String(data: jsonData, encoding: .utf8) {
+        // UserDefaultsにPlayListデータを保存
+        UserDefaults.standard.setValue(jsonString, forKey: SETTING_INFO)
+      } else {
+        print("Failed to convert JSON data to string.")
+      }
+    } catch {
+      print(error.localizedDescription)
+    }
+    
+  }
+  /// 保存されている設定情報保存
+  static func getSettingInfo2() -> Bool {
+    return UserDefaults.standard.bool(forKey: SETTING_INFO2)
+  }
+  /// 保存されている設定情報保存
+  static func saveSettingInfo2(bbb: Bool) {
+    UserDefaults.standard.setValue(bbb, forKey: SETTING_INFO2)
+    UserDefaults.standard.synchronize()
+  }
+
   /// Group情報の取得
   private static func getGroupInfo(saveKey: String) -> [GroupInfo] {   // 移動済
     // UserDefaultsから保存データ取得
@@ -393,10 +435,18 @@ struct utility {
   }
   
   // ArtWork Image取得
-  static func getArtWorkImage(imageData: Data?) -> Image? {
-    if let _imageData = imageData {
-      if let _uiImage = UIImage(data: _imageData) {
-        return Image(uiImage: _uiImage)
+  static func getArtWorkImage(imageData: Data?, showArtWork: Bool) -> Image? {
+    if showArtWork {
+      if var _imageData = imageData {
+        if let _uiImage = UIImage(data: _imageData) {
+          return Image(uiImage: _uiImage)
+        }
+      }
+    } else {
+      if let _emptyArtwork = self.emptyArtwork {
+        if let _uiImage = UIImage(data: _emptyArtwork) {
+          return Image(uiImage: _uiImage)
+        }
       }
     }
     return Image(systemName: "cat")
@@ -653,6 +703,49 @@ struct utility {
     let endDate = Date()
     print("\(log) \(endDate.timeIntervalSince(startDate))")
 #endif
+  }
+  
+  // DEBUG ログ・ファイル出力
+  static func writeStringToFile(content: String, fileName: String = "DEBUG_LOG") {
+    #if DEBUG
+    // ドキュメントディレクトリのURLを取得
+    let fileManager = FileManager.default
+    guard let documentsURL = self.getDocumentDirectory() else {
+        print("Could not find the documents directory.")
+        return
+    }
+
+    // 保存するファイルのURLを作成
+    let fileURL = documentsURL.appendingPathComponent(fileName)
+
+    // コンテンツを追加するためのデータ
+    let _content = String("\(content)\n")
+    guard let data = _content.data(using: .utf8) else {
+        print("Could not convert string to data.")
+        return
+    }
+
+    // ファイルが存在するかチェック
+    if fileManager.fileExists(atPath: fileURL.path) {
+        // ファイルが存在する場合は追加書き込み
+        if let fileHandle = try? FileHandle(forWritingTo: fileURL) {
+            fileHandle.seekToEndOfFile()
+            fileHandle.write(data)
+            fileHandle.closeFile()
+            print("Content appended successfully to \(fileURL.path)")
+        } else {
+            print("Could not open file for writing.")
+        }
+    } else {
+        // ファイルが存在しない場合は新規作成して書き込み
+        do {
+            try data.write(to: fileURL, options: .atomicWrite)
+            print("File created and written successfully to \(fileURL.path)")
+        } catch {
+            print("Failed to write file: \(error)")
+        }
+    }
+    #endif
   }
   
   static func removePrivateModeFile() {

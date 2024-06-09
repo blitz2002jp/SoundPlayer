@@ -21,7 +21,7 @@ struct PlayView: View {
           TitleView(title: _playingSound.fileNameNoExt, subTitle: _playingGroup.text, targetGroup: viewModel.playingGroup, targetSound: viewModel.getPlayingSound(), trailingItem: .menu)
           Spacer()
 
-          if let _artWork = utility.getArtWorkImage(imageData: _playingSound.artWork) {
+          if let _artWork = utility.getArtWorkImage(imageData: _playingSound.artWork, showArtWork: self.viewModel.settingInfo.showArtWork) {
             _artWork
               .resizable()
               .aspectRatio(contentMode: .fit)
