@@ -26,7 +26,7 @@ enum TimeFormat: String, Codable {
 }
 
 
-class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
+class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate, PlayerDelegateInterruption {
   
   var emptyArtWork: Data?
   
@@ -149,9 +149,10 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     self.createDataModel()
 
     // Playerデリゲート
-    player.delegate = self
-    player.delegateEarphoneControl = self
-    
+    self.player.delegate = self
+    self.player.delegateEarphoneControl = self
+    self.player.delegateInterruption = self
+
     // イヤホン
     self.player.addRemoteCommandEvent()
     
@@ -239,17 +240,22 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     return false
   }
   
-  // 再生終了の通知 デリゲート
+  /// 再生終了の通知 デリゲート
   func notifyTermination() {
     if let _playingSound = self.getPlayingSound() {
       _playingSound.currentTime = TimeInterval.zero
-      
-      
       self.playNextSound()
     }
   }
-  
-  // イヤホン操作のデリゲート(センターボタン)
+
+  /// 再生中断開始デリゲート
+  func notifyBeginInterruption() {
+    utility.debugPrint(msg: "delegate:notifyBeginInterruption")
+    // 再描画
+    self.redraw()
+  }
+
+  /// イヤホン操作のデリゲート(センターボタン)
   func notifyEarphoneTogglePlayPause() {
     if self.player.isPlaying {
       self.player.pauseSound()
@@ -261,7 +267,7 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
       }
     }
   }
-  // イヤホン操作のデリゲート(プレイボタン)
+  /// イヤホン操作のデリゲート(プレイボタン)
   func notifyEarphonePlay() {
     do {
       try self.player.Play()
@@ -270,17 +276,17 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate {
     }
   }
   
-  // イヤホン操作のデリゲート(ポーズボタン)
+  /// イヤホン操作のデリゲート(ポーズボタン)
   func notifyEarphonePause() {
     self.player.pauseSound()
   }
   
-  // イヤホン操作のデリゲート(次へボタン)
+  /// イヤホン操作のデリゲート(次へボタン)
   func notifyEarphoneNextTrack() {
     self.playNextSound()
   }
   
-  // イヤホン操作のデリゲート(前へボタン)
+  /// イヤホン操作のデリゲート(前へボタン)
   func notifyEarphonePrevTrack() {
     self.playPrevSound()
   }

@@ -19,6 +19,12 @@ protocol PlayerDelegateCurrentTime {
   func notifyCurrentTime(currentTime: TimeInterval)
 }
 
+// 再生中断の通知
+protocol PlayerDelegateInterruption {
+  // 中断開始
+  func notifyBeginInterruption()
+}
+
 // イヤホン操作の通知
 protocol EarphoneControlDelegate {
    func notifyEarphoneTogglePlayPause()
@@ -64,7 +70,8 @@ class Player: NSObject, AVAudioPlayerDelegate {
   var delegate: PlayerDelegate?
   var delegateCurrentTime: PlayerDelegateCurrentTime?
   var delegateEarphoneControl: EarphoneControlDelegate?
-
+  var delegateInterruption: PlayerDelegateInterruption?
+  
   // 外部アクセサリ(イヤホンなど)、システムコントロールのイベントへの応答定義
   func addRemoteCommandEvent() {
     let commandCenter = MPRemoteCommandCenter.shared()
@@ -133,6 +140,9 @@ class Player: NSObject, AVAudioPlayerDelegate {
     // バックグラウンド再生のために追加
     try AVAudioSession.sharedInstance().setActive(true)
     
+    // 再生の中断通知登録
+    self.setupNotifications()
+    
     if let _url = url {
       self.soundPlayer = try AVAudioPlayer(contentsOf: _url)
       self.soundPlayer.currentTime = startTime
@@ -177,7 +187,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
     
     return nil
   }
-
+  
   /// 再生位置設定
   func setPlayPosition(position: TimeInterval) {
     if let _soundPlayer = self.soundPlayer{
@@ -210,14 +220,14 @@ class Player: NSObject, AVAudioPlayerDelegate {
   }
   
   /*
-  func isPlaying() -> Bool {
-    if let _soundPlayer = self.soundPlayer {
-      return _soundPlayer.isPlaying
-    }
-    return false
-  }
+   func isPlaying() -> Bool {
+   if let _soundPlayer = self.soundPlayer {
+   return _soundPlayer.isPlaying
+   }
+   return false
+   }
    */
-
+  
   // 再生終了デリゲート
   func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
     // 終了通知
@@ -230,5 +240,48 @@ class Player: NSObject, AVAudioPlayerDelegate {
   func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
     // あとで実装
   }
+  /// 音声の中断を通知する設定
+  private func setupNotifications() {
+    // Get the default notification center instance.
+    let nc = NotificationCenter.default
+    nc.addObserver(self,
+                   selector: #selector(handleInterruption),
+                   name: AVAudioSession.interruptionNotification,
+                   object: AVAudioSession.sharedInstance())
+  }
+  
+  /// 音声の中断通知ハンドリング
+  @objc private func handleInterruption(notification: Notification) {
+    // To implement.
+    guard let userInfo = notification.userInfo,
+          let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+          let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
+    
+    // Switch over the interruption type.
+    switch type {
+    case .began:
+      // An interruption began. Update the UI as necessary.
+      utility.debugPrint(msg: "delegate:began")
+      
+      // デリゲート
+      if let dg = delegateInterruption {
+        dg.notifyBeginInterruption()
+      }
+      
+    case .ended:
+      // An interruption ended. Resume playback, if appropriate.
+      utility.debugPrint(msg: "delegate:ended")
+      
+      guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
+      let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+      if options.contains(.shouldResume) {
+        // An interruption ended. Resume playback.
+        utility.debugPrint(msg: "delegate:Resume playback.")
+      } else {
+        // An interruption ended. Don't resume playback.
+        utility.debugPrint(msg: "delegate:Don't resume playback.")
+      }
+    default: ()
+    }
+  }
 }
-
