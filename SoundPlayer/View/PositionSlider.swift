@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// 再生位置Slider
-struct PositionSlider: View, PlayerDelegateCurrentTime {
+struct PositionSlider: View, PlayerDelegateCurrentTime, PlayerDelegateTerminated {
   @EnvironmentObject var viewModel: ViewModel
   @StateObject private var sliderViewModel = SliderViewModel()
   
@@ -21,6 +21,10 @@ struct PositionSlider: View, PlayerDelegateCurrentTime {
     }
   }
   
+  // Playerからの終了通知デリゲート
+  func notifyTermination() {
+    self.sliderViewModel.tim = TimeInterval.zero
+  }
   // Playerからの再生時間通知デリゲート
   func notifyCurrentTime(currentTime: TimeInterval) {
     self.sliderViewModel.tim = currentTime
