@@ -10,7 +10,7 @@ import AVFoundation
 import MediaPlayer
 
 // 再生終了の通知
-protocol PlayerDelegate {
+protocol PlayerDelegateTerminated {
   func notifyTermination()
 }
 
@@ -67,7 +67,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
   private var timer: Timer?
   
   // 通知用デリゲート
-  var delegate: PlayerDelegate?
+  var delegate: PlayerDelegateTerminated?
   var delegateCurrentTime: PlayerDelegateCurrentTime?
   var delegateEarphoneControl: EarphoneControlDelegate?
   var delegateInterruption: PlayerDelegateInterruption?

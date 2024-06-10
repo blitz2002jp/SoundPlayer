@@ -26,7 +26,7 @@ enum TimeFormat: String, Codable {
 }
 
 
-class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate, PlayerDelegateInterruption {
+class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDelegate, PlayerDelegateInterruption {
   
   var emptyArtWork: Data?
   
@@ -244,8 +244,13 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate, Play
   func notifyTermination() {
     if let _playingSound = self.getPlayingSound() {
       _playingSound.currentTime = TimeInterval.zero
+      // 再描画
+      self.redraw()
+
       self.playNextSound()
     }
+    // 再描画
+    self.redraw()
   }
 
   /// 再生中断開始デリゲート
