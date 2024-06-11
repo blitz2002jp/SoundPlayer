@@ -247,6 +247,8 @@ class ViewModel: ObservableObject, PlayerDelegate, EarphoneControlDelegate, Play
       _playingSound.currentTime = TimeInterval.zero
       self.playNextSound()
     }
+    // 再描画
+    self.redraw()
   }
   
   /// 再生中断開始デリゲート
