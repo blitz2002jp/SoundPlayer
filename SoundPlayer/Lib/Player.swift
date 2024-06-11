@@ -10,7 +10,7 @@ import AVFoundation
 import MediaPlayer
 
 // 再生終了の通知
-protocol PlayerDelegate {
+protocol PlayerDelegateTerminated {
   func notifyTermination()
 }
 
@@ -67,11 +67,10 @@ class Player: NSObject, AVAudioPlayerDelegate {
   private var timer: Timer?
   
   // 通知用デリゲート
-  var delegate: PlayerDelegate?
+  var delegate: PlayerDelegateTerminated?
   var delegateCurrentTime: PlayerDelegateCurrentTime?
   var delegateEarphoneControl: EarphoneControlDelegate?
   var delegateInterruption: PlayerDelegateInterruption?
-
   
   // 外部アクセサリ(イヤホンなど)、システムコントロールのイベントへの応答定義
   func addRemoteCommandEvent() {
@@ -141,7 +140,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
     // バックグラウンド再生のために追加
     try AVAudioSession.sharedInstance().setActive(true)
     
-    // Player(音声の中断を通知する設定)
+    // 再生の中断通知登録
     self.setupNotifications()
 
     if let _url = url {
@@ -241,7 +240,6 @@ class Player: NSObject, AVAudioPlayerDelegate {
   func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
     // あとで実装
   }
-  
 
   /// 音声の中断を通知する設定
   private func setupNotifications() {
@@ -271,7 +269,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
         dg.notifyBeginInterruption()
       }
 
-    case .ended:
+      case .ended:
       // An interruption ended. Resume playback, if appropriate.
       utility.debugPrint(msg: "delegate:ended")
 
@@ -288,4 +286,3 @@ class Player: NSObject, AVAudioPlayerDelegate {
     }
   }
 }
-
