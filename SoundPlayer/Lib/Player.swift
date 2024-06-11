@@ -142,7 +142,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
     
     // 再生の中断通知登録
     self.setupNotifications()
-    
+
     if let _url = url {
       self.soundPlayer = try AVAudioPlayer(contentsOf: _url)
       self.soundPlayer.currentTime = startTime
@@ -240,6 +240,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
   func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
     // あとで実装
   }
+
   /// 音声の中断を通知する設定
   private func setupNotifications() {
     // Get the default notification center instance.
@@ -267,11 +268,11 @@ class Player: NSObject, AVAudioPlayerDelegate {
       if let dg = delegateInterruption {
         dg.notifyBeginInterruption()
       }
-      
-    case .ended:
+
+      case .ended:
       // An interruption ended. Resume playback, if appropriate.
       utility.debugPrint(msg: "delegate:ended")
-      
+
       guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
       let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
       if options.contains(.shouldResume) {

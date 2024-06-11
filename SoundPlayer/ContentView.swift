@@ -13,6 +13,7 @@ enum subViews: String{
 //  case AllSoundView
   case folderView
   case playListView
+  case settingView
 }
 
 struct ContentView: View {
@@ -41,15 +42,20 @@ struct ContentView: View {
         HStack {
           Image(systemName: "music.note.list")
           Button(action: {
-            // データモデル再作成
-//            self.viewModel.createDataModel()
-
             nextView = .playListView
           })
           { Text("プレイリスト") }
             .foregroundStyle(.primary)
         }
-        
+        HStack {
+          Image(systemName: "wrench.and.screwdriver")
+          Button(action: {
+            nextView = .settingView
+          })
+          { Text("設定") }
+            .foregroundStyle(.primary)
+        }
+
         if utility.isPrivateMode() {
           HStack {
             Image(systemName: "wand.and.stars.inverse")
@@ -72,6 +78,8 @@ struct ContentView: View {
       GroupListView(viewTitle: "全曲", nextView: $nextView, targetGroupType: .Folder)
     case .playListView:
       GroupListView(viewTitle: "プレイリスト", nextView: $nextView, targetGroupType: .PlayList)
+    case .settingView:
+      SettingView(nextView: $nextView)
     }
     
     if self.viewModel.getPlayingSound() != nil {

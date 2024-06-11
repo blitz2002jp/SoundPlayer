@@ -67,18 +67,21 @@ struct SoundPlayerApp: App {
         }
       // 非活性になるよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
-          // 現在の情報保存
-          viewModel.saveGroupInfos()
+          utility.debugPrint(msg: "notification:willResignActiveNotification")
         }
       // バックグランドになった。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { notification in
+          // 現在の情報保存
+          viewModel.saveGroupInfos()
+          utility.debugPrint(msg: "notification:didEnterBackgroundNotification")
         }
       // フォアグラウンドになるよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { notification in
+          utility.debugPrint(msg: "notification:willEnterForegroundNotification")
         }
       // アプリ終了するよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification)) { notification in
-          utility.debugPrint(msg: "")
+          utility.debugPrint(msg: "notification:willTerminateNotification")
         }
       // 画面が回転したよ
         .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in

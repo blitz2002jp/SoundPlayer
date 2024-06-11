@@ -6,6 +6,10 @@ struct CreateTestDataView: View {
   @State private var showingSaveAlert = false
   @Environment(\.dismiss) var dismiss
   @State private var dataClearAlert: Bool = false
+  
+  @State private var val1: Bool = false
+  @State private var val2: SettingModel?
+  @State private var val3: Bool = false
 
   var body: some View {
     Spacer()
@@ -55,7 +59,9 @@ struct CreateTestDataView: View {
 #endif
     }
     Spacer()
-    
+    Text("Setting Info : \(utility.getSettingInfo().showArtWork)")
+    Spacer()
+
     Button("データ削除(UserDefaults)") {
       self.dataClearAlert.toggle()
     }
@@ -66,11 +72,91 @@ struct CreateTestDataView: View {
       }
     }
     Spacer()
-    
-    Button("TEST") {
-      if let _soundInfo = viewModel.soundInfos.first(where: {$0.fileName == "04_MA TICARICA.m4a"}) {
-        utility.saveArtWork(imageData: _soundInfo.artWork, fileName: "artImage.PNG")
+
+    HStack {
+      Spacer()
+      Button("TEST") {
+        self.val2 = utility.getSettingInfo()
       }
+      Spacer()
+      if let _val2 = self.val2 {
+        Text(String(_val2.showArtWork))
+      } else {
+        Text("Nil")
+      }
+      Spacer()
+    }
+    
+    Spacer()
+    
+    HStack {
+      Spacer()
+      Button("TTTTTT") {
+        let res1 = utility.getSettingInfo()
+        res1.showArtWork = true
+        utility.saveSettingInfo(outputInfo: res1)
+        let res2 = utility.getSettingInfo()
+        self.val1 = res2.showArtWork
+      }
+      Spacer()
+      Text(String(self.val1))
+      Spacer()
+      Button("FFFFFF") {
+        let res1 = utility.getSettingInfo()
+        res1.showArtWork = false
+        utility.saveSettingInfo(outputInfo: res1)
+        let res2 = utility.getSettingInfo()
+        self.val1 = res2.showArtWork
+      }
+      Spacer()
+    }
+    .onAppear() {
+      let res1 = utility.getSettingInfo()
+      self.val1 = res1.showArtWork
+    }
+
+    Spacer()
+
+    HStack {
+      Spacer()
+      Button("TEST") {
+        self.val3 = utility.getSettingInfo2()
+      }
+      Spacer()
+      Text(String(self.val3))
+      Spacer()
+    }
+    
+    Spacer()
+    
+
+    HStack {
+      Spacer()
+      Button("TTTTTT") {
+        var res1 = utility.getSettingInfo2()
+        utility.writeStringToFile(content: "TRUE : \(res1)")
+        res1 = true
+        utility.saveSettingInfo2(bbb: res1)
+        let res2 = utility.getSettingInfo2()
+        utility.writeStringToFile(content: "TRUE : \(res2)")
+        self.val3 = res2
+      }
+      Spacer()
+      Text(String(self.val3))
+      Spacer()
+      Button("FFFFFF") {
+        var res1 = utility.getSettingInfo2()
+        utility.writeStringToFile(content: "FALSE : \(res1)")
+        res1 = false
+        utility.saveSettingInfo2(bbb: res1)
+        let res2 = utility.getSettingInfo2()
+        utility.writeStringToFile(content: "FALSE : \(res2)")
+        self.val3 = res2
+      }
+      Spacer()
+    }
+    .onAppear() {
+      self.val3 = utility.getSettingInfo2()
     }
     
     Spacer()

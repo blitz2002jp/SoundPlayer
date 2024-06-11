@@ -79,7 +79,7 @@ class GroupInfo: Codable, Identifiable{
     self.comment = try container.decode(String.self, forKey: .comment)
     self.sortKey = try container.decode(Int.self, forKey: .sortKey)
   }
-  
+
   enum CodingKeys: String, CodingKey {
     case groupType
     case text
