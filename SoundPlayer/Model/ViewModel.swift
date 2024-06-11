@@ -257,13 +257,6 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     self.redraw()
   }
 
-  /// 再生中断開始デリゲート
-  func notifyBeginInterruption() {
-    utility.debugPrint(msg: "delegate:notifyBeginInterruption")
-    // 再描画
-    self.redraw()
-  }
-
   /// イヤホン操作のデリゲート(センターボタン)
   func notifyEarphoneTogglePlayPause() {
     if self.player.isPlaying {
