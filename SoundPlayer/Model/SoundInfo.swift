@@ -11,16 +11,12 @@ import SwiftUI
 
 class SoundInfo: Codable, Identifiable {
 
-  private var _artWork: Data?
   var artWork: Data? {
     get {
-      if let res = _artWork {
-        return res
+      if let _artWork = utility.getArtWorkData(url: self.fullPath) {
+        return _artWork
       }
       return utility.emptyArtwork
-    }
-    set(val) {
-      self._artWork = val
     }
   }
   
@@ -112,9 +108,6 @@ class SoundInfo: Codable, Identifiable {
       if let _foldersName = fileName.deletingLastPathComponent().absoluteString.replacingOccurrences(of: removeDirName.absoluteString, with: "").replacingOccurrences(of: "/", with: "").removingPercentEncoding {
         self.foldersName = _foldersName
       }
-
-      // Art Work
-      self.artWork = utility.getArtWorkData(url: self.fullPath)
     }
   }
   
@@ -131,7 +124,6 @@ class SoundInfo: Codable, Identifiable {
     res.startTimeStr = self.startTimeStr                    // 再生開始時間
     res.volume = self.volume                             // ボリューム
     res.sortKey = self.sortKey                              // ソートキー
-    res.artWork = self.artWork
     
     return res
   }
