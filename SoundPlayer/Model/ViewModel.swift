@@ -133,20 +133,27 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   // データモデル作成
   func createDataModel() {
     // 設定情報取得
-    self.settingInfo = utility.getSettingInfo()
+    utility.funcTime("funcTime:getSettingInfo", action: {self.settingInfo = utility.getSettingInfo()})
+    // self.settingInfo = utility.getSettingInfo()
+    
     utility.funcTime("funcTime:createSoundInfo", action: {createSoundInfo()})
-    //createSoundInfo()
-    createFolderInfo()
-    self.playListInfos = utility.getPlayListInfo().sorted { $0.sortKey < $1.sortKey }
+    utility.funcTime("funcTime:createFolderInfo", action: {createFolderInfo()})
+    utility.funcTime("funcTime:getPlayListInfo", action: {self.playListInfos = utility.getPlayListInfo().sorted { $0.sortKey < $1.sortKey }})
+    // createSoundInfo()
+    // createFolderInfo()
+    // self.playListInfos = utility.getPlayListInfo().sorted { $0.sortKey < $1.sortKey }
 
     // 音声の選択フラグを設定
-    self.setSelectedSound(newGroupInfos: self.fullSoundInfos)
-    self.setSelectedSound(newGroupInfos: self.folderInfos)
+    utility.funcTime("funcTime:setSelectedSound1", action: {self.setSelectedSound(newGroupInfos: self.fullSoundInfos)})
+    utility.funcTime("funcTime:setSelectedSound2", action: {self.setSelectedSound(newGroupInfos: self.folderInfos)})
+//    self.setSelectedSound(newGroupInfos: self.fullSoundInfos)
+//    self.setSelectedSound(newGroupInfos: self.folderInfos)
   }
   
   init() {
     // データモデル作成
-    self.createDataModel()
+    utility.funcTime("funcTime:createDataModel", action: {self.createDataModel()})
+    // self.createDataModel()
 
     // Playerデリゲート
     self.player.delegate = self
