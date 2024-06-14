@@ -262,25 +262,28 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     if self.player.isPlaying {
       self.player.pauseSound()
     } else {
-      do {
-        try self.player.Play()
-      } catch {
-        print(error.localizedDescription)
-      }
+      self.playCurrentSound()
     }
+    // 再描画
+    self.redraw()
   }
   /// イヤホン操作のデリゲート(プレイボタン)
   func notifyEarphonePlay() {
-    do {
-      try self.player.Play()
-    } catch {
-      print(error.localizedDescription)
-    }
+    self.playCurrentSound()
+    // 再描画
+    self.redraw()
   }
   
   /// イヤホン操作のデリゲート(ポーズボタン)
   func notifyEarphonePause() {
+    // グループ情報保存
+    self.saveGroupInfos()
+    
+    // 停止
     self.player.pauseSound()
+    
+    // 再描画
+    self.redraw()
   }
   
   /// イヤホン操作のデリゲート(次へボタン)
@@ -415,7 +418,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
         // Playing Gropu設定
         self.playingGroup = _targetGroup
         
-        // 現在の情報保存
+        // グループ情報保存
         self.saveGroupInfos()
       }
     }
@@ -490,17 +493,15 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     return nil
   }
   
-  //
+  /// グループ情報保存
   func saveGroupInfos() {
+    // 再生中の音声の時間セット
+    if let _playingSound = self.getPlayingSound() {
+      _playingSound.currentTime = self.player.getCurrentTime()
+    }
     utility.saveGroupInfo(outputInfos: self.fullSoundInfos)
     utility.saveGroupInfo(outputInfos: self.folderInfos)
     utility.saveGroupInfo(outputInfos: self.playListInfos)
-    
-    utility.debugPrint(msg: "########## saveGroupInfos ################")
-    
-    utility.getSaveFolderInfo().forEach { item1 in
-      utility.debug2(groupInfo: item1, tag: "ViewModel(saveGroupInfos) 123456")
-    }
   }
   
   /// Soundの削除
@@ -552,7 +553,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
       }
     }
     
-    // 保存
+    // グループ情報保存
     self.saveGroupInfos()
   }
   
@@ -577,7 +578,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
         self.playListInfos.removeAll(where: {$0.text == _targetGroup.text})
       }
       
-      // 保存
+      // グループ情報保存
       self.saveGroupInfos()
     }
     
@@ -647,5 +648,20 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   func redraw() {
     utility.debugPrint(msg: "redraw")
     objectWillChange.send()
+  }
+  
+  
+  // 現在音声再生（保存されている音声再生）
+  func playCurrentSound() {
+    if let _playingGroup = self.playingGroup {
+      if let _playingSound = self.getPlayingSound() {
+        do {
+          try self.playSound(targetGroup: _playingGroup, targetSound: _playingSound, volume: self.volome)
+          
+        } catch {
+          print(error.localizedDescription)
+        }
+      }
+    }
   }
 }

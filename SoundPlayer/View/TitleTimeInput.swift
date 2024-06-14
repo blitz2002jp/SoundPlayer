@@ -56,8 +56,7 @@ struct TitleTimeInput: View {
                         let copySound = _playingSound.copy()
                         copySound.isSelected = false
                         self.viewModel.playListInfos.append(PlayListInfo(text: self.newPlaylistName, soundInfos: [copySound]))
-                        // 保存
-//                        utility.saveGroupInfo(outputInfos: self.viewModel.playListInfos)
+                        // グループ情報保存
                         self.viewModel.saveGroupInfos()
                         
                         dismiss()
@@ -68,8 +67,8 @@ struct TitleTimeInput: View {
                       if self.okCancel == .ok {
                         // 追加
                         self.viewModel.playListInfos.append(PlayListInfo(text: self.newPlaylistName, soundInfos: [_playingSound.copy()]))
-                        // 保存
-//                        utility.saveGroupInfo(outputInfos: self.viewModel.playListInfos)
+
+                        // グループ情報保存
                         self.viewModel.saveGroupInfos()
 
                         dismiss()
@@ -96,7 +95,7 @@ struct TitleTimeInput: View {
           
           if utility.isPrivateMode() {
             // Duration取得
-            let (hours, minutes, seconds) = utility.getHMS(time: _playingSound.duration())
+            let (hours, _, _) = utility.getHMS(time: _playingSound.duration())
             Section(header: Text("再生開始時間")) {
               HStack {
                 Picker(selection: $selectedValues[0], label: Text("")) {
@@ -132,7 +131,7 @@ struct TitleTimeInput: View {
           Button(action: {
             // 既存のプレイリストに追加
             if let _targetPlayList = self.viewModel.playListInfos.first(where: {$0.text == self.selectedPlayList}) {
-              if let _targetSound = self.targetSound {
+              if self.targetSound != nil {
                 let copySound = _playingSound.copy()
                 copySound.startTimeStr = String("\(selectedValues[0]):\(selectedValues[1]):\(selectedValues[2])")
                 copySound.isSelected = false

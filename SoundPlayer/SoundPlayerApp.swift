@@ -22,48 +22,10 @@ struct SoundPlayerApp: App {
       ContentView().environmentObject(viewModel)
         .onAppear() {
           utility.DebugPrintSaveData(viewModel: viewModel)
-          
-          // アプリの起動直後に現在再生対象の音声を一瞬再生し停止する（イヤホンのでの再生開始に対応するため）
-          // ◆◆　イヤホンの再生ボタンイベントはアプリで一度再生を開始しないと発火しない
-          // バックグラウンドで再生中だった場合は、この処理を行わない
-          if let _playingGroup = viewModel.playingGroup {
-            if let _playingSound = viewModel.getPlayingSound() {
-              do {
-                try viewModel.playSound(targetGroup: _playingGroup, targetSound: _playingSound, volume: Float.zero)
-                viewModel.player.pauseSound()
-                
-              } catch {
-                print(error.localizedDescription)
-              }
-            }
-          }
         }
 
       // アクティブになった
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { notification in
-/*
-          // アプリの起動直後に現在再生対象の音声を一瞬再生し停止する（イヤホンのでの再生開始に対応するため）
-          // ◆◆　イヤホンの再生ボタンイベントはアプリで一度再生を開始しないと発火しない
-          // バックグラウンドで再生中だった場合は、この処理を行わない
-          if viewModel.player.isPlaying == false {
-            if let _playingGroup = viewModel.playingGroup {
-              if let _playingSound = viewModel.getPlayingSound() {
-                do {
-                  // ボリュームを一旦ミュート
-                  let saveVolume = _playingSound.volume
-                  _playingSound.volume = 0.0
-                  try viewModel.playSound(targetGroup: _playingGroup, targetSound: _playingSound)
-                  viewModel.player.pauseSound()
-                  // ボリュームをもとに戻す
-                  _playingSound.volume = saveVolume
-
-                } catch {
-                  print(error.localizedDescription)
-                }
-              }
-            }
-          }
- */
         }
       // 非活性になるよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
@@ -71,7 +33,7 @@ struct SoundPlayerApp: App {
         }
       // バックグランドになった。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { notification in
-          // 現在の情報保存
+          // グループ情報保存
           viewModel.saveGroupInfos()
           utility.debugPrint(msg: "notification:didEnterBackgroundNotification")
         }

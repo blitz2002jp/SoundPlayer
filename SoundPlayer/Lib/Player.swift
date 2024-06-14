@@ -97,31 +97,33 @@ class Player: NSObject, AVAudioPlayerDelegate {
     })
   }
   
-  // イヤホンのセンターボタンを押した時の処理
+  /// イヤホンのセンターボタンを押した時の処理
   func remoteTogglePlayPause(_ event: MPRemoteCommandEvent) {
+    utility.debugPrint(msg: "🎧:remoteTogglePlayPause")
     if let dg = delegateEarphoneControl {
       dg.notifyEarphoneTogglePlayPause()
     }
-    // （今回は再生中なら停止、停止中なら再生をおこなっています）
   }
   
+  /// プレイボタンが押された時の処理
   func remotePlay(_ event: MPRemoteCommandEvent) {
-    // プレイボタンが押された時の処理
+    utility.debugPrint(msg: "🎧:remotePlay")
     if let dg = delegateEarphoneControl {
       dg.notifyEarphonePlay()
     }
-    // （今回は再生をおこなっています）
   }
   
+  /// ポーズボタンが押された時の処理
   func remotePause(_ event: MPRemoteCommandEvent) {
-    // ポーズボタンが押された時の処理
+    utility.debugPrint(msg: "🎧:remotePause")
     if let dg = delegateEarphoneControl {
       dg.notifyEarphonePause()
     }
   }
   
+  /// 「次へ」ボタンが押された時の処理
   func remoteNextTrack(_ event: MPRemoteCommandEvent) {
-    // 「次へ」ボタンが押された時の処理
+    utility.debugPrint(msg: "🎧:remoteNextTrack")
     if let dg = delegateEarphoneControl {
       dg.notifyEarphoneNextTrack()
     }
@@ -142,7 +144,7 @@ class Player: NSObject, AVAudioPlayerDelegate {
     
     // 再生の中断通知登録
     self.setupNotifications()
-
+    
     if let _url = url {
       self.soundPlayer = try AVAudioPlayer(contentsOf: _url)
       self.soundPlayer.currentTime = startTime
@@ -150,15 +152,21 @@ class Player: NSObject, AVAudioPlayerDelegate {
       self.soundPlayer.delegate = self
       self.soundPlayer.volume = volume
       self.soundPlayer.play()
-      
-      // 再生時間表示タイマー
-      if self.timer != nil {
-        self.timer?.invalidate()
-      }
-      self.timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(timerEvent), userInfo: nil, repeats: true)
+      /*
+       // 再生時間表示タイマー
+       if self.timer != nil {
+       self.timer?.invalidate()
+       }
+       self.timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(timerEvent), userInfo: nil, repeats: true)
+       */
     } else {
       self.soundPlayer.play()
     }
+    // 再生時間表示タイマー
+    if self.timer != nil {
+      self.timer?.invalidate()
+    }
+    self.timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(timerEvent), userInfo: nil, repeats: true)
   }
   
   // Pause
@@ -210,23 +218,6 @@ class Player: NSObject, AVAudioPlayerDelegate {
     }
     return TimeInterval.zero
   }
-  
-  /// 再生時間
-  func getPlayTime() -> TimeInterval {
-    if let _soundPlayer = self.soundPlayer {
-      return _soundPlayer.duration
-    }
-    return TimeInterval.zero
-  }
-  
-  /*
-   func isPlaying() -> Bool {
-   if let _soundPlayer = self.soundPlayer {
-   return _soundPlayer.isPlaying
-   }
-   return false
-   }
-   */
   
   // 再生終了デリゲート
   func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {

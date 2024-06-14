@@ -316,7 +316,7 @@ struct utility {
     }
     return RepeatMode.noRepeate
   }
-  // ランダムモードの保存
+  // ランダムモードの取得
   static func getRandomMode() -> Bool {
     utility.debugPrint(msg: "RandomMode(Get):\(UserDefaults.standard.bool(forKey: RANDOM_MODE))")
     return UserDefaults.standard.bool(forKey: RANDOM_MODE)
@@ -437,7 +437,7 @@ struct utility {
   // ArtWork Image取得
   static func getArtWorkImage(imageData: Data?, showArtWork: Bool) -> Image? {
     if showArtWork {
-      if var _imageData = imageData {
+      if let _imageData = imageData {
         if let _uiImage = UIImage(data: _imageData) {
           return Image(uiImage: _uiImage)
         }
@@ -552,7 +552,7 @@ struct utility {
   /// Priveteモード用ファイル作成
   static func CreatePrivateModeFile() {
     let fm = FileManager()
-    if var path = self.getDocumentDirectory() {
+    if let path = self.getDocumentDirectory() {
       fm.createFile(atPath: path.appendingPathComponent(self.PRIVATE_FILE_NAME).path, contents: nil)
     }
   }
@@ -663,7 +663,7 @@ struct utility {
   }
   static func debug2(groupInfo: GroupInfo, tag: String) {
 #if DEBUG
-    var _groupInfo = groupInfo
+    _ = groupInfo
     
     self.debugPrint(msg: "\(tag)  \(groupInfo.text) \(self.getPointer(of: groupInfo))")
     groupInfo.soundInfos.forEach { item in
