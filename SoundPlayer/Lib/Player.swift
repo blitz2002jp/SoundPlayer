@@ -27,11 +27,12 @@ protocol PlayerDelegateInterruption {
 
 // イヤホン操作の通知
 protocol EarphoneControlDelegate {
-   func notifyEarphoneTogglePlayPause()
-   func notifyEarphonePlay()
-   func notifyEarphonePause()
-   func notifyEarphoneNextTrack()
-   func notifyEarphonePrevTrack()
+  func notifyEarphoneTogglePlayPause()
+  func notifyEarphonePlay()
+  func notifyEarphonePause()
+  func notifyEarphoneNextTrack()
+  func notifyEarphonePrevTrack()
+  func notifyEarphoneDisconnected()
 }
 
 class Player: NSObject, AVAudioPlayerDelegate {
@@ -95,6 +96,12 @@ class Player: NSObject, AVAudioPlayerDelegate {
       self.remotePrevTrack(commandEvent)
       return MPRemoteCommandHandlerStatus.success
     })
+   
+    // イヤホンの切断通知
+    NotificationCenter.default.addObserver(self
+                                           , selector: #selector(self.audioSessionRouteChange)
+                                           , name: Notification.Name("AVAudioSessionRouteChangeNotification")
+                                           , object: nil)
   }
   
   /// イヤホンのセンターボタンを押した時の処理
@@ -135,7 +142,15 @@ class Player: NSObject, AVAudioPlayerDelegate {
       dg.notifyEarphonePrevTrack()
     }
   }
+
+  // イヤホンの切断通知
+  @objc func audioSessionRouteChange() {
+    if let dg = delegateEarphoneControl {
+      dg.notifyEarphoneDisconnected()
+    }
+  }
   
+
   // Play
   func Play(url: URL? = nil, startTime: TimeInterval = TimeInterval.zero, volume: Float = Float.zero, isLoop: Bool = false) throws {
     
