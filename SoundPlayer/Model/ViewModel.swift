@@ -296,6 +296,15 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     self.playPrevSound()
   }
   
+  /// イヤホンの切断
+  func notifyEarphoneDisconnected() {
+    // 停止
+    self.player.pauseSound()
+    
+    // 再描画
+    self.redraw()
+  }
+  
   /// デバイスに登録されているファイルからSoundInfoを作成する
   func createSoundInfo() {
     self.soundInfos.removeAll()
