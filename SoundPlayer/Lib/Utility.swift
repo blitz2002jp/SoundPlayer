@@ -17,6 +17,10 @@ enum OkCancel: String, Codable{
 }
 
 struct utility {
+
+  // デバッグログ・ファイル名
+  private static let DEBUG_LOG_FILE_NAME = ".DebugLog.log"
+
   // Private Modeファイル名
   private static let PRIVATE_FILE_NAME = ".PrivateMode"             // PrivateModeにするためのファイル名
   // UserDefaultのキー
@@ -76,8 +80,10 @@ struct utility {
       return self._emptyArtwork
     }
   }
-  
-  
+
+  // デバッグログ
+  private var debugLogItems = [DebugLogItemModel]()
+
   /// Documentディレクトリ取得
   static func getDocumentDirectory() -> URL?{
     if let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
@@ -756,5 +762,57 @@ struct utility {
     } catch {
       print(error.localizedDescription)
     }
+  }
+  
+  // デバッグログ消去
+  static func clearDebugLog() {
+    do {
+      if let _DocUrl = utility.getDocumentDirectory() {
+        let fullPath = _DocUrl.appendingPathComponent(DEBUG_LOG_FILE_NAME)
+        try "".write(to: fullPath, atomically: true, encoding: .utf8)
+      }
+    } catch {
+      print(error.localizedDescription)
+    }
+  }
+  /// デバッグログ保存
+  static func saveDebugLog(log: String) {
+    do {
+      var logs = self.readDebugLog()
+      logs.append(DebugLogItemModel(debugLog: log))
+      
+      // jsonDataにエンコード
+      let jsonData = try JSONEncoder().encode(logs)
+      
+      // JSONデータをStringに変換
+      if let jsonString = String(data: jsonData, encoding: .utf8) {
+        if let _DocUrl = utility.getDocumentDirectory() {
+          let fullPath = _DocUrl.appendingPathComponent(DEBUG_LOG_FILE_NAME)
+          try jsonString.write(to: fullPath, atomically: true, encoding: .utf8)
+        }
+      } else {
+        print("Failed to convert JSON data to string.")
+      }
+    } catch {
+      print(error.localizedDescription)
+    }
+  }
+  
+  /// デバッグログ読み込み
+  static func readDebugLog() -> [DebugLogItemModel] {
+    do {
+      if let _DocUrl = utility.getDocumentDirectory() {
+        let fullPath = _DocUrl.appendingPathComponent(DEBUG_LOG_FILE_NAME)
+        let jsonString = try String(contentsOf: fullPath)
+        if let jsonData = jsonString.data(using: .utf8) {
+          let a = try JSONDecoder().decode([DebugLogItemModel].self, from: jsonData)
+          return try JSONDecoder().decode([DebugLogItemModel].self, from: jsonData)
+        }
+      }
+    } catch {
+      print(error.localizedDescription)
+    }
+      
+    return [DebugLogItemModel]()
   }
 }
