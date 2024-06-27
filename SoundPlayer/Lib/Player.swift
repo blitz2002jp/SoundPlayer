@@ -154,6 +154,9 @@ class Player: NSObject, AVAudioPlayerDelegate {
   // Play
   func Play(url: URL? = nil, startTime: TimeInterval = TimeInterval.zero, volume: Float = Float.zero, isLoop: Bool = false) throws {
     
+    if let _url = url {
+      utility.saveDebugLog(log: "Play(\(_url.lastPathComponent))")
+    }
     // バックグラウンド再生のために追加
     try AVAudioSession.sharedInstance().setActive(true)
     

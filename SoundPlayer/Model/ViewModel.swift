@@ -242,7 +242,9 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   
   /// 再生終了の通知 デリゲート
   func notifyTermination() {
+    utility.saveDebugLog(log: "notifyTermination")
     if let _playingSound = self.getPlayingSound() {
+      utility.saveDebugLog(log: "notifyTermination(\(_playingSound.fileNameNoExt)")
       _playingSound.currentTime = TimeInterval.zero
       self.playNextSound()
     }

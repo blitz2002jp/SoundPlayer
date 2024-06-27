@@ -11,7 +11,16 @@ struct CreateTestDataView: View {
   @State private var val2: SettingModel?
   @State private var val3: Bool = false
 
+  @State private var showSheet = false
+  
   var body: some View {
+    Spacer()
+    Button("Test") {
+      self.showSheet.toggle()
+    }
+    .sheet(isPresented: self.$showSheet) {
+      DebugLogView()
+    }
     Spacer()
     Button("Private Mode解除") {
       utility.removePrivateModeFile()

@@ -41,6 +41,7 @@
 		5899AE292C01903000AC075D /* SearchSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5899AE282C01903000AC075D /* SearchSounds.swift */; };
 		589AD4DD2C10102000647840 /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589AD4DC2C10102000647840 /* SettingView.swift */; };
 		589AD4DF2C10132800647840 /* SettingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589AD4DE2C10132800647840 /* SettingModel.swift */; };
+		58DEA5062C2A8B690089BA62 /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58DEA5052C2A8B690089BA62 /* DebugLogView.swift */; };
 		58F70DB12BE60F19003F6B73 /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F70DB02BE60F19003F6B73 /* ToDo.swift */; };
 /* End PBXBuildFile section */
 
@@ -100,6 +101,7 @@
 		5899AE282C01903000AC075D /* SearchSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSounds.swift; sourceTree = "<group>"; };
 		589AD4DC2C10102000647840 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		589AD4DE2C10132800647840 /* SettingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingModel.swift; sourceTree = "<group>"; };
+		58DEA5052C2A8B690089BA62 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
 		58F70DB02BE60F19003F6B73 /* ToDo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -167,6 +169,7 @@
 			isa = PBXGroup;
 			children = (
 				5840EBBB2BA7E81D0043C3EA /* ContentViewTest.swift */,
+				58DEA5052C2A8B690089BA62 /* DebugLogView.swift */,
 			);
 			path = TestView;
 			sourceTree = "<group>";
@@ -421,6 +424,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				589AD4DF2C10132800647840 /* SettingModel.swift in Sources */,
+				58DEA5062C2A8B690089BA62 /* DebugLogView.swift in Sources */,
 				5894E4672BA56F740014C60E /* Utility.swift in Sources */,
 				58729EE72BABD6A100FB28BB /* PlayListInfo.swift in Sources */,
 				5840EBC82BA7E81D0043C3EA /* ContentViewTest.swift in Sources */,
