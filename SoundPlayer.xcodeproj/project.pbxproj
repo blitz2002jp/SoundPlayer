@@ -42,6 +42,7 @@
 		589AD4DD2C10102000647840 /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589AD4DC2C10102000647840 /* SettingView.swift */; };
 		589AD4DF2C10132800647840 /* SettingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589AD4DE2C10132800647840 /* SettingModel.swift */; };
 		58DEA5062C2A8B690089BA62 /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58DEA5052C2A8B690089BA62 /* DebugLogView.swift */; };
+		58DEA5082C2D21DD0089BA62 /* GroupSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58DEA5072C2D21DD0089BA62 /* GroupSelectionView.swift */; };
 		58F70DB12BE60F19003F6B73 /* ToDo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58F70DB02BE60F19003F6B73 /* ToDo.swift */; };
 /* End PBXBuildFile section */
 
@@ -102,6 +103,7 @@
 		589AD4DC2C10102000647840 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		589AD4DE2C10132800647840 /* SettingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingModel.swift; sourceTree = "<group>"; };
 		58DEA5052C2A8B690089BA62 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
+		58DEA5072C2D21DD0089BA62 /* GroupSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSelectionView.swift; sourceTree = "<group>"; };
 		58F70DB02BE60F19003F6B73 /* ToDo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -284,6 +286,7 @@
 				583088022BF072820004999F /* TitleTimeInput.swift */,
 				5899AE282C01903000AC075D /* SearchSounds.swift */,
 				589AD4DC2C10102000647840 /* SettingView.swift */,
+				58DEA5072C2D21DD0089BA62 /* GroupSelectionView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -352,7 +355,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1530;
-				LastUpgradeCheck = 1530;
+				LastUpgradeCheck = 1540;
 				TargetAttributes = {
 					5894E4312BA56F110014C60E = {
 						CreatedOnToolsVersion = 15.3;
@@ -374,6 +377,7 @@
 			knownRegions = (
 				en,
 				ja,
+				Base,
 			);
 			mainGroup = 5894E4292BA56F110014C60E;
 			productRefGroup = 5894E4332BA56F110014C60E /* Products */;
@@ -440,6 +444,7 @@
 				5899AE292C01903000AC075D /* SearchSounds.swift in Sources */,
 				586C100B2BE0A991000BAD9E /* SoundActionMenu.swift in Sources */,
 				58F70DB12BE60F19003F6B73 /* ToDo.swift in Sources */,
+				58DEA5082C2D21DD0089BA62 /* GroupSelectionView.swift in Sources */,
 				58729EE32BABD63D00FB28BB /* FullSoundInfo.swift in Sources */,
 				586C10092BDF3BD0000BAD9E /* PlayView.swift in Sources */,
 				586C100D2BE1D1BC000BAD9E /* GroupActionMenu.swift in Sources */,
@@ -490,6 +495,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -553,6 +559,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";

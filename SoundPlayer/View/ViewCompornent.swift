@@ -144,60 +144,68 @@ struct Footer: View {
   @EnvironmentObject var viewModel: ViewModel
   @State private var showPlayViewSheet = false
   @State private var showSearchSheet = false
-
+  
+  private let FooterHeight: CGFloat = 40
+//  private let FooterWidth: CGFloat = 40
+  
+  
   var body: some View {
-    HStack {
-      Button(action: { self.showSearchSheet = true}, label: {
+      HStack(spacing: 0) {
+        // 検索ボタン
         Image(systemName: "magnifyingglass")
           .foregroundStyle(.black)
-      })
-        .padding(.leading, 20)
-      Button(action: { self.showPlayViewSheet = true })
-      {
+          .onTapGesture {
+            self.showSearchSheet = true
+          }
+          .frame(maxWidth: 40, maxHeight: .infinity)
+        
+        // 音声名
         Text("\(viewModel.getPlayingSound()?.fileNameNoExt ?? "")")
-        .font(.footnote)
-        .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, alignment: .leading)
-        .padding(.leading, 10)
-      }
-      .foregroundStyle(.primary)
-
-      Spacer()
-      Image(systemName: viewModel.playMode == .play ? "pause" : "play.fill")
-        .imageScale(.large)
-        .padding(.trailing, 10)
-        .onTapGesture {
-          if let _playingGroup = self.viewModel.playingGroup {
-            if let _selectedSound = self.viewModel.getPlayingSound() {
-              try? self.viewModel.playSound(targetGroup: _playingGroup, targetSound: _selectedSound)
+          .font(.footnote)
+          .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity)
+          .onTapGesture {
+            self.showPlayViewSheet = true
+          }
+          .padding(.trailing, 10)
+        
+        // 再生・停止ボタン
+        Image(systemName: viewModel.playMode == .play ? "pause" : "play.fill")
+          .imageScale(.large)
+          .onTapGesture {
+            if let _playingGroup = self.viewModel.playingGroup {
+              if let _selectedSound = self.viewModel.getPlayingSound() {
+                try? self.viewModel.playSound(targetGroup: _playingGroup, targetSound: _selectedSound)
+              }
             }
           }
-        }
-
-      Image(systemName: "forward.fill")
-        .imageScale(.large)
-        .padding(.trailing, 10)
-    }
-    .sheet(isPresented: self.$showPlayViewSheet, onDismiss: {
-    }) {
-      if #available(iOS 16.0, *) {
-        PlayView()
-          .presentationDetents([.medium])
-      } else {
-        PlayView()
+          .frame(maxWidth: 50, maxHeight: .infinity)
+        
+        // 次へボタン
+        Image(systemName: "forward.fill")
+          .imageScale(.large)
+          .frame(maxWidth: 50, maxHeight: .infinity)
+          .onTapGesture {
+            self.viewModel.playNextSound()
+          }
       }
+      .sheet(isPresented: self.$showPlayViewSheet, onDismiss: {
+      }) {
+        if #available(iOS 16.0, *) {
+          PlayView()
+            .presentationDetents([.medium])
+        } else {
+          PlayView()
+        }
+      }
+      .sheet(isPresented: self.$showSearchSheet , onDismiss: {
+      }) {
+        SearchSounds()
+      }
+      .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: FooterHeight)
+      .background(.gray)
+      .padding(.bottom, 1)
     }
-    .sheet(isPresented: self.$showSearchSheet , onDismiss: {
-    }) {
-      SearchSounds()
-    }
-    .frame(height: 40)
-    .background(
-      // 背景に透明なViewを追加して、それをタップしたときにシートが表示されるようにする
-      Color.gray
-        .contentShape(Rectangle())
-    )
   }
-}
 
 struct TitleView: View {
 
@@ -233,6 +241,7 @@ struct TitleView: View {
           .font(.title3)
         // Textを水平方向に拡張して中央寄せにする
           .frame(maxWidth: .infinity)
+
         // 複数行の場合にも中央寄せにする
           .multilineTextAlignment(.center)
         
