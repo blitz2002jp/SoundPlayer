@@ -12,7 +12,17 @@ struct SearchSounds: View {
   @Environment(\.dismiss) var dismiss
   
   @State private var searchText = ""
+  @State private var selectedItem: SoundInfo?
+
+  @State private var selectedGroup: SegmentType = .all
+  private enum SegmentType: CaseIterable {
+    case all
+    case folder
+    case palyList
+  }
   
+  @State private var timer: Timer?
+
   var body: some View {
     VStack {
       GeometryReader { geo in
@@ -30,16 +40,22 @@ struct SearchSounds: View {
                 Image(systemName: "magnifyingglass")
                   .padding(.leading, 10)
                 TextField("検索キーワード", text: self.$searchText)
+                  .autocapitalization(/*@START_MENU_TOKEN@*/.none/*@END_MENU_TOKEN@*/)
               }
             })
             .onChange(of: searchText) { newState in
-              viewModel.SearchSound(searchText: newState)
-//            .onChange(of: searchText) { oldState, newState in
-//              viewModel.SearchSound(searchText: newState)
-              
-              // 検索キーワード保存
-              utility.saveSearchKeyword(searchKeyword: newState)
-              viewModel.redraw()
+              self.timer?.invalidate()
+              self.timer = Timer.scheduledTimer(withTimeInterval:1.0, repeats: true){ _ in
+                self.timer?.invalidate()
+
+                utility.debugPrint(msg: "**SEARCE**(\(newState)")
+                 // 検索
+                 viewModel.SearchSound(searchText: newState)
+                 
+                 // 検索キーワード保存
+                 utility.saveSearchKeyword(searchKeyword: newState)
+                 viewModel.redraw()
+              }
             }
             .frame(width: geo.size.width * 0.85)
           Spacer()
@@ -51,86 +67,100 @@ struct SearchSounds: View {
       .frame(height: 100)
       
       Spacer()
+      
+      Picker("Layout", selection: $selectedGroup) {
+          ForEach(SegmentType.allCases, id: \.self) {
+              type in
+              switch type {
+              case .all:
+                  Text("すべて")
+              case .folder:
+                  Text("全曲")
+              case .palyList:
+                  Text("プレイリスト")
+              }
+          }
+      }.pickerStyle(SegmentedPickerStyle())
+          .padding()
 
+      Spacer()
+      
       List {
-        ForEach( viewModel.folderInfos, id: \.id ) { itemGrp in
-          // 検索結果がある場合
-          if itemGrp.soundInfos.contains(where: {$0.isSearched} ) {
-            Section {
-              ForEach(itemGrp.soundInfos, id: \.id) { itemSound in
-                if itemSound.isSearched {
-                  HStack {
-                    viewModel.getArtWorkImage(soundInfo: itemSound)
-                    Text(itemSound.fileNameNoExt)
-                  }
-                  .onTapGesture {
-                    do {
-                      try viewModel.playSound(targetGroup: itemGrp,  targetSound: itemSound)
-                    } catch {
-                      print(error.localizedDescription)
-                    }
-                  }
-                }
-              }
-            } header: {
-              Text(self.getSectionTitle(groupInfo: itemGrp))
-            }
-          }
+        if self.selectedGroup == .all
+            || self.selectedGroup == .folder {
+          // Folder検索結果作成
+          SearchedItemList(itemGrps: viewModel.folderInfos)
         }
-
-
-        ForEach( viewModel.playListInfos, id: \.id ) { itemGrp in
-          // 検索結果がある場合
-          if itemGrp.soundInfos.contains(where: {$0.isSearched} ) {
-            //          List {
-            Section {
-              ForEach(itemGrp.soundInfos, id: \.id) { itemSound in
-                if itemSound.isSearched {
-                  HStack {
-                    viewModel.getArtWorkImage(soundInfo: itemSound)
-                    Text(itemSound.fileNameNoExt)
-                  }
-                  .onTapGesture {
-                    do {
-                      try viewModel.playSound(targetGroup: itemGrp,  targetSound: itemSound)
-                    } catch {
-                      print(error.localizedDescription)
-                    }
-                  }
-                }
-              }
-            } header: {
-              Text(self.getSectionTitle(groupInfo: itemGrp))
-            }
-          }
+        
+        if self.selectedGroup == .all
+            || self.selectedGroup == .palyList {
+          // PlayList検索結果作成
+          SearchedItemList(itemGrps: viewModel.playListInfos)
         }
       }
-    }
-    .onAppear() {
-      self.searchText = utility.getSearchKeyword()
-    }
-  }
-  
-  private func getSectionTitle(groupInfo: GroupInfo) -> String {
-    var res = ""
-    switch groupInfo.groupType {
-    case .Folder:
-      res = "全曲/"
-      if groupInfo.text == "" {
-        res += "Document"
-      } else {
-        res += groupInfo.text
+      .onAppear() {
+        // 保存した検索キーワード取得
+        self.searchText = utility.getSearchKeyword()
+
+        // 検索
+        viewModel.SearchSound(searchText: self.searchText)
       }
-      break
-    case .FullSound:
-      break
-    case .PlayList:
-      res = "プレイリスト/"
-      res += groupInfo.text
-      break
     }
-    return res
   }
+  func search() {
+      // send a request to API and show the response
+  }
+
 }
-
-
+  
+/// 検索結果List作成
+  struct SearchedItemList: View {
+    @EnvironmentObject var viewModel: ViewModel
+    
+    @State var itemGrps: [GroupInfo]
+    @State private var selectedItem: SoundInfo?
+    
+    var body: some View {
+      ForEach( itemGrps, id: \.id ) { itemGrp in
+        // 検索結果がある場合
+        if itemGrp.soundInfos.contains(where: {$0.isSearched} ) {
+          Section {
+            ForEach(itemGrp.soundInfos, id: \.id) { itemSound in
+              if itemSound.isSearched {
+                HStack {
+                  viewModel.getArtWorkImage(soundInfo: itemSound)
+                  Text(itemSound.fileNameNoExt)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                  Image(systemName: "ellipsis")
+                    .onTapGesture {
+                      self.selectedItem = itemSound
+                    }
+                    .sheet(item: self.$selectedItem, onDismiss: {
+                    })
+                  { item in
+                    if #available(iOS 16.0, *) {
+                      SoundActionMenu(targetGroup: itemGrp, targetSound: itemSound)
+                        .presentationDetents([.medium])
+                    } else {
+                      SoundActionMenu(targetGroup: itemGrp, targetSound: itemSound)
+                    }
+                  }
+                }
+                .onTapGesture {
+                  do {
+                    try viewModel.playSound(targetGroup: itemGrp,  targetSound: itemSound)
+                  } catch {
+                    print(error.localizedDescription)
+                  }
+                }
+              }
+            }
+          } header: {
+            Text(itemGrp.text == "" ? "Document" : itemGrp.text)
+          }
+          // Sectionヘッダ文字がすべて大文字になるのを防ぐ
+          .headerProminence(.increased)
+        }
+      }
+    }
+  }

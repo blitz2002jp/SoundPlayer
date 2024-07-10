@@ -7,10 +7,7 @@
 
 import Foundation
 
-#warning("検索結果一覧がスクロールしない")
-#warning("ランダムに配列取得は「randomElement」でできる")
-
-#warning("Remove Sound 、　Rename Sound、Rename Group")
+#warning("検索処理を非同期に")
 
 /*
  Group Remove
@@ -50,16 +47,6 @@ import Foundation
  */
 
 
-
-
-#warning("一通りテストしてみる")
-#warning("プレイリスト追加処理で再生開始時間の設定は未完成？　リリースを優先たので手つかず")
-#warning("ランダムFlagの保存、ViewModelでGroupInfoの作成時にフラグを付ける処理を追加する（SelectedFlagと同様に)")
-
-#warning("Pickerの時分秒に指定する値の上限値を決める")
-#warning("リリース準備")
-#warning("UserDefaultに保存しているデータをまとめる（資料作成）")
-#warning("TitleViewに右のアイコンを表示しない場合(.none)文字がズレる")
 
 
 /*

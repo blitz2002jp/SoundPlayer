@@ -76,22 +76,27 @@ class Player: NSObject, AVAudioPlayerDelegate {
   // 外部アクセサリ(イヤホンなど)、システムコントロールのイベントへの応答定義
   func addRemoteCommandEvent() {
     let commandCenter = MPRemoteCommandCenter.shared()
+    // トグルPlayボタン
     commandCenter.togglePlayPauseCommand.addTarget(handler: { [unowned self] commandEvent -> MPRemoteCommandHandlerStatus in
       self.remoteTogglePlayPause(commandEvent)
       return MPRemoteCommandHandlerStatus.success
     })
+    // Playボタン
     commandCenter.playCommand.addTarget(handler: { [unowned self] commandEvent -> MPRemoteCommandHandlerStatus in
       self.remotePlay(commandEvent)
       return MPRemoteCommandHandlerStatus.success
     })
+    // Pauseボタン
     commandCenter.pauseCommand.addTarget(handler: { [unowned self] commandEvent -> MPRemoteCommandHandlerStatus in
       self.remotePause(commandEvent)
       return MPRemoteCommandHandlerStatus.success
     })
+    // 次へ
     commandCenter.nextTrackCommand.addTarget(handler: { [unowned self] commandEvent -> MPRemoteCommandHandlerStatus in
       self.remoteNextTrack(commandEvent)
       return MPRemoteCommandHandlerStatus.success
     })
+    // 前へ
     commandCenter.previousTrackCommand.addTarget(handler: { [unowned self] commandEvent -> MPRemoteCommandHandlerStatus in
       self.remotePrevTrack(commandEvent)
       return MPRemoteCommandHandlerStatus.success

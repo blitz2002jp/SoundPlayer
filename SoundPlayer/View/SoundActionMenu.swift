@@ -14,6 +14,7 @@ struct SoundActionMenu: View {
   @State private var saveViewResult: OkCancel = .cancel
   @State private var showAddPlaylistDialod = false
   @State private var showDeleteAlert = false
+  @State private var showMoveDialog = false
   /// 操作対象group Sound
   var targetGroup: GroupInfo?
   var targetSound: SoundInfo?
@@ -49,6 +50,19 @@ struct SoundActionMenu: View {
                 TitleTimeInput(model: self.titleTime, targetGroup: targetGroup, targetSound: targetSound)
               }
             }
+          }
+          HStack {
+            Image(systemName: "rectangle.portrait.and.arrow.right")
+            Text("移動")
+              .onTapGesture {
+                self.showMoveDialog = true
+              }
+              .sheet(isPresented: self.$showMoveDialog, onDismiss: {
+                // 再描画
+                self.viewModel.redraw()
+              }, content: {
+                GroupSelectionView(targetGroup: targetGroup, targetSound: targetSound)
+              })
           }
           HStack {
             Image(systemName: "trash")

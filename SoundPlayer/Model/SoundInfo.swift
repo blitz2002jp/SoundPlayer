@@ -28,7 +28,7 @@ class SoundInfo: Codable, Identifiable {
       return false
     }
   }
-  
+
   var isSearched = false
   
   private var _isSelected = false
@@ -45,6 +45,7 @@ class SoundInfo: Codable, Identifiable {
       self._isSelected = val
     }
   }
+  
   var foldersName: String = ""                      // フォルダ名(Documentフォルダより下位のフォルダ)
   var fileName: String = ""                         // ファイル名
   

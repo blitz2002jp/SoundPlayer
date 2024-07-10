@@ -7,6 +7,7 @@
 import Foundation
 
 class FolderInfo: GroupInfo {
+  
   init(text: String, soundInfos: [SoundInfo] = [SoundInfo](), comment: String = "", sortKey: Int = 0, isRandom: Bool = false) {
     super.init(groupType: GroupType.Folder ,text: text, soundInfos: soundInfos, comment: comment, sortKey: sortKey)
   }

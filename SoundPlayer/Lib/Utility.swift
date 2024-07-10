@@ -16,6 +16,14 @@ enum OkCancel: String, Codable{
   case ok
 }
 
+// ファイル重複時の動作
+enum FileDuplication: String{
+  case cancel         // 中止
+  case overwrite      // 上書き保存
+  case newFileName    // 新ファイル名で保存
+}
+
+
 struct utility {
 
   // デバッグログ・ファイル名
@@ -194,7 +202,7 @@ struct utility {
     }
     return SettingModel()
   }
-  /// 保存されている設定情報保存
+  /// 設定情報保存
   static func saveSettingInfo(outputInfo: SettingModel) {
     do {
       // Group情報の配列をjsonDataにエンコード
@@ -212,11 +220,11 @@ struct utility {
     }
     
   }
-  /// 保存されている設定情報保存
+  /// 設定情報取得
   static func getSettingInfo2() -> Bool {
     return UserDefaults.standard.bool(forKey: SETTING_INFO2)
   }
-  /// 保存されている設定情報保存
+  /// 設定情報保存
   static func saveSettingInfo2(bbb: Bool) {
     UserDefaults.standard.setValue(bbb, forKey: SETTING_INFO2)
     UserDefaults.standard.synchronize()
@@ -248,6 +256,50 @@ struct utility {
       print("Error retrieving JSON string from UserDefaults")
     }
     return [GroupInfo]()
+  }
+  
+  /// Soundファイルの移動
+  static func copySoundFile(action: FileDuplication = .cancel, at: URL, to: URL) {
+    do {
+      // コピー先URL
+      var newFileUrl = to
+      
+      // コピー先ファイルの存在チェック
+      if FileManager.default.fileExists(atPath: to.path) {
+        switch action {
+        // コピーなし
+        case .cancel:
+          return
+        
+        // 上書き
+        case .overwrite:
+          // コピー先ファイルの削除
+          try FileManager.default.removeItem(at: to)
+          
+        // 新ファイル名作成
+        case .newFileName:
+          let toFileName = to.deletingPathExtension().lastPathComponent
+          let toFileExt = to.pathExtension
+          let toPath = to.deletingLastPathComponent()
+          var seq = 0
+          while(true) {
+            // 新ファイル名作成(ファイル名+連番)
+            seq += 1
+            newFileUrl = toPath.appendingPathComponent("\(toFileName)_\(seq).\(toFileExt)")
+            
+            // 新しい名前のファイルが存在しない場合
+            if !FileManager.default.fileExists(atPath: newFileUrl.path) {
+              break
+            }
+          }
+        }
+      }
+      // ファイルコピー
+      try FileManager.default.copyItem(at: at, to: newFileUrl)
+    } catch {
+      utility.debugPrint(msg: error.localizedDescription)
+      return
+    }
   }
   
   /// Group情報をJson形式で保存(UserDefaults)
@@ -805,7 +857,6 @@ struct utility {
         let fullPath = _DocUrl.appendingPathComponent(DEBUG_LOG_FILE_NAME)
         let jsonString = try String(contentsOf: fullPath)
         if let jsonData = jsonString.data(using: .utf8) {
-          let a = try JSONDecoder().decode([DebugLogItemModel].self, from: jsonData)
           return try JSONDecoder().decode([DebugLogItemModel].self, from: jsonData)
         }
       }

@@ -262,6 +262,9 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   /// イヤホン操作のデリゲート(センターボタン)
   func notifyEarphoneTogglePlayPause() {
     if self.player.isPlaying {
+      // グループ情報の保存
+      self.saveGroupInfos()
+
       self.player.pauseSound()
     } else {
       self.playCurrentSound()
@@ -269,6 +272,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     // 再描画
     self.redraw()
   }
+
   /// イヤホン操作のデリゲート(プレイボタン)
   func notifyEarphonePlay() {
     self.playCurrentSound()
@@ -300,6 +304,9 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   
   /// イヤホンの切断
   func notifyEarphoneDisconnected() {
+    // グループ情報の保存
+    self.saveGroupInfos()
+
     // 停止
     self.player.pauseSound()
     
@@ -399,7 +406,6 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
 
     if let _targetGroup = targetGroup {
       if let _targetSound = targetSound {
-//        utility.debugPrint(msg: "******** \(_targetSound.fileNameNoExt)(\(_targetSound.currentTimeStr))")
         // 選択状態セット
         _targetGroup.selectedSound = _targetSound
         
@@ -536,7 +542,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
       }
     }
   }
-  
+
   /// GroupName変更
   func renameGroupName(targetGroup: GroupInfo?, newGroupName: String) throws {
     if let _targetGroup = targetGroup {
