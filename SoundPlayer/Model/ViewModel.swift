@@ -28,10 +28,10 @@ enum TimeFormat: String, Codable {
 
 class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDelegate, PlayerDelegateInterruption {
   var emptyArtWork: Data?
-
+  
   // Player
   var player = Player()
-
+  
   // 音声データ
   var soundInfos = [SoundInfo]()
   var fullSoundInfos = [FullSoundInfo]()
@@ -129,7 +129,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
       return .pause
     }
   }
-
+  
   // データモデル作成
   func createDataModel() {
     // 設定情報取得
@@ -138,7 +138,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     createSoundInfo()
     createFolderInfo()
     self.playListInfos = utility.getPlayListInfo().sorted { $0.sortKey < $1.sortKey }
-
+    
     // 音声の選択フラグを設定
     self.setSelectedSound(newGroupInfos: self.fullSoundInfos)
     self.setSelectedSound(newGroupInfos: self.folderInfos)
@@ -147,12 +147,12 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   init() {
     // データモデル作成
     self.createDataModel()
-
+    
     // Playerデリゲート
     self.player.delegate = self
     self.player.delegateEarphoneControl = self
     self.player.delegateInterruption = self
-
+    
     // イヤホン
     self.player.addRemoteCommandEvent()
     
@@ -169,31 +169,31 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   /// 音声の選択フラグを設定
   func setSelectedSound(newGroupInfos: [GroupInfo]) {
     /*
-    if newGroupInfos.count > 0 {
-      var oldGroupInfos: [GroupInfo]? = nil
-      
-      if newGroupInfos[0].groupType == .FullSound {
-        oldGroupInfos = utility.getSaveFullSoundInfo()
-      } else if newGroupInfos[0].groupType == .Folder {
-        oldGroupInfos = utility.getSaveFolderInfo()
-      } else if newGroupInfos[0].groupType == .PlayList {
-        oldGroupInfos = utility.getPlayListInfo()
-      }
-      
-      if let _oldFullSoundInfos = oldGroupInfos {
-        _oldFullSoundInfos.forEach { oldItem in
-          // 一致するグループを取得
-          if let newItem = newGroupInfos.first( where: { $0.text == oldItem.text }) {
-            oldItem.soundInfos.forEach { oldSound in
-              if let _targetSound = newItem.soundInfos.first(where: {$0.path?.absoluteString == oldSound.path?.absoluteString}) {
-                _targetSound.isSelected = oldSound.isSelected
-                _targetSound.currentTime = oldSound.currentTime
-              }
-            }
-          }
-        }
-      }
-    }
+     if newGroupInfos.count > 0 {
+     var oldGroupInfos: [GroupInfo]? = nil
+     
+     if newGroupInfos[0].groupType == .FullSound {
+     oldGroupInfos = utility.getSaveFullSoundInfo()
+     } else if newGroupInfos[0].groupType == .Folder {
+     oldGroupInfos = utility.getSaveFolderInfo()
+     } else if newGroupInfos[0].groupType == .PlayList {
+     oldGroupInfos = utility.getPlayListInfo()
+     }
+     
+     if let _oldFullSoundInfos = oldGroupInfos {
+     _oldFullSoundInfos.forEach { oldItem in
+     // 一致するグループを取得
+     if let newItem = newGroupInfos.first( where: { $0.text == oldItem.text }) {
+     oldItem.soundInfos.forEach { oldSound in
+     if let _targetSound = newItem.soundInfos.first(where: {$0.path?.absoluteString == oldSound.path?.absoluteString}) {
+     _targetSound.isSelected = oldSound.isSelected
+     _targetSound.currentTime = oldSound.currentTime
+     }
+     }
+     }
+     }
+     }
+     }
      */
     if newGroupInfos.count > 0 {
       var oldGroupInfos: [GroupInfo]? = nil
@@ -258,13 +258,13 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     // 再描画
     self.redraw()
   }
-
+  
   /// イヤホン操作のデリゲート(センターボタン)
   func notifyEarphoneTogglePlayPause() {
     if self.player.isPlaying {
       // グループ情報の保存
       self.saveGroupInfos()
-
+      
       self.player.pauseSound()
     } else {
       self.playCurrentSound()
@@ -272,7 +272,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     // 再描画
     self.redraw()
   }
-
+  
   /// イヤホン操作のデリゲート(プレイボタン)
   func notifyEarphonePlay() {
     self.playCurrentSound()
@@ -306,7 +306,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   func notifyEarphoneDisconnected() {
     // グループ情報の保存
     self.saveGroupInfos()
-
+    
     // 停止
     self.player.pauseSound()
     
@@ -320,7 +320,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     utility.getSoundFiles().forEach { item in
       self.soundInfos.append(SoundInfo(fileName: item))
     }
-
+    
     // ソート（フォルダ名＋ファイル名）
     self.soundInfos.sort{
       let d0 = $0.fullPath?.absoluteString ?? ""
@@ -403,7 +403,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
         oldPath = _oldPath.absoluteString
       }
     }
-
+    
     if let _targetGroup = targetGroup {
       if let _targetSound = targetSound {
         // 選択状態セット
@@ -542,7 +542,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
       }
     }
   }
-
+  
   /// GroupName変更
   func renameGroupName(targetGroup: GroupInfo?, newGroupName: String) throws {
     if let _targetGroup = targetGroup {
@@ -579,7 +579,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     if let _targetGroup = targetGroup {
       // フォルダ削除
       try _targetGroup.removeFolder()
-
+      
       // PlayListから削除されたフォルダのSoundを参照してるものを削除
       if _targetGroup.groupType == .Folder {
         if let _docPath = utility.getDocumentDirectory() {
@@ -637,13 +637,17 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   }
   
   func SearchSound(targetGroup: GroupInfo, searchText: String) {
-    targetGroup.soundInfos.forEach { item in
-      item.isSearched = false
-      if item.fileNameNoExt.contains(searchText) {
-        item.isSearched = true
+    if targetGroup.text.contains(searchText) {
+      targetGroup.soundInfos.forEach { item in item.isSearched = true }
+    } else {
+      targetGroup.soundInfos.forEach { item in
+        item.isSearched = false
+        if item.fileNameNoExt.contains(searchText) {
+          item.isSearched = true
+        }
       }
-    }
   }
+}
 
   func getArtWorkImage(soundInfo: SoundInfo) -> some View {
     var image: Image

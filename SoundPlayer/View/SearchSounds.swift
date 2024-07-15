@@ -107,10 +107,6 @@ struct SearchSounds: View {
       }
     }
   }
-  func search() {
-      // send a request to API and show the response
-  }
-
 }
   
 /// 検索結果List作成
