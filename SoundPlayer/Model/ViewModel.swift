@@ -168,33 +168,6 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   
   /// 音声の選択フラグを設定
   func setSelectedSound(newGroupInfos: [GroupInfo]) {
-    /*
-     if newGroupInfos.count > 0 {
-     var oldGroupInfos: [GroupInfo]? = nil
-     
-     if newGroupInfos[0].groupType == .FullSound {
-     oldGroupInfos = utility.getSaveFullSoundInfo()
-     } else if newGroupInfos[0].groupType == .Folder {
-     oldGroupInfos = utility.getSaveFolderInfo()
-     } else if newGroupInfos[0].groupType == .PlayList {
-     oldGroupInfos = utility.getPlayListInfo()
-     }
-     
-     if let _oldFullSoundInfos = oldGroupInfos {
-     _oldFullSoundInfos.forEach { oldItem in
-     // 一致するグループを取得
-     if let newItem = newGroupInfos.first( where: { $0.text == oldItem.text }) {
-     oldItem.soundInfos.forEach { oldSound in
-     if let _targetSound = newItem.soundInfos.first(where: {$0.path?.absoluteString == oldSound.path?.absoluteString}) {
-     _targetSound.isSelected = oldSound.isSelected
-     _targetSound.currentTime = oldSound.currentTime
-     }
-     }
-     }
-     }
-     }
-     }
-     */
     if newGroupInfos.count > 0 {
       var oldGroupInfos: [GroupInfo]? = nil
       
