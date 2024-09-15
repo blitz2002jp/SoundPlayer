@@ -26,8 +26,11 @@ struct TitleTimeInput: View {
     if let _playingGroup = targetGroup {
       if let _playingSound = targetSound {
         VStack {
+          TitleView(title: _playingSound.fileNameNoExt, subTitle: _playingGroup.displayText,menuContent: nil)
+/*
           TitleView(title: _playingSound.fileNameNoExt, subTitle: _playingGroup.text, targetGroup: targetGroup, targetSound: targetSound, trailingItem: .none) {
           }
+ */
           
           List {
             Picker("", selection: $selectedPlayList) {
@@ -55,7 +58,9 @@ struct TitleTimeInput: View {
                         // 追加
                         let copySound = _playingSound.copy()
                         copySound.isSelected = false
-                        self.viewModel.playListInfos.append(PlayListInfo(text: self.newPlaylistName, soundInfos: [copySound]))
+                        let newPlayList = PlayListInfo(text: self.newPlaylistName, soundInfos: [copySound])
+                        copySound.parentId = newPlayList.id
+                        self.viewModel.playListInfos.append(newPlayList)
                         // グループ情報保存
                         self.viewModel.saveGroupInfos()
                         
@@ -65,8 +70,11 @@ struct TitleTimeInput: View {
                     }
                     .sheet(isPresented: self.$showInputNewNameArert15, onDismiss: {
                       if self.okCancel == .ok {
+                        let copySound = _playingSound.copy()
+                        let newPlayList = PlayListInfo(text: self.newPlaylistName, soundInfos: [copySound])
+                        copySound.parentId = newPlayList.id
                         // 追加
-                        self.viewModel.playListInfos.append(PlayListInfo(text: self.newPlaylistName, soundInfos: [_playingSound.copy()]))
+                        self.viewModel.playListInfos.append(newPlayList)
 
                         // グループ情報保存
                         self.viewModel.saveGroupInfos()
@@ -133,6 +141,7 @@ struct TitleTimeInput: View {
             if let _targetPlayList = self.viewModel.playListInfos.first(where: {$0.text == self.selectedPlayList}) {
               if self.targetSound != nil {
                 let copySound = _playingSound.copy()
+                copySound.parentId = _targetPlayList.id
                 copySound.startTimeStr = String("\(selectedValues[0]):\(selectedValues[1]):\(selectedValues[2])")
                 copySound.isSelected = false
                 _targetPlayList.soundInfos.append(copySound)

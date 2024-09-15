@@ -193,7 +193,9 @@ class Player: NSObject, AVAudioPlayerDelegate {
   }
   
   // Pause
-  func pauseSound(){
+  func pauseSound() {
+    utility.saveDebugLog(log: "pauseSound")
+
     if let _soundPlayer = self.soundPlayer {
       _soundPlayer.pause()
     }

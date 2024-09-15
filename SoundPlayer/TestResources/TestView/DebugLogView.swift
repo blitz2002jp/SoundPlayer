@@ -13,6 +13,7 @@ struct DebugLogView: View {
   
   var body: some View {
     VStack {
+      TitleView(title: "Log", subTitle: "", menuContent: nil)
       HStack {
         Spacer()
         Button(action: {
@@ -47,66 +48,6 @@ struct DebugLogView: View {
 #Preview {
   DebugLogView()
 }
-
-/*
-/// Debugログ管理
-class DebugLogManager {
-  private let FILE_NAME = ".DebugLog.log"
-  private var debugLogItems = [DebugLogItemModel]()
-  // 消去
-  func clearDebugLog() {
-    do {
-      if let _DocUrl = utility.getDocumentDirectory() {
-        let fullPath = _DocUrl.appendingPathComponent(self.FILE_NAME)
-        try "".write(to: fullPath, atomically: true, encoding: .utf8)
-      }
-    } catch {
-      print(error.localizedDescription)
-    }
-  }
-  /// 保存
-  func saveDebugLog() {
-    do {
-      // Group情報の配列をjsonDataにエンコード
-      let jsonData = try JSONEncoder().encode(self.debugLogItems)
-      
-      // JSONデータをStringに変換
-      if let jsonString = String(data: jsonData, encoding: .utf8) {
-        if let _DocUrl = utility.getDocumentDirectory() {
-          let fullPath = _DocUrl.appendingPathComponent(self.FILE_NAME)
-          try jsonString.write(to: fullPath, atomically: true, encoding: .utf8)
-        }
-      } else {
-        print("Failed to convert JSON data to string.")
-      }
-    } catch {
-      print(error.localizedDescription)
-    }
-  }
-  
-  /// 読み込み
-  func readDebugLog() -> [DebugLogItemModel] {
-    do {
-      if let _DocUrl = utility.getDocumentDirectory() {
-        let fullPath = _DocUrl.appendingPathComponent(self.FILE_NAME)
-        let jsonString = try String(contentsOf: fullPath)
-        if let jsonData = jsonString.data(using: .utf8) {
-          return try JSONDecoder().decode([DebugLogItemModel].self, from: jsonData)
-        }
-      }
-    } catch {
-      print(error.localizedDescription)
-    }
-      
-    return [DebugLogItemModel]()
-  }
-
-  
-  func addDebugLog(debugLogItem: DebugLogItemModel) {
-    self.debugLogItems.append(debugLogItem)
-  }
-}
-*/
 
 /// デバッグログModel
 class DebugLogItemModel: Codable, Identifiable {

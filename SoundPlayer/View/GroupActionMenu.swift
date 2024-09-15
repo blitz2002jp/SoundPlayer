@@ -25,7 +25,10 @@ struct GroupActionMenu: View {
   var body: some View {
     VStack {
       if let _targetGroup = self.targetGroup {
+        TitleView(title: _targetGroup.displayText, subTitle: "", menuContent: nil)
+/*
         TitleView(title: _targetGroup.text, subTitle: "", targetGroup: targetGroup, targetSound: nil, trailingItem: .none)
+ */
       }
 
       List {
@@ -54,7 +57,7 @@ struct GroupActionMenu: View {
                       viewModel.redraw()
                     }
                   } catch {
-                    print(error.localizedDescription)
+                    utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
                   }
                 }
                 .disabled(!self.viewModel.validationGroupName(text: self.renameText))
@@ -67,7 +70,7 @@ struct GroupActionMenu: View {
                     
                     self.okCancel = .ok
                   } catch {
-                    print(error.localizedDescription)
+                    utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
                   }
                 }
                 // 再表示
@@ -92,7 +95,7 @@ struct GroupActionMenu: View {
                     // 再表示
                     viewModel.redraw()
                   } catch {
-                    print(error.localizedDescription)
+                    utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
                   }
                   // ダイアログClose
                   dismiss()
@@ -121,7 +124,10 @@ struct InputTextView: View {
   @Binding var inputText: String
   
   var body: some View {
+    TitleView(title: self.title, subTitle: "", menuContent: nil)
+/*
     TitleView(title: self.title, subTitle: "", targetGroup: targetGroup, targetSound: nil, trailingItem: .none)
+ */
     
     Spacer()
     

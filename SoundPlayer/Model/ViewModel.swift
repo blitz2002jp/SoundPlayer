@@ -38,6 +38,26 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   var folderInfos = [FolderInfo]()
   var playListInfos = [PlayListInfo]()
   
+  var interruptSounds = [SoundInfo]()
+  var playSoundList = [CurrentPlayingSound]()
+  var currentPlaySoundIndex: Int {
+    get {
+      return utility.getPlayingSoundsIndex()
+    }
+    set(val) {
+      utility.savePlayingSoundsIndex(index: val)
+    }
+  }
+
+  var currentPlayingSound: SoundInfo? {
+    get {
+      if self.playSoundList.count > self.currentPlaySoundIndex {
+        return self.playSoundList[self.currentPlaySoundIndex].soundInfo
+      }
+      return nil
+    }
+  }
+
   // 設定データ
   var settingInfo = SettingModel()
   
@@ -142,6 +162,75 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     // 音声の選択フラグを設定
     self.setSelectedSound(newGroupInfos: self.fullSoundInfos)
     self.setSelectedSound(newGroupInfos: self.folderInfos)
+    
+
+    // 現在再生
+    var currentPlayingSounds = [CurrentPlayingSound]()
+    self.currentPlaySoundIndex = utility.getPlayingSoundsIndex()
+    
+    if let _playingSounds = utility.getPlayingSounds() {
+      if let a = _playingSounds.first(where: {$0.isInterruptSound == false}) {
+        var targetGroups: [GroupInfo]?
+        switch a.groupType {
+        case GroupType.FullSound:
+          targetGroups = self.fullSoundInfos
+          break
+        case GroupType.Folder:
+          targetGroups = self.folderInfos
+          break
+        case GroupType.PlayList:
+          targetGroups = self.playListInfos
+          break
+        }
+        // ベースになるグループからcurrentPlayingSoundsを作成
+        if let _targetGroups = targetGroups {
+          if let _targetGroup = _targetGroups.first(where: {$0.text == a.groupText}) {
+            _targetGroup.soundInfos.forEach { itemSound in
+              currentPlayingSounds.append(CurrentPlayingSound(soundInfo: itemSound, groupText: _targetGroup.text, groupType: a.groupType))
+            }
+          }
+        }
+        // 次に再生音声を追加
+        _playingSounds.enumerated().forEach( { index, item in
+          if item.isInterruptSound {
+            currentPlayingSounds.insert(CurrentPlayingSound(soundInfo: item.soundInfo, groupText: item.groupText, groupType: item.groupType, isInterruptSound: true), at: index)
+          }
+        })
+        self.playSoundList = currentPlayingSounds
+        self.dump(_playSoundListEx: self.playSoundList)
+        
+      }
+    }
+/*
+    if let _playSoundListEx = utility.getPlayingSounds() {
+      self.dump(_playSoundListEx: _playSoundListEx)
+      self.playSoundListEx = _playSoundListEx
+      let groupTexts = Dictionary(grouping: _playSoundListEx) { [$0.groupType.rawValue, $0.groupText] }
+      for (key, val) in groupTexts {
+        let k = key
+        let v = val
+        var targetGroups: [GroupInfo]?
+        if let grpType = GroupType(rawValue: key[0]) {
+          switch grpType {
+          case GroupType.FullSound:
+            targetGroups = self.fullSoundInfos
+            break
+          case GroupType.Folder:
+            targetGroups = self.folderInfos
+            break
+          case GroupType.PlayList:
+            targetGroups = self.playListInfos
+            break
+          }
+          if let _targetGroups = targetGroups {
+            if let grp = _targetGroups.first(where: {$0.text == key[1]}) {
+              val.forEach {sound in sound.soundInfo.parentId = grp.id}
+            }
+          }
+        }
+      }
+    }
+ */
   }
   
   init() {
@@ -194,33 +283,29 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     }
   }
   
-  func isPlayingSound(groupInfo: GroupInfo, soundInfo: SoundInfo) -> Bool {
-    utility.debugPrint(msg: "getPlayingImage isPlayingSound \(soundInfo.fileNameNoExt)")
+  func isPlayingSound(targetSound: SoundInfo) -> Bool {
     if self.player.isPlaying {
-      if let _playingGroup = self.playingGroup {
-        if let _playingSound = self.getPlayingSound() {
-          if _playingGroup.text == groupInfo.text
-              && _playingGroup.groupType == groupInfo.groupType {
-            if _playingSound.fullPath?.absoluteString == soundInfo.fullPath?.absoluteString {
-              utility.debugPrint(msg: "getPlayingImage isPlayingSound \(soundInfo.fileNameNoExt) ++++++++++++++++++++++++")
-              return true
-            }
-          }
+      if let _playingSound = self.currentPlayingSound {
+        if _playingSound.id == targetSound.id {
+          return true
         }
       }
     }
-    utility.debugPrint(msg: "getPlayingImage isPlayingSound \(soundInfo.fileNameNoExt) -----------------------")
     return false
   }
-  
+
   /// 再生終了の通知 デリゲート
   func notifyTermination() {
-    utility.saveDebugLog(log: "notifyTermination")
+    if let _currentPlayingSound = self.currentPlayingSound {
+      _currentPlayingSound.currentTime = TimeInterval.zero
+      self.playNextSound()
+    }
+/*
     if let _playingSound = self.getPlayingSound() {
-      utility.saveDebugLog(log: "notifyTermination(\(_playingSound.fileNameNoExt)")
       _playingSound.currentTime = TimeInterval.zero
       self.playNextSound()
     }
+*/
     // 再描画
     self.redraw()
   }
@@ -238,9 +323,14 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
       // グループ情報の保存
       self.saveGroupInfos()
       
-      self.player.pauseSound()
+      // Pause
+      self.pauseSound()
     } else {
-      self.playCurrentSound()
+      do {
+        try self.playSound()
+      } catch {
+        utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
+      }
     }
     // 再描画
     self.redraw()
@@ -248,7 +338,12 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   
   /// イヤホン操作のデリゲート(プレイボタン)
   func notifyEarphonePlay() {
-    self.playCurrentSound()
+    do {
+      try self.playSound()
+    } catch {
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
+    }
+//    self.playCurrentSound()
     // 再描画
     self.redraw()
   }
@@ -257,10 +352,10 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   func notifyEarphonePause() {
     // グループ情報保存
     self.saveGroupInfos()
-    
-    // 停止
-    self.player.pauseSound()
-    
+
+    // Pause
+    self.pauseSound()
+
     // 再描画
     self.redraw()
   }
@@ -280,18 +375,21 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     // グループ情報の保存
     self.saveGroupInfos()
     
-    // 停止
-    self.player.pauseSound()
-    
+    // Pause
+    self.pauseSound()
+
     // 再描画
     self.redraw()
   }
   
   /// デバイスに登録されているファイルからSoundInfoを作成する
   func createSoundInfo() {
+    // Full Sound の ID
+    let fullSoundId = UUID().uuidString
+    
     self.soundInfos.removeAll()
     utility.getSoundFiles().forEach { item in
-      self.soundInfos.append(SoundInfo(fileName: item))
+      self.soundInfos.append(SoundInfo(parentId: fullSoundId, fileName: item))
     }
     
     // ソート（フォルダ名＋ファイル名）
@@ -305,19 +403,24 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     self.fullSoundInfos = [FullSoundInfo]()
     self.fullSoundInfos.append(FullSoundInfo(text: "Full Sound"))
     self.fullSoundInfos[0].soundInfos = self.soundInfos
+    self.fullSoundInfos[0].id = fullSoundId
+    
+    // ParentIdセット
+//    self.soundInfos.forEach { item in item.parectId = self.fullSoundInfos[0].id }
   }
   
   /// フォルダ情報作成
   func createFolderInfo() {
     self.folderInfos.removeAll()
-    
-    // URLのパスコンポーネントを取得
     self.soundInfos.forEach { item in
       let copyItem = item.copy()
       if let folder = self.folderInfos.first(where: {$0.text == item.foldersName}){
+        copyItem.parentId = folder.id
         folder.soundInfos.append(copyItem)
       } else {
-        self.folderInfos.append(FolderInfo(text: item.foldersName, soundInfos: [copyItem]))
+        let newFolder = FolderInfo(text: item.foldersName, soundInfos: [copyItem])
+        copyItem.parentId = newFolder.id
+        self.folderInfos.append(newFolder)
       }
     }
   }
@@ -350,148 +453,109 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
   /// グループ再生
   func playGroup(targetGroupInfo: GroupInfo?) throws {
     if let _targetGroupInfo = targetGroupInfo {
-      if _targetGroupInfo.selectedSound != nil {
-        try self.playSound(targetGroup: _targetGroupInfo, targetSound: _targetGroupInfo.selectedSound)
-      } else {
-        if _targetGroupInfo.soundInfos.count > 0 {
-          try self.playSound(targetGroup: _targetGroupInfo, targetSound: _targetGroupInfo.soundInfos[0])
-        }
-      }
+      self.changSoundList(targetGroup: _targetGroupInfo)
+      try playSound()
     }
   }
   
   /// 停止
   func pauseSound() {
     self.player.pauseSound()
+    
+    // 再描画
+    self.redraw()
   }
   
-  /// 指定された音声を再生
-  func playSound(targetGroup: GroupInfo?, targetSound: SoundInfo?, volume: Float = utility.getPlayingSoundVolume()) throws {
-    // 現在の音声のPath取得
-    var oldPath = ""
-    var currentPlayingSound = SoundInfo()
-    if let _currentPlayingSound = self.getPlayingSound() {
-      currentPlayingSound = _currentPlayingSound
-      if let _oldPath = _currentPlayingSound.path {
-        oldPath = _oldPath.absoluteString
+  /// 再生
+  func playSound(volume: Float = utility.getPlayingSoundVolume()) throws {
+    if let _currentPlayingSound = self.currentPlayingSound {
+      // 選択フラグ設定
+      if let _targetGroup = getGroup(targetSound: _currentPlayingSound) {
+        _targetGroup.selectedSound = _currentPlayingSound
       }
-    }
-    
-    if let _targetGroup = targetGroup {
-      if let _targetSound = targetSound {
-        // 選択状態セット
-        _targetGroup.selectedSound = _targetSound
-        
-        // 音声の長さを保存
-        self.playingSoundDuration = _targetSound.duration()
-        
-        if self.player.isPlaying {
-          
-          // Pause
-          self.player.pauseSound()
-          
-          // 再生時間保存
-          currentPlayingSound.currentTime = self.player.getCurrentTime()
-          
-          utility.debugPrint(msg: "currentTime:\(currentPlayingSound.fileNameNoExt):\(utility.timeIntervalToString(timeInterval: currentPlayingSound.currentTime))")
-          
-          if let _newPath = _targetSound.path {
-            if oldPath != _newPath.absoluteString {
-              // Play
-              try self.player.Play(url: _targetSound.fullPath, startTime: _targetSound.currentTime, volume: volume)
-            }
-          }
-        } else {
-          // Play
-          try self.player.Play(url: _targetSound.fullPath, startTime: _targetSound.currentTime, volume: volume)
-        }
-        // Playing Gropu設定
-        self.playingGroup = _targetGroup
-        
-        // グループ情報保存
-        self.saveGroupInfos()
-      }
+
+      // 再生
+      try self.player.Play(url: _currentPlayingSound.fullPath, startTime: _currentPlayingSound.currentTime, volume: volume)
     }
     
     // 再表示
     self.redraw()
   }
   
+  /// 再生対象音声を選択
+  func selectPlaySound(targetSound: SoundInfo) {
+    if let index = self.playSoundList.firstIndex(where: {$0.soundInfo.parentId == targetSound.parentId && $0.soundInfo.fileNameNoExt == targetSound.fileNameNoExt}) {
+      // 再生対象インデックス設定
+      self.currentPlaySoundIndex = index
+      if let _group = getGroup(targetSound: targetSound) {
+        // 再生対象音声電卓
+        _group.selectedSound = targetSound
+      }
+    }
+    // 再表示
+    self.redraw()
+  }
+
+  /// 次を再生
   func playNextSound() {
-    var soundsIndex = 0
-    let repeatMode = utility.getRepearMode()
-    let randomMode = utility.getRandomMode()
-    
-    if let _playingGroup = self.playingGroup {
-      // RepeateAllまたはランダム再生の場合のみ続行
-      if repeatMode != .noRepeate {
-        // 現在再生中の音声取得
-        if let _selectedSound = _playingGroup.selectedSound {
-          if _playingGroup.soundInfos.count > 0 {
-            
-            if randomMode {
-              soundsIndex = Int.random(in: 0..<_playingGroup.soundInfos.count - 1)
-            } else {
-              // 現在再生中のSoundのインデックス取得
-              if let _playingSoundIndex = _playingGroup.soundInfos.firstIndex(where: { $0.id == _selectedSound.id }) {
-                if repeatMode == .repeateAll {
-                  if(_playingSoundIndex + 1 < _playingGroup.soundInfos.count) {
-                    soundsIndex = _playingSoundIndex + 1
-                  }
-                } else if repeatMode == .repeateOne {
-                  soundsIndex = _playingSoundIndex
-                }
-              }
-            }
-            // 再生
-            try! self.playSound(targetGroup: self.playingGroup, targetSound: _playingGroup.soundInfos[soundsIndex])
-          }
+    // Pause
+    self.pauseSound()
+
+    // 次の音声を決める
+    if utility.getRandomMode() {
+      // ランダム再生
+      self.currentPlaySoundIndex = Int.random(in: 0..<playSoundList.count - 1)
+    } else {
+      if self.playSoundList.count > self.currentPlaySoundIndex + 1 {
+        self.currentPlaySoundIndex += 1
+      } else {
+        if utility.getRepearMode() == .repeateAll {
+          self.currentPlaySoundIndex = 0
         }
       }
     }
+
+    do {
+      try self.playSound()
+    } catch {
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
+    }
   }
   
+  /// 前を再生
   func playPrevSound() {
-    if let _playingGroup = self.playingGroup {
-      if let _selectedSound = _playingGroup.selectedSound {
-        if _playingGroup.soundInfos.count > 0 {
-          if let _selectedSoundIndex = _playingGroup.soundInfos.firstIndex(where: { $0.id == _selectedSound.id }) {
-            if(_selectedSoundIndex - 1 >= 0) {
-              // Pause
-              self.player.pauseSound()
-              
-              try! self.playSound(targetGroup: self.playingGroup, targetSound: _playingGroup.soundInfos[_selectedSoundIndex - 1])
-            }
-          }
-        }
+    if self.currentPlaySoundIndex >= 0 {
+      self.currentPlaySoundIndex -= 1
+
+      // Pause
+      self.pauseSound()
+      do {
+        // Play
+        try self.playSound()
+      } catch {
+        utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
       }
     }
   }
   
   // 音声の現在再生時間
   func getPlayingTime() -> TimeInterval {
-    if let _selectedSound = self.getPlayingSound() {
+    if let _selectedSound = self.currentPlayingSound {
       return _selectedSound.currentTime
     }
     return TimeInterval.zero
   }
   
-  func getPlayingSound() -> SoundInfo? {
-    if let _playingGroup = self.playingGroup {
-      return _playingGroup.selectedSound
-    }
-    return nil
-  }
-  
   /// グループ情報保存
   func saveGroupInfos() {
     // 再生中の音声の時間セット
-    if let _playingSound = self.getPlayingSound() {
+    if let _playingSound = self.currentPlayingSound {
       _playingSound.currentTime = self.player.getCurrentTime()
     }
     utility.saveGroupInfo(outputInfos: self.fullSoundInfos)
     utility.saveGroupInfo(outputInfos: self.folderInfos)
     utility.saveGroupInfo(outputInfos: self.playListInfos)
+    utility.savePlayingSounds(outputInfos: self.playSoundList)
   }
   
   /// Soundの削除
@@ -528,8 +592,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
       // GroupがFolderの場合、PlayListのFolder名を変更する
       if _targetGroup.groupType == .Folder {
         // PlayListの参照を変更する
-        if let _docPath = utility.getDocumentDirectory() {
-          let oldFullPath = _docPath.appendingPathComponent(oldGroupName)
+        if let oldFullPath = utility.getDocumentPath(fileName: oldGroupName){
           self.playListInfos.forEach { folderItem in
             folderItem.soundInfos.forEach { fileItem in
               if let _fullpath = fileItem.fullPath {
@@ -555,8 +618,7 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
       
       // PlayListから削除されたフォルダのSoundを参照してるものを削除
       if _targetGroup.groupType == .Folder {
-        if let _docPath = utility.getDocumentDirectory() {
-          let removePath = _docPath.appendingPathComponent(_targetGroup.text)
+        if let removePath = utility.getDocumentPath(fileName: _targetGroup.text) {
           self.playListInfos.forEach { folderItem in
             folderItem.soundInfos.removeAll(where: {$0.fullPath == removePath})
           }
@@ -643,19 +705,51 @@ class ViewModel: ObservableObject, PlayerDelegateTerminated, EarphoneControlDele
     utility.debugPrint(msg: "redraw")
     objectWillChange.send()
   }
+
+  /// グループ取得（指定されたSoundのグループを取得）
+  func getGroup(targetSound: SoundInfo) -> GroupInfo? {
+    if let _res = self.fullSoundInfos.first(where: { $0.id == targetSound.parentId }) {
+      return _res
+    }
+    
+    if let _res = self.folderInfos.first(where: { $0.id == targetSound.parentId }) {
+      return _res
+    }
+    
+    if let _res = self.playListInfos.first(where: { $0.id == targetSound.parentId }) {
+      return _res
+    }
+    return nil
+  }
   
-  
-  // 現在音声再生（保存されている音声再生）
-  func playCurrentSound() {
-    if let _playingGroup = self.playingGroup {
-      if let _playingSound = self.getPlayingSound() {
-        do {
-          try self.playSound(targetGroup: _playingGroup, targetSound: _playingSound, volume: self.volome)
-          
-        } catch {
-          print(error.localizedDescription)
-        }
+  /// 追加「次に再生」
+  func insertNextPlay(targetSound: SoundInfo?) {
+    if let _targetSound = targetSound {
+      if let _targetGroup = getGroup(targetSound: _targetSound) {
+        self.playSoundList.insert(CurrentPlayingSound(soundInfo: _targetSound, groupText: _targetGroup.text, groupType: _targetGroup.groupType, isInterruptSound: true)
+, at: self.currentPlaySoundIndex + 1)
       }
+      utility.savePlayingSounds(outputInfos: self.playSoundList)
     }
   }
+  
+  /// 再生リスト作成
+  func changSoundList(targetGroup: GroupInfo) {
+    self.playSoundList = targetGroup.soundInfos.map { CurrentPlayingSound(soundInfo: $0, groupText: targetGroup.text, groupType: targetGroup.groupType)}
+
+    self.currentPlaySoundIndex = 0
+    if let idx = targetGroup.soundInfos.firstIndex(where: {$0.isSelected}) {
+      self.currentPlaySoundIndex = idx
+    }
+    
+    utility.savePlayingSounds(outputInfos: self.playSoundList)
+  }
+
+  #if DEBUG
+  private func dump(_playSoundListEx: [CurrentPlayingSound]) {
+    _playSoundListEx.forEach { item in
+      print("\(item.groupType.rawValue):\(item.groupText):\(item.soundInfo.fileNameNoExt)")
+    }
+  }
+  #endif
 }

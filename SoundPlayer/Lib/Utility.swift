@@ -41,6 +41,9 @@ struct utility {
   private static let SELECTED_GROUP_TEXT = "SELECTED_GROUP_TEXT"
   private static let PLAYING_GROUP_TYPE = "PLAYING_GROUP_TYPE"        // 現在のグループType
   private static let PLAYING_GROUP_TEXT = "PLAYING_GROUP_TEXT"        // 現在のグループ(フォルダ名、プレイリスト名)
+  private static let PLAYING_SOUNDS = "PLAYING_SOUNDS"                // 現在再生対象の音声
+  private static let CURRENT_SOUND_INDEX = "CURRENT_SOUND_INDEX"      // 現在再生対象の音声インデックス
+
   private static let PLAYING_SOUND_DURATION = "PLAYING_SOUND_DURATION"  // 現在の音源の長さ
   private static let PLAYING_SOUND_VOLUME = "PLAYING_SOUND_VOLUME"      // 音量
   private static let SETTING_FILE_DIRECTORY = "SETTING_FILE_DIRECTORY"
@@ -82,7 +85,7 @@ struct utility {
           self._emptyArtwork = try Data(contentsOf: url)
           // imageDataを使用して必要な処理を行う
         } catch {
-          print(error.localizedDescription)
+          utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
         }
       }
       return self._emptyArtwork
@@ -174,32 +177,45 @@ struct utility {
     return [URL]()
   }
   
+  static func getFolders() -> [URL] {
+    do {
+      if let _docPath = self.getDocumentDirectory() {
+        let res = try FileManager.default.contentsOfDirectory(atPath: _docPath.path)
+        print("")
+      }
+    } catch {
+      self.debugPrint(msg: error.localizedDescription)
+    }
+    return [URL]()
+  }
+  
   /// 保存されているFullSoundInfo取得
   static func getSaveFullSoundInfo() -> [FullSoundInfo] {
-    let fetchedFolders: [GroupInfo] = self.getGroupInfo(saveKey: FULL_SOUND_INFO)
-    return fetchedFolders.map { $0 as! FullSoundInfo }
+    if let res: [FullSoundInfo] = self.getJsonData(key: FULL_SOUND_INFO) {
+      return res
+    }
+    return [FullSoundInfo]()
   }
   /// 保存されているFolderInfo取得
   static func getSaveFolderInfo() -> [FolderInfo] {
-    let fetchedFolders: [GroupInfo] = self.getGroupInfo(saveKey: FOLDER_INFO)
-    return fetchedFolders.map { $0 as! FolderInfo }
+    if let res: [FolderInfo] = self.getJsonData(key: FOLDER_INFO) {
+      return res
+    }
+    return [FolderInfo]()
   }
   /// 保存されているPlayListInfo取得
   static func getPlayListInfo() -> [PlayListInfo] {
-    let fetchedFolders: [GroupInfo] = self.getGroupInfo(saveKey: PLAY_LIST_INFO)
-    return fetchedFolders.map { $0 as! PlayListInfo }
+    if let res: [PlayListInfo] = self.getJsonData(key: PLAY_LIST_INFO) {
+      return res
+    }
+    return [PlayListInfo]()
   }
   /// 保存されている設定情報取得
   static func getSettingInfo() -> SettingModel {
-    if let jsonString = UserDefaults.standard.string(forKey: SETTING_INFO) {
-      if let jsonData = jsonString.data(using: .utf8) {
-        do {
-          return try JSONDecoder().decode(SettingModel.self, from: jsonData)
-        } catch {
-          print(error.localizedDescription)
-        }
-      }
+    if let res: SettingModel = self.getJsonData(key: SETTING_INFO) {
+      return res
     }
+
     return SettingModel()
   }
   /// 設定情報保存
@@ -216,7 +232,7 @@ struct utility {
         print("Failed to convert JSON data to string.")
       }
     } catch {
-      print(error.localizedDescription)
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
     }
     
   }
@@ -230,34 +246,6 @@ struct utility {
     UserDefaults.standard.synchronize()
   }
 
-  /// Group情報の取得
-  private static func getGroupInfo(saveKey: String) -> [GroupInfo] {   // 移動済
-    // UserDefaultsから保存データ取得
-    if let jsonString = UserDefaults.standard.string(forKey: saveKey) {
-
-      // String型データをData型に変換
-      if let jsonData = jsonString.data(using: .utf8) {
-        do {
-          // JsonDataを配列に変換
-          if saveKey == FULL_SOUND_INFO {
-            return try JSONDecoder().decode([FullSoundInfo].self, from: jsonData)
-          } else if saveKey == FOLDER_INFO {
-            return try JSONDecoder().decode([FolderInfo].self, from: jsonData)
-          } else if saveKey == PLAY_LIST_INFO {
-            return try JSONDecoder().decode([PlayListInfo].self, from: jsonData)
-          }
-        } catch {
-          print("Error decoding JSON data: \(error.localizedDescription)")
-        }
-      } else {
-        print("Error converting JSON string to data")
-      }
-    } else {
-      print("Error retrieving JSON string from UserDefaults")
-    }
-    return [GroupInfo]()
-  }
-  
   /// Soundファイルの移動
   static func copySoundFile(action: FileDuplication = .cancel, at: URL, to: URL) {
     do {
@@ -297,8 +285,7 @@ struct utility {
       // ファイルコピー
       try FileManager.default.copyItem(at: at, to: newFileUrl)
     } catch {
-      utility.debugPrint(msg: error.localizedDescription)
-      return
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
     }
   }
   
@@ -324,21 +311,8 @@ struct utility {
         }
       }
     } catch {
-      print(error.localizedDescription)
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
     }
-  }
-  
-  /// PlayListInfoをファイル出力する
-  static func playListInfoToFile(groupinfo: [PlayListInfo] ,fileName: String, outputUrl: URL? = nil) throws {
-    var outputFullUrl: URL
-    if let _outputUrl = outputUrl {
-      outputFullUrl = _outputUrl.appendingPathComponent(fileName)
-    } else {
-      outputFullUrl = utility.getDocumentDirectory()!.appendingPathComponent(fileName)
-    }
-    
-    // エンコードと出力
-    try JSONEncoder().encode(groupinfo).write(to:outputFullUrl)
   }
   
   // 再生対象のグループ情報の保存
@@ -423,14 +397,81 @@ struct utility {
   
   // 現在の音声の再生時間取得
   static func getPlayingSoundDuration() -> TimeInterval {
-    return UserDefaults.standard.double(forKey: PLAYING_SOUND_DURATION)
+    if let res: TimeInterval = self.getJsonData(key: PLAYING_SOUND_DURATION) {
+      return res
+    }
+    return TimeInterval.zero
   }
   
   // 現在のグループ名(text)取得
   static func getPlayingGroupText() -> String? {
     return UserDefaults.standard.string(forKey: PLAYING_GROUP_TEXT)
   }
+
+  // 現在再生対象の音声リスト取得
+  static func getPlayingSounds() -> [CurrentPlayingSound]? {
+    return self.getJsonData(key: PLAYING_SOUNDS)
+  }
+
+  // 現在再生対象の音声インデクス取得
+  static func getPlayingSoundsIndex() -> Int {
+    return UserDefaults.standard.integer(forKey: CURRENT_SOUND_INDEX)
+  }
+
+  // 現在再生対象の音声リスト保存
+  static func savePlayingSounds(outputInfos:[CurrentPlayingSound]) {
+#if DEBUG
+    self.debugPrint(msg: "saveGroupInfo(savePlayingSounds)")
+#endif
+    do {
+      if outputInfos.count > 0 {
+        let jsonData = try JSONEncoder().encode(outputInfos)
+        
+        // JSONデータをStringに変換
+        if let jsonString = String(data: jsonData, encoding: .utf8) {
+          // UserDefaultsにPlayListデータを保存
+          UserDefaults.standard.setValue(jsonString, forKey: PLAYING_SOUNDS)
+        } else {
+          print("Failed to convert JSON data to string.")
+        }
+      }
+    } catch {
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
+    }
+  }
+
+  // 現在再生対象の音声インデクス取得
+  static func savePlayingSoundsIndex(index: Int) {
+    UserDefaults.standard.setValue(index, forKey: CURRENT_SOUND_INDEX)
+  }
+
+  // Jsonデータ取得
+  static func getJsonData<T: Decodable>(key: String) -> T? {
+    // UserDefaultsから保存データ取得
+    if let jsonString = UserDefaults.standard.string(forKey: key) {
+      return self.decodeJsonData(jsonString: jsonString)
+    } else {
+      print("Error retrieving JSON string from UserDefaults")
+    }
+    return nil
+  }
   
+  // Jsonデータデコード
+  static func decodeJsonData<T: Decodable>(jsonString: String) -> T? {
+    // String型データをData型に変換
+    if let jsonData = jsonString.data(using: .utf8) {
+      do {
+        return try JSONDecoder().decode(T.self, from: jsonData)
+      } catch {
+        utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
+      }
+    } else {
+      print("Error converting JSON string to data")
+    }
+
+    return nil
+  }
+
   // 現在選択されているグループ名(text)取得
   static func getSelectedGroupText() -> String? {
     return UserDefaults.standard.string(forKey: SELECTED_GROUP_TEXT)
@@ -510,32 +551,17 @@ struct utility {
     return Image(systemName: "cat")
   }
 
-  static func getPlayingImage(isPlaying: Bool, item: SoundInfo) -> some View {
-    if isPlaying {
-      return Image(systemName: "speaker.zzz")
-        .opacity(item.isSelected ? 1.0 : 0)
-        .frame(width: 20, height: 20)
-        .foregroundStyle(.primary)
-    } else {
-      return Image(systemName: "speaker")
-        .opacity(item.isSelected ? 1.0 : 0)
-        .frame(width: 20, height: 20)
-        .foregroundStyle(.primary)
-    }
-  }
-  
   // PNGファイルにSave
   static func saveArtWork(imageData: Data?, fileName: String = UUID().uuidString) {
     if let _imageData = imageData {
       if let _uiImage = UIImage(data: _imageData) {
-        if let _docUrl = utility.getDocumentDirectory() {
+        if let _saveUrl = utility.getDocumentPath(fileName: fileName) {
           // PNG形式で画像を保存
           do {
-            let _saveUrl = _docUrl.appendingPathComponent(fileName)
             try _uiImage.pngData()?.write(to: _saveUrl)
             utility.debugPrint(msg: "Image saved to: \(_saveUrl.absoluteString)")
           } catch {
-            print("Error saving image:", error.localizedDescription)
+            utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
           }
         }
       }
@@ -568,9 +594,8 @@ struct utility {
   
   /// プライベートモード判定
   static func isPrivateMode() -> Bool {
-    if let _documentDirectory = self.getDocumentDirectory() {
-      
-      return FileManager.default.fileExists(atPath: _documentDirectory.appendingPathComponent(PRIVATE_FILE_NAME).path)
+    if let _documentDirectory = self.getDocumentPath(fileName: PRIVATE_FILE_NAME) {
+      return FileManager.default.fileExists(atPath: _documentDirectory.path)
     }
     return false
   }
@@ -610,8 +635,8 @@ struct utility {
   /// Priveteモード用ファイル作成
   static func CreatePrivateModeFile() {
     let fm = FileManager()
-    if let path = self.getDocumentDirectory() {
-      fm.createFile(atPath: path.appendingPathComponent(self.PRIVATE_FILE_NAME).path, contents: nil)
+    if let path = self.getDocumentPath(fileName: self.PRIVATE_FILE_NAME) {
+      fm.createFile(atPath: path.path, contents: nil)
     }
   }
   
@@ -659,7 +684,7 @@ struct utility {
           try fileManager.removeItem(atPath: itemPath)
         }
       } catch {
-        print("フォルダの内容を削除できませんでした: \(error.localizedDescription)")
+        utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
       }
     }
 
@@ -701,7 +726,7 @@ struct utility {
     self.debugPrint(msg: "PLAYING_SOUND_DURATION:\(self.getPlayingSoundDuration())")
     self.debugPrint(msg: "PLAYING_SOUND_VOLUME:\(self.getPlayingSoundVolume())")               // 音量
     
-    if let _selectedSound = viewModel.getPlayingSound() {
+    if let _selectedSound = viewModel.currentPlayingSound {
       self.debugPrint(msg: "SelectedSound FileName : \(_selectedSound.fileName)")
       self.debugPrint(msg: "SelectedSound currentTime : \(_selectedSound.currentTime)")
       self.debugPrint(msg: "SelectedSound currentTime : \(_selectedSound.currentTime)")
@@ -754,6 +779,12 @@ struct utility {
 #endif
   }
   
+  static func exceptionMessage(className: String, functionName: String, err: Error) {
+    let log = "\(className):\(functionName):\(err.localizedDescription)"
+    print(log)
+ //   self.saveDebugLog(log: log)
+  }
+  
   static func funcTime(_ log: String, action: () -> Void) {
 #if DEBUG
     let startDate = Date()
@@ -763,68 +794,27 @@ struct utility {
 #endif
   }
   
-  // DEBUG ログ・ファイル出力
-  static func writeStringToFile(content: String, fileName: String = "DEBUG_LOG") {
-    #if DEBUG
-    // ドキュメントディレクトリのURLを取得
-    let fileManager = FileManager.default
-    guard let documentsURL = self.getDocumentDirectory() else {
-        print("Could not find the documents directory.")
-        return
-    }
 
-    // 保存するファイルのURLを作成
-    let fileURL = documentsURL.appendingPathComponent(fileName)
-
-    // コンテンツを追加するためのデータ
-    let _content = String("\(content)\n")
-    guard let data = _content.data(using: .utf8) else {
-        print("Could not convert string to data.")
-        return
-    }
-
-    // ファイルが存在するかチェック
-    if fileManager.fileExists(atPath: fileURL.path) {
-        // ファイルが存在する場合は追加書き込み
-        if let fileHandle = try? FileHandle(forWritingTo: fileURL) {
-            fileHandle.seekToEndOfFile()
-            fileHandle.write(data)
-            fileHandle.closeFile()
-            print("Content appended successfully to \(fileURL.path)")
-        } else {
-            print("Could not open file for writing.")
-        }
-    } else {
-        // ファイルが存在しない場合は新規作成して書き込み
-        do {
-            try data.write(to: fileURL, options: .atomicWrite)
-            print("File created and written successfully to \(fileURL.path)")
-        } catch {
-            print("Failed to write file: \(error)")
-        }
-    }
-    #endif
-  }
   
+  // プライベートモードFile削除
   static func removePrivateModeFile() {
     do {
-      if let _docDir = utility.getDocumentDirectory() {
-        try FileManager.default.removeItem(at: _docDir.appendingPathComponent(utility.PRIVATE_FILE_NAME))
+      if let fullPath = utility.getDocumentPath(fileName: utility.PRIVATE_FILE_NAME) {
+        try FileManager.default.removeItem(at: fullPath)
       }
     } catch {
-      print(error.localizedDescription)
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
     }
   }
   
   // デバッグログ消去
   static func clearDebugLog() {
     do {
-      if let _DocUrl = utility.getDocumentDirectory() {
-        let fullPath = _DocUrl.appendingPathComponent(DEBUG_LOG_FILE_NAME)
+      if let fullPath = utility.getDocumentPath(fileName: DEBUG_LOG_FILE_NAME) {
         try "".write(to: fullPath, atomically: true, encoding: .utf8)
       }
     } catch {
-      print(error.localizedDescription)
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
     }
   }
   /// デバッグログ保存
@@ -838,32 +828,39 @@ struct utility {
       
       // JSONデータをStringに変換
       if let jsonString = String(data: jsonData, encoding: .utf8) {
-        if let _DocUrl = utility.getDocumentDirectory() {
-          let fullPath = _DocUrl.appendingPathComponent(DEBUG_LOG_FILE_NAME)
+        if let fullPath = self.getDocumentPath(fileName: DEBUG_LOG_FILE_NAME) {
           try jsonString.write(to: fullPath, atomically: true, encoding: .utf8)
         }
       } else {
         print("Failed to convert JSON data to string.")
       }
     } catch {
-      print(error.localizedDescription)
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
     }
   }
   
   /// デバッグログ読み込み
   static func readDebugLog() -> [DebugLogItemModel] {
     do {
-      if let _DocUrl = utility.getDocumentDirectory() {
-        let fullPath = _DocUrl.appendingPathComponent(DEBUG_LOG_FILE_NAME)
+      if let fullPath = self.getDocumentPath(fileName: DEBUG_LOG_FILE_NAME) {
         let jsonString = try String(contentsOf: fullPath)
-        if let jsonData = jsonString.data(using: .utf8) {
-          return try JSONDecoder().decode([DebugLogItemModel].self, from: jsonData)
+        if jsonString.count > 0 {
+          if let res: [DebugLogItemModel] = self.decodeJsonData(jsonString: jsonString) {
+            return res
+          }
         }
       }
     } catch {
-      print(error.localizedDescription)
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
     }
       
     return [DebugLogItemModel]()
+  }
+  
+  static func getDocumentPath(fileName: String) -> URL? {
+    if let _DocUrl = utility.getDocumentDirectory() {
+      return _DocUrl.appendingPathComponent(fileName)
+    }
+    return nil
   }
 }

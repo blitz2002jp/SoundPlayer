@@ -144,15 +144,18 @@ struct SearchSounds: View {
                 }
                 .onTapGesture {
                   do {
+                    try self.viewModel.playSound()
+                    /*
                     try viewModel.playSound(targetGroup: itemGrp,  targetSound: itemSound)
+                     */
                   } catch {
-                    print(error.localizedDescription)
+                    utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
                   }
                 }
               }
             }
           } header: {
-            Text(itemGrp.text == "" ? "Document" : itemGrp.text)
+            Text(itemGrp.displayText)
           }
           // Sectionヘッダ文字がすべて大文字になるのを防ぐ
           .headerProminence(.increased)

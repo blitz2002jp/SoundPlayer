@@ -7,6 +7,12 @@
 
 import Foundation
 
+#warning("起動直後にPlayViewを表示したときの再生時間が正しいか？　すべて０になってる？")
+#warning("GroupInfoのTextとして表示するDocumentの表示方法を整理する")
+#warning("Exceptionの保存を確認（エラーになる）")
+#warning("chtchで表示するprintを工夫してメソッド名などの表示も行えるようにする")
+#warning("FolderListから表示した音声リストの再生アイコンが再生していない曲に表示される")
+#warning("次に再生が再生されるー＞FooterのPauseボタンを押すと停止しないで頭から再生される")
 #warning("検索処理を非同期に")
 
 /*

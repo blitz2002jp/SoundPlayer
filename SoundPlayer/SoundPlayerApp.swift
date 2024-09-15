@@ -26,24 +26,25 @@ struct SoundPlayerApp: App {
 
       // アクティブになった
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { notification in
+          utility.saveDebugLog(log: "notification : didBecomeActiveNotification")
         }
       // 非活性になるよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { notification in
-          utility.debugPrint(msg: "notification:willResignActiveNotification")
+          utility.saveDebugLog(log: "notification : willResignActiveNotification")
         }
       // バックグランドになった。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { notification in
           // グループ情報保存
           viewModel.saveGroupInfos()
-          utility.debugPrint(msg: "notification:didEnterBackgroundNotification")
+          utility.saveDebugLog(log: "notification : didEnterBackgroundNotification")
         }
       // フォアグラウンドになるよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { notification in
-          utility.debugPrint(msg: "notification:willEnterForegroundNotification")
+          utility.saveDebugLog(log: "notification : willEnterForegroundNotification")
         }
       // アプリ終了するよ。
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification)) { notification in
-          utility.debugPrint(msg: "notification:willTerminateNotification")
+          utility.saveDebugLog(log: "notification : willTerminateNotification")
         }
       // 画面が回転したよ
         .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
@@ -69,7 +70,7 @@ class CustomAppDelegate: UIResponder, UIApplicationDelegate {
     do {
       try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playback)
     } catch {
-      print(error.localizedDescription)
+      utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
     }
 
     return true
@@ -84,6 +85,7 @@ class CustomAppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   func applicationDidEnterBackground(_ application: UIApplication) {
+    utility.saveDebugLog(log: "applicationDidEnterBackground")
       // アプリケーションがバックグラウンドに移行する直前に呼ばれる
       // ここでバックグラウンドに移行する直前の処理を行う
   }

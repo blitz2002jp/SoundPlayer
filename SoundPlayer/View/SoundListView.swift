@@ -27,24 +27,11 @@ struct SoundListView: View {
               let _ = self.debug1(soundInfo: item)
 #endif
             HStack {
-              if item.isSelected {
-                if viewModel.isPlayingSound(groupInfo: _targetGroup, soundInfo: item) {
-                  HStack(spacing: 2) {
-                    utility.getPlayingImage(isPlaying: true, item: item)
-                    viewModel.getArtWorkImage(soundInfo: item)
-                  }
-                } else {
-                  HStack(spacing: 2) {
-                    utility.getPlayingImage(isPlaying: false, item: item)
-                    viewModel.getArtWorkImage(soundInfo: item)
-                  }
-                }
-              } else {
-                HStack(spacing: 2) {
-                  utility.getPlayingImage(isPlaying: false, item: item)
-                  viewModel.getArtWorkImage(soundInfo: item)
-                }
+              HStack(spacing: 2) {
+                self.speakerImage(targetSound: item)
+                self.viewModel.getArtWorkImage(soundInfo: item)
               }
+
               Text(item.text == "" ? item.fileNameNoExt : item.text)
                 .lineLimit(1)
                 .padding([.leading, .trailing, .top, .bottom], 10)
@@ -66,10 +53,28 @@ struct SoundListView: View {
             }
             .padding([.leading, .trailing], 20)
             .onTapGesture {
+                // 現在最中音声と同じ
+                if let _currentPlayingSound = self.viewModel.currentPlayingSound {
+                  if _currentPlayingSound == item {
+                    if self.viewModel.player.isPlaying {
+                      // 停止
+                      self.viewModel.pauseSound()
+                      return
+                    }
+                  }
+                }
+
               do {
-                try viewModel.playSound(targetGroup: _targetGroup,  targetSound: item)
+                // 再生リスト作成
+                self.viewModel.changSoundList(targetGroup: _targetGroup)
+                
+                // 再生対象の選択
+                self.viewModel.selectPlaySound(targetSound: item)
+                
+                // 再生
+                try self.viewModel.playSound()
               } catch {
-                print(error.localizedDescription)
+                utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
               }
             }
           }
@@ -77,6 +82,19 @@ struct SoundListView: View {
       }
     }
     .navigationBarTitle(self.viewTitle)
+  }
+
+  // スピーカーImage取得
+  @ViewBuilder private func speakerImage(targetSound: SoundInfo) -> some View {
+    @State var speakerImageName = "speaker"
+    if targetSound.isSelected {
+      Image(systemName: viewModel.isPlayingSound(targetSound: targetSound) ? "speaker.zzz" : "speaker")
+        .frame(width: 20, height: 20)
+        .foregroundStyle(.primary)
+    } else {
+      Color.clear
+        .frame(width: 20, height: 20)
+    }
   }
 
 #if DEBUG

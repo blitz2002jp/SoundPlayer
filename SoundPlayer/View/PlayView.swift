@@ -14,13 +14,21 @@ struct PlayView: View {
   @State var randomBackColor: Color = .clear
   @State var repeateBackColor: Color = .clear
   
+  @State private var showPlayLists = false
+  
   var body: some View {
     VStack {
-      if let _playingGroup = viewModel.playingGroup {
-        if let _playingSound = viewModel.getPlayingSound() {
-          TitleView(title: _playingSound.fileNameNoExt, subTitle: _playingGroup.text, targetGroup: viewModel.playingGroup, targetSound: viewModel.getPlayingSound(), trailingItem: .menu)
-          Spacer()
+      if let _playingSound = self.viewModel.currentPlayingSound {
+        if let _playingGroup = self.viewModel.getGroup(targetSound: _playingSound) {
+          TitleView(title: _playingSound.fileNameNoExt, subTitle: _playingGroup.displayText, menuContent: AnyView(PlayViewMenu(targetGroup: _playingGroup, targetSound: _playingSound)))
+/*
+ TitleView(title: _playingSound.fileNameNoExt, subTitle: _playingGroup.text, content: PlayViewMenu(targetGroup: _playingGroup, targetSound: _playingSound))
 
+ 
+          TitleView(title: _playingSound.fileNameNoExt, subTitle: _playingGroup.text, targetGroup: _playingGroup, targetSound: _playingSound, trailingItem: .menu)
+ */
+          Spacer()
+          
           if let _artWork = utility.getArtWorkImage(imageData: _playingSound.artWork, showArtWork: self.viewModel.settingInfo.showArtWork) {
             _artWork
               .resizable()
@@ -36,20 +44,20 @@ struct PlayView: View {
           HStack {
             Spacer()
             RandomButton()
-/*
-            Image(systemName: "shuffle")
-              .font(.title3)
-              .background(self.randomBackColor)
-              .onTapGesture {
-                var randomMode = utility.getRandomMode()
-                randomMode.toggle()
-                utility.saveRandomMode(randomMode: randomMode)
-                self.randomBackColor = self.getRandomBackColor(idRandom: randomMode)
-              }
-              .onAppear() {
-                self.randomBackColor = self.getRandomBackColor(idRandom: utility.getRandomMode())
-              }
- */
+            /*
+             Image(systemName: "shuffle")
+             .font(.title3)
+             .background(self.randomBackColor)
+             .onTapGesture {
+             var randomMode = utility.getRandomMode()
+             randomMode.toggle()
+             utility.saveRandomMode(randomMode: randomMode)
+             self.randomBackColor = self.getRandomBackColor(idRandom: randomMode)
+             }
+             .onAppear() {
+             self.randomBackColor = self.getRandomBackColor(idRandom: utility.getRandomMode())
+             }
+             */
             Spacer()
             Image(systemName: "backward.fill")
               .font(.title3)
@@ -61,9 +69,16 @@ struct PlayView: View {
               .font(.title3)
               .onTapGesture {
                 do {
+                  if self.viewModel.player.isPlaying {
+                    self.viewModel.pauseSound()
+                  } else {
+                    try self.viewModel.playSound()
+                  }
+/*
                   try viewModel.playSound(targetGroup: viewModel.playingGroup, targetSound: viewModel.getPlayingSound())
+ */
                 } catch {
-                  print(error.localizedDescription)
+                  utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
                 }
               }
             Spacer()
@@ -81,9 +96,23 @@ struct PlayView: View {
           // ボリューム
           VolumeSlider(sliderVal: $volume)
           Spacer()
+          HStack {
+            Spacer()
+            Button("A") {
+              self.showPlayLists = true
+            }
+            .sheet(isPresented: self.$showPlayLists) {
+              if #available(iOS 16.0, *) {
+                SoundListView()
+                  .presentationDetents([.medium])
+              } else {
+                SoundListView()
+              }
+            }
+            Spacer()
+          }
         } else { //_playingSound
         }
-      } else { //_playingGroup
       }
     }
     .padding([.leading, .trailing], 10)
@@ -94,5 +123,29 @@ struct PlayView: View {
   }
   func getRepeateColor(repeatMode: RepeatMode) -> Color {
     return repeatMode == .repeateAll ? Color.yellow.opacity(0.5) : .clear
+  }
+}
+
+struct PlayViewMenu: View {
+  var targetGroup: GroupInfo?
+  var targetSound: SoundInfo?
+  @State private var showMenu = false
+
+  var body: some View {
+    // メニュー
+    Image(systemName: "ellipsis.circle")
+      .frame(width: 20)
+      .onTapGesture {
+          self.showMenu = true
+      }
+      .sheet(isPresented: self.$showMenu)
+    {
+      if #available(iOS 16.0, *) {
+        SoundActionMenu(targetGroup: targetGroup, targetSound: targetSound)
+          .presentationDetents([.medium])
+      } else {
+        SoundActionMenu(targetGroup: targetGroup, targetSound: targetSound)
+      }
+    }
   }
 }

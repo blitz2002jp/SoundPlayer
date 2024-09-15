@@ -146,21 +146,21 @@ struct Footer: View {
   @State private var showSearchSheet = false
   
   private let FooterHeight: CGFloat = 40
-//  private let FooterWidth: CGFloat = 40
   
   
   var body: some View {
-      HStack(spacing: 0) {
-        // 検索ボタン
-        Image(systemName: "magnifyingglass")
-          .foregroundStyle(.black)
-          .onTapGesture {
-            self.showSearchSheet = true
-          }
-          .frame(maxWidth: 40, maxHeight: .infinity)
-        
+    HStack(spacing: 0) {
+      // 検索ボタン
+      Image(systemName: "magnifyingglass")
+        .foregroundStyle(.black)
+        .onTapGesture {
+          self.showSearchSheet = true
+        }
+        .frame(maxWidth: 40, maxHeight: .infinity)
+      Spacer()
+      if let _currentPlayingSound = self.viewModel.currentPlayingSound {
         // 音声名
-        Text("\(viewModel.getPlayingSound()?.fileNameNoExt ?? "")")
+        Text(_currentPlayingSound.fileNameNoExt)
           .font(.footnote)
           .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity)
           .onTapGesture {
@@ -172,11 +172,20 @@ struct Footer: View {
         Image(systemName: viewModel.playMode == .play ? "pause" : "play.fill")
           .imageScale(.large)
           .onTapGesture {
-            if let _playingGroup = self.viewModel.playingGroup {
-              if let _selectedSound = self.viewModel.getPlayingSound() {
-                try? self.viewModel.playSound(targetGroup: _playingGroup, targetSound: _selectedSound)
+            do {
+              if self.viewModel.player.isPlaying {
+                self.viewModel.pauseSound()
+              } else {
+                try self.viewModel.playSound()
               }
+            } catch {
+              utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
             }
+/*
+            if let _playingGroup = self.viewModel.getCurrentPlayingSoundGroup() {
+              try? self.viewModel.playSound(targetGroup: _playingGroup, targetSound: self.viewModel.currentPlayingSound)
+            }
+ */
           }
           .frame(maxWidth: 50, maxHeight: .infinity)
         
@@ -188,6 +197,7 @@ struct Footer: View {
             self.viewModel.playNextSound()
           }
       }
+    }
       .sheet(isPresented: self.$showPlayViewSheet, onDismiss: {
       }) {
         if #available(iOS 16.0, *) {
@@ -208,20 +218,10 @@ struct Footer: View {
   }
 
 struct TitleView: View {
-
-  enum TrailingItem {
-    case none
-    case menu
-  }
-
   var title: String
   var subTitle : String
-  
-  // 対象Group Sound
-  var targetGroup: GroupInfo?
-  var targetSound: SoundInfo?
+  let menuContent: AnyView?
 
-  var trailingItem:TrailingItem = .none
   var onOk: () -> Void = {}
   @State private var showMenu = false
   @Environment(\.dismiss) var dismiss
@@ -234,38 +234,23 @@ struct TitleView: View {
           .onTapGesture {
             dismiss()
           }
-
+        
         // Imageを右寄せにするためにSpacerを追加
         Spacer()
         Text(self.title)
           .font(.title3)
-        // Textを水平方向に拡張して中央寄せにする
-          .frame(maxWidth: .infinity)
 
-        // 複数行の場合にも中央寄せにする
-          .multilineTextAlignment(.center)
-        
-//        if self.trailingItem == .menu {
+        Spacer()
+
+        if let _menuContent = menuContent {
           // メニュー
-          Image(systemName: "ellipsis.circle")
-            .opacity(self.trailingItem == .menu ? 1.0 : 0.0)
-            .onTapGesture {
-              if self.trailingItem == .menu {
-                self.showMenu = true
-              }
-            }
-            .sheet(isPresented: self.$showMenu)
-          {
-            if #available(iOS 16.0, *) {
-              SoundActionMenu(targetGroup: targetGroup, targetSound: targetSound)
-                .presentationDetents([.medium])
-            } else {
-              SoundActionMenu(targetGroup: targetGroup, targetSound: targetSound)
-            }
-          }
+          menuContent
+        } else {
+          Color.clear.frame(width: 20, height: 5)
         }
-//      }
-      Text(self.subTitle == "" ? "Document" : self.subTitle)
+
+      }
+      Text(self.subTitle)
         .font(.footnote)
         .foregroundStyle(Color.gray.opacity(0.5))
       Divider()

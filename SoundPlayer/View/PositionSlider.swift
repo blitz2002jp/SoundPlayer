@@ -14,10 +14,10 @@ struct PositionSlider: View, PlayerDelegateCurrentTime, PlayerDelegateTerminated
   
   private var targetSound: SoundInfo {
     get {
-      if let _playingSound = viewModel.getPlayingSound() {
+      if let _playingSound = viewModel.currentPlayingSound {
         return _playingSound
       }
-      return SoundInfo()
+      return SoundInfo(parentId: "")
     }
   }
   

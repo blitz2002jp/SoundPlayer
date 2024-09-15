@@ -14,19 +14,25 @@ enum GroupType: String, Codable {
   case PlayList
 }
 
-class GroupInfo: Codable, Identifiable{
+class GroupInfo: Codable, Identifiable {
+  var id: String
   var groupType: GroupType = .FullSound                     // グループタイプ
   var text = ""                             // 表示名
+  var displayText: String {                             // 表示名
+    get {
+      if self.text == "" {
+        return "Document"
+      }
+      return self.text
+    }
+  }
   var soundInfos = [SoundInfo]()                   // 音声情報
   var comment = ""                           // コメント
   var sortKey = 0                              // ソートキー
   
   var folder: URL? {
     get {
-      if let _documentPath = utility.getDocumentDirectory() {
-        return _documentPath.appendingPathComponent(self.text)
-      }
-      return nil
+      return utility.getDocumentPath(fileName: self.text)
     }
   }
   var selectedSound: SoundInfo? {               // 選択音声
@@ -49,7 +55,8 @@ class GroupInfo: Codable, Identifiable{
     }
   }
   
-  init(groupType: GroupType, text: String, soundInfos: [SoundInfo] = [SoundInfo](), comment: String = "", sortKey: Int = 0) {
+  init(id: String = UUID().uuidString, groupType: GroupType, text: String, soundInfos: [SoundInfo] = [SoundInfo](), comment: String = "", sortKey: Int = 0) {
+    self.id = id
     self.groupType = groupType
     self.text = text
     self.soundInfos = soundInfos
@@ -57,9 +64,10 @@ class GroupInfo: Codable, Identifiable{
     self.sortKey = sortKey
   }
   
-  init(){
+  init(id: String = UUID().uuidString) {
+    self.id = id
   }
-
+  
   func copy(copyTo: GroupInfo) -> GroupInfo {
     copyTo.groupType = self.groupType
     copyTo.text = self.text
@@ -70,24 +78,6 @@ class GroupInfo: Codable, Identifiable{
     return copyTo
   }
 
-  // Json Decode用のinit(Json Decoderから呼ばれる)
-  required init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    self.groupType = try container.decode(GroupType.self, forKey: .groupType)
-    self.text = try container.decode(String.self, forKey: .text)
-    self.soundInfos = try container.decode([SoundInfo].self, forKey: .soundInfos)
-    self.comment = try container.decode(String.self, forKey: .comment)
-    self.sortKey = try container.decode(Int.self, forKey: .sortKey)
-  }
-
-  enum CodingKeys: String, CodingKey {
-    case groupType
-    case text
-    case soundInfos
-    case comment
-    case sortKey
-  }
-  
   /// Sound Fileの削除
   func removeSoundFile(removeSound: SoundInfo) {
     if let _fileUrl = removeSound.fullPath {
@@ -95,7 +85,7 @@ class GroupInfo: Codable, Identifiable{
         // ファイル削除
         try FileManager.default.removeItem(at: _fileUrl)
       }catch {
-        print("Remove File failure.(\(error.localizedDescription)")
+        utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
       }
     }
   }

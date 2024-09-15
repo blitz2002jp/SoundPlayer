@@ -25,7 +25,10 @@ struct SoundActionMenu: View {
     VStack {
       if let _targetGroup = targetGroup {
         if let _targetSound = targetSound {
+          TitleView(title: _targetSound.fileNameNoExt, subTitle: _targetGroup.displayText, menuContent: nil)
+/*
           TitleView(title: _targetSound.fileNameNoExt, subTitle: _targetGroup.text, targetGroup: targetGroup, targetSound: targetSound, trailingItem: .none)
+ */
         }
       }
       List {
@@ -38,7 +41,7 @@ struct SoundActionMenu: View {
                 self.titleTime.hours = hours
                 self.titleTime.minutes = minutes
                 self.titleTime.seconds = seconds
-                self.titleTime.titles = viewModel.playListInfos.map{ $0.text }
+                self.titleTime.titles = viewModel.playListInfos.map{ $0.displayText }
                 self.showAddPlaylistDialod.toggle()
               }
               .sheet(isPresented: $showAddPlaylistDialod)
@@ -50,6 +53,17 @@ struct SoundActionMenu: View {
                 TitleTimeInput(model: self.titleTime, targetGroup: targetGroup, targetSound: targetSound)
               }
             }
+          }
+          HStack {
+            Image(systemName: "arrow.up.to.line")
+            Text("次に再生")
+              .onTapGesture {
+                //　追加
+                self.viewModel.insertNextPlay(targetSound: targetSound)
+
+                // ダイアログClose
+                dismiss()
+              }
           }
           HStack {
             Image(systemName: "rectangle.portrait.and.arrow.right")

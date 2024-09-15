@@ -82,7 +82,7 @@ struct ContentView: View {
       SettingView(nextView: $nextView)
     }
     
-    if self.viewModel.getPlayingSound() != nil {
+    if self.viewModel.currentPlayingSound != nil {
       // フッター
       Footer()
     }

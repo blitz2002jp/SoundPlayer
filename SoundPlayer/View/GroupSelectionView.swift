@@ -42,8 +42,11 @@ struct GroupSelectionView: View {
     if let _targetGroup = targetGroup {
       if let _targetSound = targetSound {
         VStack {
+          TitleView(title: _targetSound.fileNameNoExt, subTitle: _targetGroup.displayText, menuContent: nil)
+/*
           TitleView(title: _targetSound.fileNameNoExt, subTitle: _targetGroup.text, targetGroup: targetGroup, targetSound: targetSound, trailingItem: .none) {
           }
+ */
           NavigationView {
             List {
               Picker("", selection: $selectedFolder) {
@@ -104,8 +107,7 @@ struct GroupSelectionView: View {
         // フォルダーの場合
         if _targetGroup.groupType == .Folder {
           if let _at = _targetSound.fullPath {
-            if var _to = utility.getDocumentDirectory() {
-              _to = _to.appendingPathComponent("\(distinationFolder)/\(_targetSound.fileName)")
+            if let _to = utility.getDocumentPath(fileName: "\(distinationFolder)/\(_targetSound.fileName)") {
               // コピー
               utility.copySoundFile(action: .newFileName, at: _at, to: _to)
               

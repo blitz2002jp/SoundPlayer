@@ -35,6 +35,13 @@ struct GroupListView: View {
   
   @State private var selectItemGroup: GroupInfo?
   @State private var selectItemMenu: GroupInfo?
+  
+  private var selectItemGroupText: String {
+    if let _selectItemGroup = self.selectItemGroup {
+      return _selectItemGroup.displayText
+    }
+    return ""
+  }
 
   var body: some View {
     VStack {
@@ -43,7 +50,7 @@ struct GroupListView: View {
           VStack {
             ForEach(self.targetGroupInfos, id: \.id) { item in
               HStack{
-                Text(getGroupName(groupInfo: item))
+                Text(item.displayText)
                   .lineLimit(1)
                   .padding([.leading, .trailing, .top, .bottom], 20)
                   .frame(maxWidth: .infinity, alignment: .leading)
@@ -71,12 +78,15 @@ struct GroupListView: View {
                   do {
                     try self.viewModel.playGroup(targetGroupInfo: item)
                   } catch {
-                    print(error.localizedDescription)
+                    utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
                     self.isShowAlert = true
                   }
                 }, label: {
                   Image(systemName: "play.circle")
                 })
+              }
+              .onTapGesture {
+                print("****** \(item.text) ******")
               }
             }
           }
@@ -90,36 +100,19 @@ struct GroupListView: View {
           }))
         }
         .background(
-          NavigationLink(destination: SoundListView(viewTitle: self.getGroupName(groupInfo:  self.selectItemGroup), targetGroup: self.selectItemGroup, viewModel: _viewModel), isActive: $isActive) {
+          NavigationLink(destination: SoundListView(viewTitle: self.selectItemGroupText, targetGroup: self.selectItemGroup, viewModel: _viewModel), isActive: $isActive) {
             EmptyView()
           })
+/*
+        .background(
+          NavigationLink(destination: SoundListView(viewTitle: self.selectItemGroup?.text, targetGroup: self.selectItemGroup, viewModel: _viewModel), isActive: $isActive) {
+            EmptyView()
+          })
+ */
       }
-    }
-    .onAppear() {
-//      self.viewModel.createDataModel()
     }
   }
   
-  // Group名取得
-  func getGroupName(groupInfo: GroupInfo?) -> String {
-    if let _groupInfo = groupInfo {
-      if _groupInfo.groupType == .Folder {
-        if _groupInfo.text.count < 1 {
-          return "Document"
-        }
-      }
-      return _groupInfo.text
-    }
-    return ""
-    /*
-     if let _groupInfo = groupInfo {
-     return _groupInfo.text
-     }
-     
-     return ""
-     */
-  }
-
   #if DEBUG
   private func getIndex(idx: Int) -> Int {
     return idx + 1

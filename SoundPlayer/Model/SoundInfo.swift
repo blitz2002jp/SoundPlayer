@@ -9,8 +9,10 @@ import Foundation
 import AVFoundation
 import SwiftUI
 
-class SoundInfo: Codable, Identifiable {
-
+class SoundInfo: Codable, Identifiable, Equatable {
+  
+  var parentId: String
+  
   var artWork: Data? {
     get {
       if let _artWork = utility.getArtWorkData(url: self.fullPath) {
@@ -37,11 +39,6 @@ class SoundInfo: Codable, Identifiable {
       return self._isSelected
     }
     set(val) {
-#if DEBUG
-      if val {
-//        print("getPlayingImage _isSelected \(self.fileNameNoExt)")
-      }
-#endif
       self._isSelected = val
     }
   }
@@ -91,10 +88,14 @@ class SoundInfo: Codable, Identifiable {
     }
   }
   
-  init(){
+  init(parentId: String) {
+    self.parentId = parentId
   }
   
-  init(fileName: URL){
+  init(parentId: String, fileName: URL){
+    
+    self.parentId = parentId
+
     // fileNameからDocumentsディレクトリを除くディレクトリとファイル名を抽出
     if let docDir = utility.getDocumentDirectory() {
       // ファイル名
@@ -111,10 +112,17 @@ class SoundInfo: Codable, Identifiable {
       }
     }
   }
-  
+
+  static func ==(lhs: SoundInfo, rhs: SoundInfo) -> Bool {
+    if lhs.parentId == rhs.parentId && lhs.fileName == rhs.fileName {
+        return true
+    }
+      return false
+  }
+
   // Cron
   func copy() -> SoundInfo{
-    let res = SoundInfo()
+    let res = SoundInfo(parentId: "")
     res.isSelected = self.isSelected
     res.isSearched = self.isSearched
     res.foldersName = self.foldersName                     // フォルダ名(Documentフォルダより下位のフォルダ)
@@ -136,11 +144,23 @@ class SoundInfo: Codable, Identifiable {
         let audioPlayer = try AVAudioPlayer(contentsOf: _url)
         return audioPlayer.duration
       } catch {
-        print("Error initializing AVAudioPlayer: \(error.localizedDescription)")
+        utility.exceptionMessage(className: String(describing: type(of: self)), functionName: #function, err: error)
       }
     }
     return TimeInterval.zero
   }
 }
 
+class CurrentPlayingSound: Codable, Identifiable {
+  var soundInfo: SoundInfo
+  var groupText: String
+  var groupType: GroupType
+  var isInterruptSound: Bool    // 次に再生音声
 
+  init(soundInfo: SoundInfo, groupText: String, groupType: GroupType, isInterruptSound: Bool = false) {
+    self.soundInfo = soundInfo
+    self.groupText = groupText
+    self.groupType = groupType
+    self.isInterruptSound = isInterruptSound
+  }
+}

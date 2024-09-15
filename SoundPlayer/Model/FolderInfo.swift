@@ -12,7 +12,7 @@ class FolderInfo: GroupInfo {
     super.init(groupType: GroupType.Folder ,text: text, soundInfos: soundInfos, comment: comment, sortKey: sortKey)
   }
   
-  override init() {
+  override init(id: String  = UUID().uuidString) {
     super.init()
   }
   
@@ -23,7 +23,7 @@ class FolderInfo: GroupInfo {
   required init(from decoder: any Decoder) throws {
     try super.init(from: decoder)
   }
-  
+
   /// Folder名変更
   override func renameFolder(newFolderName: String) throws {
     if let _folder = self.folder {

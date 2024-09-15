@@ -4,13 +4,14 @@
 //
 //  Created by masazumi oeda on 2024/03/21.
 //
+import Foundation
 
 class PlayListInfo: GroupInfo {
   init(text: String, soundInfos: [SoundInfo] = [SoundInfo](), comment: String = "", sortKey: Int = 0, isRandom: Bool = false) {
     super.init(groupType: GroupType.PlayList ,text: text, soundInfos: soundInfos, comment: comment, sortKey: sortKey)
   }
 
-  override init() {
+  override init(id: String = UUID().uuidString) {
     super.init()
   }
   

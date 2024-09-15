@@ -211,7 +211,6 @@
 				580F9F792BCCCF3B00DFC9D0 /* Resource */,
 				58F70DB02BE60F19003F6B73 /* ToDo.swift */,
 				5894E46F2BA56FA80014C60E /* SoundPlayerApp.swift */,
-				5894E47A2BA571760014C60E /* ContentView.swift */,
 				5894E4392BA56F120014C60E /* Assets.xcassets */,
 				5894E4752BA570140014C60E /* Info.plist */,
 				5894E4792BA571660014C60E /* View */,
@@ -275,18 +274,19 @@
 		5894E4792BA571660014C60E /* View */ = {
 			isa = PBXGroup;
 			children = (
+				5894E47A2BA571760014C60E /* ContentView.swift */,
 				581656152BF5C3920038818F /* AlertTextField.swift */,
-				5894E4702BA56FA80014C60E /* SoundListView.swift */,
-				5894E4712BA56FA80014C60E /* ViewCompornent.swift */,
+				58DEA5072C2D21DD0089BA62 /* GroupSelectionView.swift */,
 				5894E45F2BA56F350014C60E /* GroupListView.swift */,
 				582CDE792BCE41BE008C4980 /* PositionSlider.swift */,
 				586C10082BDF3BD0000BAD9E /* PlayView.swift */,
-				586C100A2BE0A991000BAD9E /* SoundActionMenu.swift */,
 				586C100C2BE1D1BC000BAD9E /* GroupActionMenu.swift */,
-				583088022BF072820004999F /* TitleTimeInput.swift */,
+				586C100A2BE0A991000BAD9E /* SoundActionMenu.swift */,
 				5899AE282C01903000AC075D /* SearchSounds.swift */,
 				589AD4DC2C10102000647840 /* SettingView.swift */,
-				58DEA5072C2D21DD0089BA62 /* GroupSelectionView.swift */,
+				5894E4702BA56FA80014C60E /* SoundListView.swift */,
+				583088022BF072820004999F /* TitleTimeInput.swift */,
+				5894E4712BA56FA80014C60E /* ViewCompornent.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
